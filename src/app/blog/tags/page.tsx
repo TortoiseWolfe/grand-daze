@@ -3,6 +3,7 @@ import Link from 'next/link';
 import TagCloud from '@/components/molecular/TagCloud';
 import blogData from '@/lib/blog/blog-data.json';
 import { getProjectConfig } from '@/config/project.config';
+import { ogImage } from '@/utils/metadata';
 
 export const metadata: Metadata = {
   // This route claims its own URL (#668).
@@ -10,6 +11,9 @@ export const metadata: Metadata = {
   title: 'Blog Tags | Grand Daze',
   description: 'Browse all blog post tags and topics',
   openGraph: {
+    // Without this the card is dropped: the App Router REPLACES nested
+    // metadata objects rather than merging them (upstream #990).
+    images: [ogImage()],
     url: '/blog/tags/',
     title: 'Blog Tags',
     description: 'Browse all blog post tags and topics',

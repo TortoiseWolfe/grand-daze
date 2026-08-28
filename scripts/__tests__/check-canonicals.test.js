@@ -41,7 +41,13 @@ const FILLER = 24;
  * `routes` maps a route to the path its canonical CLAIMS — omit a route's entry
  * and it self-canonicals, which is the common case.
  */
-function run({ origin, prefix = '', claims = {}, noCanonical = [] }) {
+function run({
+  origin,
+  prefix = '',
+  claims = {},
+  noCanonical = [],
+  noOgImage = [],
+}) {
   const root = mkdtempSync(join(tmpdir(), 'canon-'));
   const out = join(root, 'out');
   mkdirSync(out, { recursive: true });
@@ -59,9 +65,15 @@ function run({ origin, prefix = '', claims = {}, noCanonical = [] }) {
       const link = noCanonical.includes(route)
         ? ''
         : `<link rel="canonical" href="${origin}${prefix}${claimed}"/>`;
+      // Every fixture page carries a card unless the test asks otherwise: these
+      // fixtures exercise the CANONICAL logic, and a missing og:image would fail
+      // them for an unrelated reason (upstream #990).
+      const og = noOgImage.includes(route)
+        ? ''
+        : `<meta property="og:image" content="${origin}${prefix}/opengraph-image.png"/>`;
       writeFileSync(
         join(dir, 'index.html'),
-        `<html><head>${link}</head></html>`
+        `<html><head>${link}${og}</head></html>`
       );
     }
 
@@ -149,4 +161,27 @@ test('the #396 non-vacuity floor still fires on a nearly-empty export', () => {
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+/** Upstream #990: og:image vanished from ten routes and nothing noticed. */
+test('FAILS when a route renders no og:image', () => {
+  const r = run({ origin: 'https://example.com', noOgImage: ['/'] });
+  assert.equal(r.code, 1, `expected failure, got:\n${r.out}`);
+  assert.match(r.out, /no preview/);
+  assert.match(r.out, /^\s+\/$/m);
+});
+
+test('names every offending route, not just the first', () => {
+  const r = run({
+    origin: 'https://example.com',
+    noOgImage: ['/', '/p1/', '/p2/'],
+  });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /no og:image\s+3/);
+});
+
+test('PASSES when every route carries a card', () => {
+  const r = run({ origin: 'https://example.com' });
+  assert.equal(r.code, 0, `expected pass, got:\n${r.out}`);
+  assert.match(r.out, /no og:image\s+0/);
 });

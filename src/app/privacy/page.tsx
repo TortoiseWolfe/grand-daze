@@ -1,11 +1,11 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { PrivacyActions } from '@/components/privacy/PrivacyActions';
+import { routeMetadata } from '@/utils/metadata';
 
 export const metadata: Metadata = {
-  // This route claims its own URL (#668).
-  alternates: { canonical: '/privacy/' },
-  openGraph: { url: '/privacy/' },
+  // Claims its own URL and keeps the social card (#668, upstream #990).
+  ...routeMetadata('/privacy/'),
   title: 'Privacy Policy - Grand Daze',
   description:
     'Learn how Grand Daze protects your privacy and handles your personal information.',

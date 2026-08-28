@@ -1,11 +1,11 @@
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { routeMetadata } from '@/utils/metadata';
 
 export const metadata: Metadata = {
-  // This route claims its own URL (#668).
-  alternates: { canonical: '/terms/' },
-  openGraph: { url: '/terms/' },
+  // Claims its own URL and keeps the social card (#668, upstream #990).
+  ...routeMetadata('/terms/'),
   title: 'Terms of Service - Grand Daze',
   description:
     'The terms that govern purchases of Grand Daze services and products, including payment, refunds, cancellation and ownership of delivered work.',

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DOCS, SECTIONS, findDoc, neighbours } from '@/lib/docs/registry';
 import { renderDoc } from '@/lib/docs/render';
+import { routeMetadata } from '@/utils/metadata';
 
 // 3a (#380). The comp is a documentation ARTICLE page: nav rail as a well,
 // active page as a raised pill, code in recessed panels, an "On this page"
@@ -25,9 +26,8 @@ export async function generateMetadata({
   return {
     title: doc ? `${doc.title} - Grand Daze` : 'Documentation - Grand Daze',
     description: doc?.hint,
-    // Each doc claims its own URL (#668).
-    alternates: { canonical: `/docs/${slug}/` },
-    openGraph: { url: `/docs/${slug}/` },
+    // Claims its own URL and keeps the social card (#668, upstream #990).
+    ...routeMetadata(`/docs/${slug}/`),
   };
 }
 

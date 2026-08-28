@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ContactForm } from '@/components/forms/ContactForm';
 import { projectConfig } from '@/config/project.config';
+import { ogImage } from '@/utils/metadata';
 
 export const metadata: Metadata = {
   // This route claims its own URL (#668).
@@ -10,6 +11,9 @@ export const metadata: Metadata = {
     "Get in touch with the Grand Daze team. We'd love to hear from you!",
   keywords: ['contact', 'support', 'help', 'feedback', 'Grand Daze'],
   openGraph: {
+    // Without this the card is dropped: the App Router REPLACES nested
+    // metadata objects rather than merging them (upstream #990).
+    images: [ogImage()],
     url: '/contact/',
     title: 'Contact Us | Grand Daze',
     description: 'Get in touch with the Grand Daze team',

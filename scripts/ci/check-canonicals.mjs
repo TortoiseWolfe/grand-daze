@@ -110,7 +110,37 @@ async function derivePrefix(outDir) {
 
 const CANONICAL_RE = /<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i;
 
+/**
+ * `og:image` is what every platform except Twitter/X reads for a link preview.
+ *
+ * It went missing on ten routes at once upstream and nothing noticed
+ * (TortoiseWolfe/ScriptHammer#990). The App Router REPLACES nested metadata objects
+ * rather than deep-merging, so a page declaring `openGraph: { url: '/x/' }` to claim
+ * its URL silently discarded the inherited `images`.
+ *
+ * Invisible in review and invisible in the app — the page renders perfectly either
+ * way, and only a scraper sees the hole. So it is checked against the built output,
+ * on the same walk that already visits every page.
+ */
+const OG_IMAGE_RE = /<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i;
+
+/**
+ * Routes that legitimately have no social card, each with the reason.
+ *
+ * Both are static HTML copied from `public/`, not Next routes — they never pass
+ * through the metadata layer, and neither is a URL anyone shares.
+ */
+const NO_CARD_EXPECTED = new Map([
+  [
+    '/offline/',
+    'public/offline.html — the PWA fallback the service worker serves',
+  ],
+  ['/wireframes/viewer/', 'public/wireframes/viewer.html — an iframe target'],
+]);
+
 let checked = 0;
+let noOgImage = [];
+const staleExemptions = [];
 let selfCanonical = 0;
 let missing = 0;
 let allowed = 0;
@@ -126,6 +156,13 @@ for await (const file of htmlFiles(OUT)) {
   const html = await readFile(file, 'utf8');
   const m = CANONICAL_RE.exec(html);
   checked++;
+
+  // Same walk, second question: does this page carry a social card at all?
+  if (!OG_IMAGE_RE.test(html) && !NO_CARD_EXPECTED.has(route))
+    noOgImage.push(route);
+  // An exemption for a page that HAS a card is a rule quietly excusing nothing.
+  if (OG_IMAGE_RE.test(html) && NO_CARD_EXPECTED.has(route))
+    staleExemptions.push(route);
 
   if (!m) {
     missing++;
@@ -171,6 +208,7 @@ console.log(
 );
 console.log(`  allowed cross    ${allowed}`);
 console.log(`  WRONG            ${wrong.length}`);
+console.log(`  no og:image      ${noOgImage.length}`);
 
 // A run that inspected nothing must not pass. This suite's own history is full of
 // gates that were green because they were looking at an empty list (#396, #411).
@@ -178,6 +216,29 @@ if (checked < 20) {
   console.error(
     `::error::only ${checked} HTML file(s) found under ${OUT}/ — expected the full ` +
       `static export. This check is not looking at the site.`
+  );
+  process.exit(1);
+}
+
+if (staleExemptions.length) {
+  console.error(
+    `\n::error::${staleExemptions.length} route(s) are exempted from the og:image ` +
+      `check but do render one: ${staleExemptions.join(', ')}. Remove them from ` +
+      `NO_CARD_EXPECTED — an exemption nobody needs is one that will later excuse a ` +
+      `real regression.`
+  );
+  process.exit(1);
+}
+
+if (noOgImage.length) {
+  console.log('');
+  for (const route of noOgImage.slice(0, 40)) console.log(`   ${route}`);
+  if (noOgImage.length > 40)
+    console.log(`   … and ${noOgImage.length - 40} more`);
+  console.error(
+    `\n::error::${noOgImage.length} route(s) render no og:image, so every platform ` +
+      `except Twitter/X shows no preview when the link is shared. Spread ` +
+      `routeMetadata(path) from src/utils/metadata.tsx instead (upstream #990).`
   );
   process.exit(1);
 }
@@ -198,4 +259,6 @@ if (wrong.length) {
   process.exit(1);
 }
 
-console.log('\n  OK — every route claims itself, or claims nothing.');
+console.log(
+  '\n  OK — every route claims itself, or claims nothing, and carries a card.'
+);

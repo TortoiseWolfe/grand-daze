@@ -1,11 +1,11 @@
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { routeMetadata } from '@/utils/metadata';
 
 export const metadata: Metadata = {
-  // This route claims its own URL (#668).
-  alternates: { canonical: '/comment-policy/' },
-  openGraph: { url: '/comment-policy/' },
+  // Claims its own URL and keeps the social card (#668, upstream #990).
+  ...routeMetadata('/comment-policy/'),
   title: 'Comment Policy - Grand Daze',
   description:
     'Our comment policy promotes constructive dialogue. We welcome diverse opinions expressed respectfully.',
