@@ -1,0 +1,208 @@
+# RLS + provider-contract conformance gate (#265 / #280).
+#
+# This is the anti-drift alarm the #265 scoping called for. `pnpm test:rls`
+# runs in ZERO other workflows: the default `pnpm test --run` (ci.yml) EXCLUDES
+# tests/rls/** and both messaging-provider contract runners (vitest.config.ts).
+# So until now neither the Supabase RLS policies NOR the two backend providers
+# were gated in CI. This job closes that gap.
+#
+# It spins up a LOCAL, ephemeral dual-provider stack (local Supabase + the .NET
+# messaging server) and runs the full `pnpm test:rls` config against it:
+#   - tests/rls/**                         (the 75 RLS policies, 9 suites)
+#   - messaging-provider.supabase.test.ts  (C7-C14, [supabase])
+#   - messaging-provider.dotnet.test.ts    (C7-C14, [dotnet], live ASP.NET)
+# Verified 107/107 green locally before wiring.
+#
+# NOTE ON CONCURRENCY: unlike e2e.yml, this job does NOT need the repo-wide
+# `e2e-supabase` mutex. That mutex exists because every E2E run shares ONE cloud
+# Supabase project and races the others' cleanup hooks. This job uses its own
+# per-runner ephemeral Postgres, so two concurrent runs cannot race. A per-ref
+# group (cancel superseded runs) is all that's warranted.
+#
+# The creds below are the well-known PUBLIC Supabase self-hosting demo keys
+# (already committed in docker-compose.yml's x-supabase-env anchor) — LOCAL ONLY.
+
+name: Conformance
+
+# NO TRIGGER `paths:` FILTER, DELIBERATELY (#572 item 6).
+#
+# A `paths:` filter here means the workflow reports NOTHING on an unrelated PR — and a
+# required check that never reports is PENDING FOREVER, not skipped. That is precisely
+# why this suite could not be made required, and why `Conformance` was red on every push
+# from e0add554 to 007a60de — six merges — while all three required checks stayed green,
+# because none of them runs `pnpm test:rls`.
+#
+# Filtering now happens in the `changes` job below and the always-reporting `result` job
+# at the bottom, the same shim that made `e2e-local.yml` requirable. Pinned by
+# scripts/__tests__/conformance-requirable.test.js.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  # Per-ref only. Each run owns an isolated local stack — no shared backend to
+  # serialize against (contrast e2e.yml's repo-wide e2e-supabase mutex).
+  group: conformance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Does this change need conformance?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history: the PR case diffs against the merge base, which a shallow
+          # clone does not contain.
+          fetch-depth: 0
+
+      - name: Decide
+        id: decide
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            # push to main and workflow_dispatch always run. A dispatch is a deliberate
+            # request, and main is the branch whose state everything else is measured
+            # against — neither is a place to guess.
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "  ${{ github.event_name }} — running unconditionally"
+            exit 0
+          fi
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          echo "  base=$BASE head=$HEAD"
+          node scripts/ci/conformance-changes.mjs "$BASE" "$HEAD"
+
+  rls-conformance:
+    name: RLS + provider conformance (local dual-provider stack)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Local demo env (compose + test share the same public demo creds)
+        run: |
+          # Satisfy compose's `.env` (interpolation defaults + any env_file) from
+          # the committed LOCAL-demo template.
+          cp .env.local-supabase .env
+          # The template's Supabase URL targets host.docker.internal (for the
+          # in-container app); the test runs on the RUNNER and reaches the
+          # published ports on localhost. Normalize so a .env load can't hand the
+          # test an unresolvable host.
+          sed -i 's|host\.docker\.internal|localhost|g' .env
+          # Export the anon + service-role keys (from the committed template, so
+          # they're never duplicated here) for the test process, plus the
+          # runner-reachable localhost URLs for the published stack ports. These
+          # are authoritative for the test's process.env.
+          grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY)=' .env.local-supabase >> "$GITHUB_ENV"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
+            echo "DOTNET_API_URL=http://localhost:5099"
+            # Raw Postgres (for the #321 dotnet_app backstop test) — published on
+            # the runner at localhost:54322; in-container the test defaults to
+            # supabase-db:5432.
+            echo "SUPABASE_DB_HOST=localhost"
+            echo "SUPABASE_DB_PORT=54322"
+          } >> "$GITHUB_ENV"
+
+      - name: Bring up the dual-provider stack (local Supabase + .NET)
+        run: |
+          # Only the services test:rls actually needs — NOT scripthammer (the
+          # test runs on the runner, not in the app container) and not the
+          # studio/mail/storage/realtime/meta extras.
+          docker compose --profile supabase --profile dotnet up -d --build \
+            supabase-db supabase-kong supabase-auth supabase-rest dotnet-messaging
+
+      - name: Wait for Postgres, Kong+Auth+REST, and the .NET server
+        run: |
+          # GitHub Actions runs this with `bash -eo pipefail`. The probes below
+          # are EXPECTED to fail on early iterations (services still starting);
+          # `set +e` stops `set -e` from aborting the loop on the first failed
+          # curl/exec so it can actually retry.
+          set +e
+          ANON="$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+          for i in $(seq 1 60); do
+            db=$(docker compose exec -T supabase-db pg_isready -U postgres -d postgres >/dev/null 2>&1 && echo ok || echo no)
+            rest=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 -H "apikey: $ANON" http://localhost:54321/rest/v1/ 2>/dev/null)
+            auth=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 -H "apikey: $ANON" http://localhost:54321/auth/v1/health 2>/dev/null)
+            net=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://localhost:5099/health 2>/dev/null)
+            echo "try $i: db=$db rest=$rest auth=$auth dotnet=$net"
+            if [ "$db" = ok ] && [ "$rest" = 200 ] && [ "$auth" = 200 ] && [ "$net" = 200 ]; then
+              echo "stack ready"; break
+            fi
+            if [ "$i" = 60 ]; then
+              echo "::error::stack did not become ready within ~5 min"
+              docker compose logs --tail=80 supabase-db supabase-auth supabase-rest supabase-kong dotnet-messaging
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate project configuration
+        run: node scripts/detect-project.js
+
+      - name: Run RLS + provider conformance (pnpm test:rls)
+        run: pnpm test:rls
+
+      - name: Dump stack logs on failure
+        if: failure()
+        run: docker compose logs --tail=120 supabase-db supabase-auth supabase-rest supabase-kong dotnet-messaging
+
+      - name: Tear down
+        if: always()
+        run: docker compose --profile supabase --profile dotnet down -v
+
+  # The always-reporting aggregate. THIS is the context to require, not
+  # `rls-conformance` — this one reports on every PR, including those that skip the
+  # suite, so it can never be pending forever.
+  result:
+    name: Conformance result
+    runs-on: ubuntu-latest
+    needs: [changes, rls-conformance]
+    if: always()
+    steps:
+      - name: Verdict
+        run: |
+          set -euo pipefail
+          RAN="${{ needs.changes.outputs.run }}"
+          RESULT="${{ needs.rls-conformance.result }}"
+          echo "  changes.run=$RAN  rls-conformance.result=$RESULT"
+
+          if [ "$RAN" != "true" ]; then
+            # Nothing conformance-relevant changed. Green, and say so out loud rather
+            # than reporting a bare success nobody can interpret.
+            echo "  no conformance-relevant paths changed — suite skipped, reporting green"
+            exit 0
+          fi
+
+          # It ran, so its verdict is the verdict. `cancelled` is NOT treated as a pass:
+          # a cancelled run observed nothing, and calling that green is the #396 shape
+          # this whole issue is about.
+          case "$RESULT" in
+            success) echo "  conformance passed"; exit 0 ;;
+            *) echo "  conformance did not pass (result=$RESULT)"; exit 1 ;;
+          esac

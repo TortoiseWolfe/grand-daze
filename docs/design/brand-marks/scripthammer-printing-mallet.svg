@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="ScriptHammer printing mallet">
+  <title>ScriptHammer printing mallet</title>
+  <g transform="rotate(42 200 200)">
+    <path fill="#B08F5E" d="M178,154 L222,154 L215,332 L185,332 Z"></path>
+    <path fill="#7E6038" d="M208,154 L222,154 L215,332 L206,332 Z"></path>
+    <path fill="#E6CB99" d="M106,64 L132,36 L268,36 L294,64 Z"></path>
+    <path fill="#8E7042" d="M186,40 L214,40 L216,60 L184,60 Z"></path>
+    <path fill="#C9A470" d="M106,64 L294,64 L280,154 L120,154 Z"></path>
+    <path fill="#9C7844" d="M252,64 L294,64 L280,154 L247,154 Z"></path>
+  </g>
+</svg>

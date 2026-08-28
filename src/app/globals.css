@@ -1,0 +1,1896 @@
+@import 'tailwindcss';
+/* Vendored @font-face declarations (#730). GENERATED — see
+ * scripts/fonts/vendor-google-fonts.mjs. These are next/font/google's own output copied
+ * verbatim and repointed at src/fonts/, so the BUILD no longer fetches from
+ * fonts.gstatic.com. That fetch failed twice in twelve hours: once killing a production
+ * deploy, once building an E2E shard with 0 tests. */
+@import './fonts.generated.css';
+/* OpenDyslexic, self-hosted from @fontsource (SIL OFL-1.1) — #823.
+ *
+ * It CANNOT go through fonts.generated.css: that file is vendored from
+ * next/font/google's build output by scripts/fonts/vendor-google-fonts.mjs, and
+ * OpenDyslexic is not a Google font.
+ *
+ * Declaring @font-face here costs nothing until the font is used — a browser
+ * fetches the woff2 only when text actually needs rendering in it. So the
+ * dyslexia-friendly option is available instantly on selection, with no runtime
+ * CDN fetch and nothing to 404.
+ *
+ * It previously pointed at `/fonts/OpenDyslexic-Regular.woff2`, which does not
+ * exist, so selecting it silently rendered Comic Sans — the fallback in its own
+ * stack. */
+@import '@fontsource/opendyslexic/400.css';
+@import '@fontsource/opendyslexic/700.css';
+@import '../styles/colorblind-patterns.css';
+@import '../styles/prism-vscode-dark.css';
+@import '../styles/mobile-first-utilities.css';
+@import '../styles/reduced-motion.css';
+
+/* The variables next/font used to emit via its `.variable` classes, now declared directly
+ * (#730). VALUES COPIED EXACTLY from the generated CSS — including each "* Fallback"
+ * family, which is not decorative: those faces carry `size-adjust` / `ascent-override`
+ * metrics that hold the layout still while the real face loads. Dropping them would
+ * reintroduce layout shift that nothing in CI measures.
+ *
+ * On :root rather than a class on <html>, because #377 established these must be visible to
+ * both <html> and <body> — when they sat on <body> the type stack silently fell through to
+ * ui-sans-serif while the fonts downloaded perfectly. */
+:root {
+  --font-archivo:
+    'Archivo', 'Archivo Fallback', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-archivo-black:
+    'Archivo Black', 'Archivo Black Fallback', system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  --font-jetbrains:
+    'JetBrains Mono', 'JetBrains Mono Fallback', 'SF Mono', Monaco,
+    'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+}
+
+/* /pricing only. next/font generated a `.className` per family and the page applies them to
+ * 19 elements; these replace them one-for-one so no call site changes. Scoped as classes,
+ * not variables, because that is exactly what they replace — in particular `--font-display`
+ * is already Archivo Black globally, and the pricing page must NOT redefine it. */
+.sh-font-special-elite {
+  font-family: 'Special Elite', 'Special Elite Fallback';
+}
+.sh-font-plex-sans {
+  font-family: 'IBM Plex Sans', 'IBM Plex Sans Fallback';
+}
+.sh-font-plex-mono {
+  font-family: 'IBM Plex Mono', 'IBM Plex Mono Fallback';
+}
+
+@theme {
+  /* Mobile-first breakpoints (PRP-017) */
+  --breakpoint-xs: 20rem; /* 320px - Small phones (minimum supported) */
+  --breakpoint-sm: 26.875rem; /* 430px - Standard phones (must NOT match 428px exactly) */
+  --breakpoint-md: 48rem; /* 768px - Tablets */
+  --breakpoint-lg: 64rem; /* 1024px - Desktop */
+  --breakpoint-xl: 80rem; /* 1280px - Large desktop */
+
+  /* Type stack (#377). THIS MAPPING IS LOAD-BEARING — without it the faces
+   * declared by `next/font` in layout.tsx are downloaded and rendered nowhere.
+   * That was the state of Geist for the whole life of this repo before #377:
+   * `--font-geist-sans` existed on <body> and no rule ever referenced it, so
+   * Tailwind's default `--font-sans` (ui-sans-serif) won by default. */
+  --font-sans:
+    var(--font-archivo), system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    var(--font-jetbrains), 'SF Mono', Monaco, 'Inconsolata', 'Fira Mono',
+    'Source Code Pro', monospace;
+  --font-display: var(--font-archivo-black), var(--font-sans);
+}
+
+/* ============================================================================
+ * `container` must fill the viewport, not the previous breakpoint (#373 §A1)
+ *
+ * Tailwind 4 builds `container`'s max-width ladder from the registered
+ * `@theme` breakpoints above, emitting a tier at each one. Between tiers,
+ * content is pinned to the LOWER value — so the narrow mobile-first ladder
+ * this project deliberately chose turns into dead gutter at every width in
+ * between:
+ *
+ *     390px viewport -> capped at 320px ->  70px wasted (17.9%)
+ *     428px          -> capped at 320px -> 108px wasted (25.2%)
+ *     767px          -> capped at 430px -> 337px wasted (43.9%)
+ *
+ * Measured, not derived: at 767px `getComputedStyle(el).maxWidth` really did
+ * return `430px`. 36 call sites across 28 files, including GlobalNav, Footer
+ * and the cookie banner, so it was never scoped to one page. The visible
+ * symptom was one-sentence copy wrapping to five lines inside a ~228px column
+ * with empty gutters either side.
+ *
+ * Overriding the utility replaces the whole generated ladder with a single
+ * cap. Call sites keep their own `mx-auto px-4`, so horizontal padding is
+ * unaffected — this only stops the width being thrown away.
+ *
+ * NOT a reason to widen the breakpoints: they are correct for what they are
+ * for (`sm` is 430px on purpose, and must not equal 428px). The bug is that
+ * `container` reuses them for something they were never meant to describe.
+ * ========================================================================= */
+@utility container {
+  width: 100%;
+  max-width: 80rem; /* 1280px, matching --breakpoint-xl */
+}
+
+/* ============================================================================
+ * Form labels must be readable, not decorative (#411)
+ *
+ * DaisyUI's `.label` mutes its own text — measured `#9094a1` on base-200 in
+ * scripthammer-dark, which is **5.86:1**, under the 7:1 this repo gates at.
+ * That is not one page: it is every form in the product — sign-in, sign-up,
+ * reset-password, profile, payment, payment-demo, payment-result, contact and
+ * admin/messaging all reported it.
+ *
+ * It went unseen because the contrast gate looked at four routes and none of
+ * them had a form. A label is the text telling someone what to type; it is the
+ * last thing that should be dimmed for style.
+ * ========================================================================= */
+.label,
+.label > span,
+.label-text,
+/* `.table th` is the same defect in a different component: DaisyUI dims
+   column headers to #9094a1 on base-200 in the dark theme — 5.86:1. Found by
+   #411 on /account/audit and /payment-demo, both of which render tables. A
+   column header is the label for its column; dimming it is the same mistake
+   as dimming a form label. */
+.table thead th,
+.table th {
+  color: var(--color-base-content);
+}
+
+/* ============================================================================
+ * A field's position must not depend on how long its label reads (#436)
+ *
+ * DaisyUI's `.label` is `inline-flex`. In markup that assumes a block — a
+ * wrapper holding a label and then its control — that makes the layout a
+ * function of the COPY: if `labelWidth + controlWidth` happens to fit the
+ * container, the control rides up onto the label's line and that one field sits
+ * a label-width right of every other field in the same form.
+ *
+ * Measured before this rule, sweeping 7 routes x 6 widths: 5 of 27 forms had
+ * fields that disagreed with their own siblings.
+ *
+ *   /contact   @1024 and @1280   "Subject" shares its label's line; the other
+ *                                three fields do not. Rename it "Subject line"
+ *                                and the defect moves elsewhere.
+ *   /reset-password @768/1024/1280  "New Password" shares; "Confirm Password"
+ *                                does not, putting their inputs 108px apart.
+ *
+ * `flex` rather than `block` keeps DaisyUI's own inner alignment (a label may
+ * hold text plus a hint or a required marker) while making the box block-level,
+ * so a following control always begins on the next line.
+ *
+ * This does NOT disturb the deliberate two-column rows on /sign-in and /sign-up
+ * (#384), where the label is a flex ITEM of a row container — a flex item's
+ * display is blockified by its parent regardless. Verified: those forms measured
+ * internally consistent before this rule and unchanged after it.
+ * ========================================================================= */
+.label {
+  display: flex;
+
+  /* ------------------------------------------------------------------
+   * ...and a label must not be forced onto one line either (#511).
+   *
+   * DaisyUI ships `.label { white-space: nowrap }`. Every field hint in the
+   * product is a `.label`, so any hint longer than its container renders at
+   * its full single-line width and runs off the side. Measured on /account:
+   * "Your friendly name shown to other users" is 330px in a 288px column,
+   * and the layout frame's `overflow-x-clip` hid it from every gate until
+   * #506 stopped excusing clipped content.
+   *
+   * `normal` only changes what would otherwise overflow — a label short
+   * enough to fit already occupies one line and is unaffected. Verified
+   * across all 57 `.label` call sites by the horizontal-overflow sweep and
+   * `form-label-grid.spec.ts`, which is the gate that would catch a label
+   * wrapping where it should not.
+   * ------------------------------------------------------------------ */
+  white-space: normal;
+}
+
+@plugin "daisyui" {
+  themes:
+    scripthammer-dark --default,
+    scripthammer-light,
+    scripthammer-forge,
+    light,
+    dark,
+    cupcake,
+    bumblebee,
+    emerald,
+    corporate,
+    synthwave,
+    retro,
+    cyberpunk,
+    valentine,
+    halloween,
+    garden,
+    forest,
+    aqua,
+    lofi,
+    pastel,
+    fantasy,
+    wireframe,
+    black,
+    luxury,
+    dracula,
+    cmyk,
+    autumn,
+    business,
+    acid,
+    lemonade,
+    night,
+    coffee,
+    winter,
+    dim,
+    nord,
+    sunset;
+}
+
+/* ScriptHammer Dark Theme — VS Code dark meets metallic craftsmanship */
+@plugin "daisyui/theme" {
+  name: 'scripthammer-dark';
+  default: true;
+  color-scheme: dark;
+
+  --color-base-100: oklch(22.84% 0.038 282.93); /* #1a1a2e charcoal */
+  --color-base-200: oklch(21.13% 0.039 282.53); /* #16162a darker */
+  --color-base-300: oklch(28.51% 0.067 281.32); /* #25254a borders */
+  --color-base-content: oklch(92.88% 0.013 255.51); /* #e2e8f0 cool gray text */
+
+  --color-primary: oklch(76.05% 0.024 258.37); /* #a8b2c1 silver/steel */
+  --color-primary-content: oklch(22.84% 0.038 282.93);
+
+  --color-secondary: oklch(87.91% 0.043 76.31); /* #e8d4b8 warm amber */
+  --color-secondary-content: oklch(22.84% 0.038 282.93);
+
+  --color-accent: oklch(75.35% 0.139 232.66); /* #38bdf8 electric blue */
+  --color-accent-content: oklch(22.84% 0.038 282.93);
+
+  --color-neutral: oklch(31.14% 0.052 282.99); /* #2d2d4a purple-gray */
+  --color-neutral-content: oklch(87.17% 0.009 258.34);
+
+  --color-info: oklch(73.08% 0.13 260.06); /* #77a8f9 — AAA 7.11:1 */
+  --color-info-content: oklch(22.84% 0.038 282.93);
+  --color-success: oklch(72.27% 0.192 149.58); /* #22c55e */
+  --color-success-content: oklch(22.84% 0.038 282.93);
+  --color-warning: oklch(90.52% 0.166 98.11); /* #fde047 */
+  --color-warning-content: oklch(22.84% 0.038 282.93);
+  --color-error: oklch(74.7% 0.132 20.69); /* #f58989 — AAA 7.17:1 */
+  --color-error-content: oklch(22.84% 0.038 282.93);
+
+  --radius-selector: 0.75rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+/* ScriptHammer Light Theme — warm parchment with adjusted brand colors
+ *
+ * Every colour below was AAA-verified against base-100 ONLY (#21), and the old
+ * annotations said so — "AAA 8.03:1" was true on #f5f0eb. Text is routinely
+ * placed on base-200 (#ebe5dd) too, where the same colours measured 6.4–6.5:1
+ * and failed the 7:1 gate.
+ *
+ * Found by #411, once the contrast sweep stopped looking at 4 routes and
+ * started looking at 40: /blog/seo alone reported 19 nodes. It is also the
+ * root cause of the 6.44:1 `text-accent` eyebrow that reached main in #407 and
+ * was worked around locally instead of fixed here.
+ *
+ * Each lightness is now the measured minimum that clears 7:1 on base-100 AND
+ * base-200, with a small margin. The shift is ~2 points — visually almost
+ * nothing, and it removes a whole class of violation rather than one instance.
+ * Solved by canvas readback, NOT getComputedStyle, which returns oklch()
+ * unparsed (see lesson_oklch_contrast_canvas_playwright). */
+@plugin "daisyui/theme" {
+  name: 'scripthammer-light';
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: oklch(95.76% 0.009 67.72); /* #f5f0eb warm parchment */
+  --color-base-200: oklch(92.44% 0.013 75.36); /* #ebe5dd */
+  --color-base-300: oklch(87.66% 0.016 73.66); /* #ddd5cb */
+  --color-base-content: oklch(27.81% 0.03 256.85); /* #1f2937 dark text */
+
+  --color-primary: oklch(41% 0.03 257.68); /* AAA on base-100 AND base-200 */
+  --color-primary-content: oklch(100% 0 0);
+
+  --color-secondary: oklch(
+    42.2% 0.116 46.14
+  ); /* AAA on base-100 AND base-200 */
+  --color-secondary-content: oklch(100% 0 0);
+
+  --color-accent: oklch(40.8% 0.098 239.94); /* AAA on base-100 AND base-200 */
+  --color-accent-content: oklch(100% 0 0);
+
+  --color-neutral: oklch(37.29% 0.031 259.73); /* #374151 */
+  --color-neutral-content: oklch(98.46% 0.002 247.84);
+
+  --color-info: oklch(42% 0.167 262.77); /* AAA on base-100 AND base-200 */
+  --color-info-content: oklch(100% 0 0);
+  --color-success: oklch(39.9% 0.11 149.9); /* AAA on base-100 AND base-200 */
+  --color-success-content: oklch(100% 0 0);
+  --color-warning: oklch(41.3% 0.09 76.98); /* AAA on base-100 AND base-200 */
+  --color-warning-content: oklch(100% 0 0);
+  --color-error: oklch(42.9% 0.164 26.98); /* AAA on base-100 AND base-200 */
+  --color-error-content: oklch(100% 0 0);
+
+  --radius-selector: 0.75rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+/* ScriptHammer Forge — the commerce design import, made AAA-safe
+ *
+ * Palette measured off `docs/design/commerce/pricing-demo.html` by RENDERING it
+ * and reading pixels back through a canvas, not by parsing the CSS as text.
+ * That distinction has cost this repo twice (#379): a tag-stripping read drops
+ * every gradient and image and produces a confident, wrong answer.
+ *
+ * The demo declares eleven custom properties. FIVE OF THEM CANNOT BE USED AS
+ * TEXT AS DRAWN — measured against the demo's own three surfaces (#0f0d0b,
+ * #191512, #221c17), where this repo gates at AAA 7:1:
+ *
+ *     copper  #b87333   5.12 / 4.79 / 4.44   fails AA
+ *     patina  #5f8d7e   5.17 / 4.84 / 4.49   fails AA
+ *     danger  #c4553d   4.35 / 4.07 / 3.78   fails AA
+ *     ok      #6f9e5c   6.21 / 5.81 / 5.39   AA only
+ *     muted   #9c8f7f   6.14 / 5.75 / 5.33   AA only
+ *
+ * The demo's own primary button — light label on copper — measures 3.01:1.
+ *
+ * So the drawn values are kept for the three surfaces, the text and brass (all
+ * AAA as-is), and the remaining five are lifted in HSL — hue and saturation
+ * held, lightness raised to the minimum that clears 7:1 on the WORST of the
+ * three surfaces. Checking against base-100 alone is the exact mistake #411
+ * found in the light theme, where every colour was honestly verified on one
+ * surface and failed on the one underneath it.
+ *
+ * PRIMARY IS BRASS, NOT COPPER. Near-black on brass is 8.62:1; on copper it is
+ * 5.12:1 and no amount of content-colour juggling fixes that without changing
+ * the fill. Copper stays in the palette as `secondary` (lifted), so the family
+ * survives while the button that carries text is the one that can. */
+@plugin "daisyui/theme" {
+  name: 'scripthammer-forge';
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #0f0d0b; /* --bg, as drawn */
+  --color-base-200: #191512; /* --surface, as drawn */
+  --color-base-300: #221c17; /* --surface-2, as drawn */
+  --color-base-content: #ece4d9; /* --text — 15.39/14.40/13.37 */
+
+  --color-primary: #d9a441; /* --brass, as drawn — 8.62/8.07/7.49 */
+  --color-primary-content: #0f0d0b; /* 8.62:1 on the fill */
+
+  --color-secondary: #d59c68; /* --copper lifted from #b87333 — 7.06 */
+  --color-secondary-content: #0f0d0b;
+
+  --color-accent: #8ab0a4; /* --patina lifted from #5f8d7e — 7.08 */
+  --color-accent-content: #0f0d0b;
+
+  --color-neutral: #221c17;
+  --color-neutral-content: #b1a69a; /* --muted lifted from #9c8f7f — 7.06 */
+
+  --color-info: #8ab0a4; /* the demo declares none; patina stands in */
+  --color-info-content: #0f0d0b;
+  --color-success: #8cb37c; /* --ok lifted from #6f9e5c — 7.07 */
+  --color-success-content: #0f0d0b;
+  --color-warning: #d9a441; /* brass doubles as warning */
+  --color-warning-content: #0f0d0b;
+  --color-error: #db9788; /* --danger lifted from #c4553d — 7.05 */
+  --color-error-content: #0f0d0b;
+
+  /* The demo's --radius is 4px throughout — machined, not rounded. */
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+/* ============================================================================
+ * 2a "Machine Shop" depth system (#377, epic #376)
+ *
+ * Three primitives: a raised PLATE holds content, a cut WELL holds data, a
+ * GROOVE holds inputs and thin strips. One light source, from above.
+ *
+ * The design was authored dark-only, against literal rgba(0,0,0,.8–.9). That
+ * cannot ship here: this app has 32 themes and a black shadow is invisible on
+ * the dark ones and bruises the light ones. So both inks are derived from the
+ * active theme's OWN base-100 via relative colour syntax, which means each
+ * theme gets depth carrying its own hue and chroma — the parchment themes cast
+ * a warm shadow, the cool ones a cool shadow.
+ *
+ * WHY TWO INKS, AND WHY EVERY PRIMITIVE USES BOTH.
+ * Measured across all 32 themes, base-100 lightness spans the entire range:
+ * `black` sits at L=0 and ten themes (light, bumblebee, emerald, corporate,
+ * lofi, pastel, fantasy, wireframe, cmyk, winter) sit at L=1. At L=0 a shadow
+ * has no room to get darker; at L=1 a highlight has no room to get lighter.
+ * A single-ink system is therefore invisible at one end or the other.
+ *
+ * The two ramps have complementary headroom — shadow scales with L, edge
+ * scales with (1 - L) — so their sum is constant and at least one always has
+ * room. That is why a plate carries a rim and a groove carries a highlight:
+ * on `black` the rim is the entire effect, on `wireframe` the shadow is.
+ *
+ * Declared on `[data-theme]` as well as `:root` so a theme-scoped subtree —
+ * the 32 side-by-side previews on /themes (#382) — recomputes its own inks
+ * instead of inheriting the page's.
+ * ========================================================================= */
+:root,
+[data-theme] {
+  /* Surface pushed toward black. Headroom = L, so it fades out on dark themes. */
+  --sh-ink-shadow: oklch(from var(--color-base-100) calc(l * 0.42) c h / 0.55);
+  --sh-ink-shadow-soft: oklch(
+    from var(--color-base-100) calc(l * 0.42) c h / 0.32
+  );
+
+  /* Surface pushed toward white. Headroom = 1 - L, so it fades out on light
+   * themes. This is the "machined edge" — the lit top lip of a cut face. */
+  --sh-ink-edge: oklch(
+    from var(--color-base-100) calc(l + (1 - l) * 0.55) c h / 0.5
+  );
+
+  /* Raised: content sits on top of the page. */
+  --sh-plate:
+    0 6px 12px -5px var(--sh-ink-shadow),
+    0 2px 4px -2px var(--sh-ink-shadow-soft), inset 0 1px 0 var(--sh-ink-edge);
+
+  /* Lifted: the plate, raised further. Hover only.
+   *
+   * Built from the same inks as --sh-plate rather than a literal black. The
+   * hover rule used to hard-code `rgb(0 0 0 / 0.3)`, which is invisible on a
+   * dark surface and grey sludge on a saturated one — exactly what these ink
+   * tokens exist to replace. It survived the whole #376/#426 epic because the
+   * rule never rendered (#838), so no screenshot could show it. */
+  --sh-plate-lift:
+    0 10px 20px -6px var(--sh-ink-shadow),
+    0 4px 8px -3px var(--sh-ink-shadow-soft), inset 0 1px 0 var(--sh-ink-edge);
+
+  /* Cut: data sits down inside the page.
+   *
+   * INSET-DOMINANT, and that is a correction to the authored recipe. The mock
+   * gave the well a big OUTER drop plus a 1px inner top lip — which reads as a
+   * cut only against the one dark background it was drawn on. Everywhere else
+   * it is a plate with a softer shadow: measured on light AND dark themes,
+   * plate and well both resolved to "outer drop + one inset line", so the two
+   * were near-indistinguishable in use (caught applying them to /docs, #380).
+   *
+   * A cut is the plate inverted, and the physics say so: light from above puts
+   * the shadow INSIDE the top edge of a recess and lights its bottom lip.
+   *
+   *   plate = outer drop below + inset highlight on top   (raised, casts down)
+   *   well  = inset shadow on top + inset highlight below (cut, catches light)
+   *
+   * A groove is then just a tighter well, which is why the two share a shape. */
+  --sh-well:
+    inset 0 8px 16px -6px var(--sh-ink-shadow),
+    inset 0 2px 3px -2px var(--sh-ink-shadow), inset 0 -1px 0 var(--sh-ink-edge);
+
+  /* Machined channel: inputs and thin strips. Pure inset, no outer drop. */
+  --sh-groove:
+    inset 0 3px 8px var(--sh-ink-shadow), inset 0 -1px 0 var(--sh-ink-edge);
+}
+
+/* Exposed as utilities so callers compose them like any other Tailwind class
+ * rather than remembering to plumb `box-shadow: var(--sh-plate)` by hand.
+ *
+ * Force-emitted, because Tailwind only generates a `@utility` it can see used
+ * in scanned source. These three are a foundation shipped ahead of the page
+ * tickets that consume them (#379–#384), so on this branch nothing references
+ * them yet and all three would compile to nothing — untested until the first
+ * consumer landed and discovered they were broken. Three rules of CSS is a
+ * cheap price for a primitive that is verifiable the day it ships. */
+@source inline("sh-plate sh-well sh-groove");
+
+@utility sh-plate {
+  box-shadow: var(--sh-plate);
+}
+
+@utility sh-well {
+  box-shadow: var(--sh-well);
+}
+
+@utility sh-groove {
+  box-shadow: var(--sh-groove);
+}
+
+/* valentine: lift `base-300` so body text clears WCAG AA (#805).
+ *
+ * DaisyUI's stock `valentine` puts `base-content` (#c5005a) on `base-300`
+ * (#f9cbe5) at **4.17:1** — below the 4.5 floor for normal body text. It was the
+ * only enabled theme of the 35 that failed AA, and it failed unnoticed because
+ * neither existing gate looks here: `color-contrast.spec.ts` sweeps AAA but only
+ * the two house themes, and `embed-theme-contrast.spec.ts` covers all 34 but only
+ * the Disqus embed's pairs. #422 is what finally gave every theme a verdict.
+ *
+ * Lifting the surface rather than darkening the text keeps valentine's identity —
+ * the pink IS the theme — and preserves the surface hierarchy, which a naive fix
+ * inverts:
+ *
+ *   base-100  #fcf2f8   5.45:1
+ *   base-200  #f9e4f0   4.94:1
+ *   base-300  #fbd9ec   4.61:1   <- was #f9cbe5 at 4.17
+ *
+ * Still descending, so base-300 remains the deepest surface.
+ *
+ * Re-measure with `node scripts/theme-contrast/generate.mjs` after any change here;
+ * `theme-contrast-is-current.test.js` fails until the committed data is regenerated,
+ * which is the intended behaviour rather than an obstacle. */
+[data-theme='valentine'] {
+  --color-base-300: #fbd9ec;
+}
+
+/* ScriptHammer visual polish — scoped to custom themes only.
+ * Stock DaisyUI themes keep their original look untouched.
+ *
+ * The `:not()` chain is load-bearing (#379). This selector is `[attr] .class`
+ * — specificity 0,2,0 — while a Tailwind `@utility` is 0,1,0, so on the two
+ * DEFAULT themes this block silently beat `sh-plate`/`sh-well`/`sh-groove`
+ * and a card carrying a depth utility rendered this literal-black shadow
+ * instead. Exactly the thing the depth system exists to replace, winning by
+ * specificity on the only two themes most people ever see.
+ *
+ * Opting out by name rather than raising the utilities' specificity keeps the
+ * legacy look everywhere it is still wanted, and makes the depth system the
+ * explicit override wherever a page has been migrated. Remove this block
+ * entirely once every surface is on the depth tokens. */
+/* The DaisyUI primitives carry the depth vocabulary directly (#427).
+ *
+ * This replaces two blocks of literal-black drop shadow. Those existed so that
+ * pages nobody had migrated still looked deliberate, and their comment set the
+ * exit condition: remove them once every surface is on the depth tokens. That
+ * framing assumed migration meant hand-applying `sh-plate` to every element on
+ * 43 routes. It does not have to: 38 of those routes are thin shells over 46
+ * shared components built from these ten primitives, so putting the vocabulary
+ * on the BASE CLASSES moves the whole app at once and the page tickets
+ * (#428-#435) are left with composition rather than re-shadowing.
+ *
+ * Literal black is also the thing --sh-ink-shadow exists to replace: it is
+ * derived from the theme's own surface, so it stays correct on both house
+ * themes instead of being tuned for the dark one and tolerated on the light.
+ *
+ * Scoped to the two house themes. Stock DaisyUI themes keep their original
+ * look — 32 themes depend on that contract, and it is why the selectors below
+ * are attribute-scoped rather than bare element rules.
+ *
+ * The `:not()` chain is load-bearing (#379). These selectors are
+ * `[attr] .class` — specificity 0,2,0 — while a Tailwind `@utility` is 0,1,0,
+ * so without the opt-out this block beats `sh-plate`/`sh-well`/`sh-groove` and
+ * an element carrying a depth utility silently renders the default treatment
+ * for its primitive instead. Any rule added here needs the same chain.
+ *
+ * Focus is safe to shadow over: DaisyUI draws its focus ring with
+ * `outline: 2px solid`, not box-shadow (`components/input.css`), so nothing
+ * here can erase it. Verified rather than assumed. */
+
+/* Raised — content sitting on top of the page. */
+[data-theme='scripthammer-dark']
+  .card:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .card:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .card:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-dark']
+  .alert:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .alert:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .alert:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-dark']
+  .modal-box:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .modal-box:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .modal-box:not(.sh-plate):not(.sh-well):not(.sh-groove) {
+  box-shadow: var(--sh-plate);
+}
+
+/* Cut — data sitting down inside the page. */
+[data-theme='scripthammer-dark']
+  .stats:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .stats:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .stats:not(.sh-plate):not(.sh-well):not(.sh-groove) {
+  box-shadow: var(--sh-well);
+}
+
+/* Machined channel — inputs and thin strips. A control you type into is cut
+ * into the surface; that is the whole grammar of the system. */
+[data-theme='scripthammer-dark']
+  .input:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .input:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .input:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-dark']
+  .select:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .select:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .select:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-dark']
+  .textarea:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .textarea:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .textarea:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-dark']
+  .file-input:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-light']
+  .file-input:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-forge']
+  .file-input:not(.sh-plate):not(.sh-well):not(.sh-groove),
+[data-theme='scripthammer-dark'] .table thead th,
+[data-theme='scripthammer-light'] .table thead th,
+[data-theme='scripthammer-forge'] .table thead th {
+  box-shadow: var(--sh-groove);
+}
+
+/* Buttons are raised, and they press. `.btn-ghost` and `.btn-link` are flat by
+ * definition — shadowing them would make "quiet action" read as a raised one,
+ * which is the opposite of what the variant means. */
+[data-theme='scripthammer-dark']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ),
+[data-theme='scripthammer-light']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ),
+[data-theme='scripthammer-forge']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ) {
+  box-shadow: var(--sh-plate);
+}
+
+/* A STRICT SPECIFICITY LADDER. Read the numbers before editing (#838).
+ *
+ *   resting  chain                                  (0,7,0)
+ *   hover    chain + :hover                         (0,8,0)
+ *   active   chain + :not(.btn-disabled) + :active  (0,9,0)
+ *
+ * `:not()` contributes the specificity of its ARGUMENT, so the five-`:not()`
+ * chain on the resting rule scores 7 — and the previous hover (0,3,0) and
+ * active (0,6,0) rules both LOST to their own neighbour. Neither had ever
+ * applied on any of the three house themes: hover and active resolved to the
+ * resting `--sh-plate` and buttons never lifted and never pressed.
+ *
+ * The chain was added by #379 so this block would stop beating the `sh-*`
+ * utilities, and it silently disabled the two rules underneath it.
+ *
+ * So each state repeats the whole chain. It is verbose on purpose: the states
+ * must out-specify resting, and doing it by counting rather than by source
+ * order means re-ordering this file cannot swap them back.
+ * Gated by tests/e2e/tests/depth-tokens.spec.ts. */
+[data-theme='scripthammer-dark']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ):hover,
+[data-theme='scripthammer-light']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ):hover,
+[data-theme='scripthammer-forge']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ):hover {
+  box-shadow: var(--sh-plate-lift);
+}
+
+[data-theme='scripthammer-dark']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ):not(.btn-disabled):active,
+[data-theme='scripthammer-light']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ):not(.btn-disabled):active,
+[data-theme='scripthammer-forge']
+  .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
+    .sh-groove
+  ):not(.btn-disabled):active {
+  box-shadow: var(--sh-groove);
+}
+
+/* DaisyUI's .stat-title and .stat-desc ship base-content at 60% alpha, which
+ * falls short of WCAG AA. This block already corrected that to 80% — and 80%
+ * is STILL SHORT, which nobody could see until #454's admin fixture let the AAA
+ * sweep reach an admin route.
+ *
+ * The old comment claimed "~7.1:1 on light". Measured on /admin/email:
+ *
+ *   .stat-title  #484f58 on #ebe5dd  =  6.62:1   against a 7:1 gate
+ *
+ * 7.1 was computed against **base-100**. A `.stats` block sits on **base-200**,
+ * and that is exactly the surface #462 records as the trap: `/80` measures 7.08
+ * on base-100 and 6.4–6.5 on base-200. The alpha was right for the surface it
+ * was checked on and wrong for the one it renders on.
+ *
+ * Solid, therefore — the same conclusion #411, #425 and #495 reached for
+ * `.label`, the 404 copy and the conversation timestamp. A stat's caption is
+ * the label for its number; there is no reading in which it should be dimmer
+ * than the text around it. */
+[data-theme='scripthammer-dark'] .stat-title,
+[data-theme='scripthammer-dark'] .stat-desc,
+[data-theme='scripthammer-light'] .stat-title,
+[data-theme='scripthammer-forge'] .stat-title,
+[data-theme='scripthammer-light'] .stat-desc,
+[data-theme='scripthammer-forge'] .stat-desc {
+  color: var(--color-base-content);
+}
+
+/* Avatar glow/shadow — uses base-content so it auto-adapts:
+ * dark themes → light glow, light themes → dark shadow.
+ * Works across all 35 DaisyUI themes. */
+.avatar {
+  filter: drop-shadow(
+    0 4px 8px color-mix(in oklch, currentColor 25%, transparent)
+  );
+}
+
+/* Override DaisyUI drawer-side to respect container bounds
+ * DaisyUI's default uses position:fixed + height:100dvh which is viewport-relative.
+ * This makes it absolute (relative to nearest positioned ancestor) so it stays
+ * within containers like the messages page which has bottom-24 for footer clearance.
+ */
+.drawer-side {
+  position: absolute !important;
+  height: 100% !important;
+  top: 0 !important;
+}
+
+/* ============================================================================
+ * Where the type stack is actually applied (#377).
+ *
+ * This block replaces two `@font-face` rules that declared `font-family:
+ * 'Geist'` and `'Geist Mono'` with a `font-display` and a `size-adjust` and
+ * NO `src` descriptor. A `@font-face` without `src` is invalid and discarded
+ * by the parser, so they had never done anything.
+ *
+ * `--sh-font-body` / `--sh-font-display` are the single channel through which
+ * BOTH font controls speak — the accessibility panel's sans/serif/mono toggle
+ * and the six-font FontSwitcher. Before #377 each wrote `document.body.style
+ * .fontFamily` directly, so they raced on one inline property and the last
+ * writer won. An inline style also outranks every stylesheet rule, which is
+ * the other half of why the brand face never appeared.
+ *
+ * IN `@layer base` ON PURPOSE. globals.css is unlayered, so an element
+ * selector written here would outrank Tailwind's `font-mono` utility and
+ * freeze every heading — the same cascade mistake as the `.text-*{!important}`
+ * block removed in #388. Inside `base`, utilities still win.
+ * ========================================================================= */
+@layer base {
+  body {
+    font-family: var(--sh-font-body, var(--font-sans));
+  }
+
+  /* The display face is a separate channel so a user font choice can replace
+   * it. #377: someone who picks OpenDyslexic must not still get Archivo Black
+   * on every heading. Both controls set both variables together. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--sh-font-display, var(--font-display));
+  }
+}
+
+/* Accessibility Font Scaling System + Mobile-First Fluid Typography (PRP-017) */
+:root {
+  /* Base scale factor - controlled by accessibility settings.
+     Must equal FONT_SCALE_FACTORS.medium in @/config/accessibility-tokens
+     (the DEFAULT_ACCESSIBILITY_SETTINGS.fontSize value). No setting maps to 1
+     -- the smallest is 1.25 -- so a `1` here paints a size the app can never
+     be set to, then jumps on hydration (#388). AccessibilityScript overrides
+     this pre-paint for anyone with a stored preference; this value is what a
+     first-time or JS-disabled visitor gets. */
+  --font-scale-factor: 1.5;
+
+  /* The sticky GlobalNav's real border-box height (#301).
+     GlobalNav.tsx:172's inner div is h-16 (4rem) and :170's header adds
+     border-b, so the header measures 65px -- confirmed live. Every existing
+     hard-coded call site says 64 and is therefore 1px short
+     (TwinCanvas.client.tsx, messages/page.tsx:78,
+     messages/new-group/page.tsx:417, wireframes/page.tsx:23). Migrating those
+     is deliberately out of #301's scope; this var exists because the twin
+     chrome spans two styling idioms -- AtlasViewer uses Tailwind classes,
+     stage/Hud.tsx uses inline style objects -- and a CSS var is the only thing
+     both can share (a TS constant cannot appear in a class name).
+     4rem is safe: --font-scale-factor scales the --text-* tokens only, never
+     the root font-size, so h-16 is 64px at every accessibility setting. */
+  --nav-h: calc(4rem + 1px);
+
+  /* The twin routes' compact footer strip (src/twin/TwinFooter.tsx): 44px of
+     content -- CLAUDE.md's touch-target floor -- plus the iOS home indicator.
+     layout.tsx:68 sets viewportFit:'cover', so env() is non-zero there. */
+  --twin-footer-h: calc(2.75rem + env(safe-area-inset-bottom));
+
+  /* Font loading optimization to reduce CLS */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Fluid typography using clamp() for mobile-first responsive scaling
+   * Format: clamp(min, preferred, max) * scale-factor
+   * min: mobile (320px), preferred: fluid calc, max: desktop (1024px+)
+   */
+  --text-xs: calc(
+    clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem) * var(--font-scale-factor)
+  );
+  --text-sm: calc(
+    clamp(0.75rem, 0.65rem + 0.5vw, 0.875rem) * var(--font-scale-factor)
+  );
+  --text-base: calc(
+    clamp(0.875rem, 0.8rem + 0.5vw, 1rem) * var(--font-scale-factor)
+  );
+  --text-lg: calc(
+    clamp(1rem, 0.95rem + 0.5vw, 1.125rem) * var(--font-scale-factor)
+  );
+  --text-xl: calc(
+    clamp(1.125rem, 1rem + 0.75vw, 1.25rem) * var(--font-scale-factor)
+  );
+  --text-2xl: calc(
+    clamp(1.25rem, 1.1rem + 1vw, 1.5rem) * var(--font-scale-factor)
+  );
+  --text-3xl: calc(
+    clamp(1.5rem, 1.3rem + 1.25vw, 1.875rem) * var(--font-scale-factor)
+  );
+  --text-4xl: calc(
+    clamp(1.75rem, 1.5rem + 1.5vw, 2.25rem) * var(--font-scale-factor)
+  );
+  --text-5xl: calc(clamp(2rem, 1.75rem + 2vw, 3rem) * var(--font-scale-factor));
+  --text-6xl: calc(
+    clamp(2.5rem, 2rem + 2.5vw, 3.75rem) * var(--font-scale-factor)
+  );
+  --text-7xl: calc(
+    clamp(3rem, 2.5rem + 3vw, 4.5rem) * var(--font-scale-factor)
+  );
+  --text-8xl: calc(clamp(4rem, 3rem + 4vw, 6rem) * var(--font-scale-factor));
+  --text-9xl: calc(clamp(5rem, 4rem + 5vw, 8rem) * var(--font-scale-factor));
+}
+
+/* Subtle Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* The `.text-xs`..`.text-9xl` overrides that used to live here were deleted in
+   #388. They were redundant AND actively harmful:
+
+   - Redundant: Tailwind v4 already emits `.text-4xl{font-size:var(--text-4xl)}`,
+     and the `--text-*` tokens are redefined above in an unlayered `:root`,
+     which outranks Tailwind's `@layer theme`. So Tailwind's own utilities
+     already resolved to the fluid, accessibility-scaled values.
+   - Harmful: because globals.css is unlayered, these rules outranked every
+     responsive variant. `sm:text-5xl` emits into `@layer utilities` and lost
+     to an unlayered `.text-4xl{...!important}`, so ~42 responsive font ladders
+     across 15 files silently rendered frozen at their base size.
+
+   Deleting them also restores Tailwind's `--text-*--line-height` pairing,
+   which the `font-size`-only overrides had suppressed. */
+
+/* Also scale heading elements that don't have explicit classes.
+   Deliberately KEPT (#388): this is what makes bare <h1>..<p> scale, and blog
+   post headings currently depend on it. It is unlayered too, but it only
+   matches elements with no `text-*` class, so it cannot shadow a utility. */
+h1:not([class*='text-']) {
+  font-size: var(--text-4xl);
+}
+h2:not([class*='text-']) {
+  font-size: var(--text-3xl);
+}
+h3:not([class*='text-']) {
+  font-size: var(--text-2xl);
+}
+h4:not([class*='text-']) {
+  font-size: var(--text-xl);
+}
+h5:not([class*='text-']) {
+  font-size: var(--text-lg);
+}
+h6:not([class*='text-']) {
+  font-size: var(--text-base);
+}
+p:not([class*='text-']) {
+  font-size: var(--text-base);
+}
+
+/* The 2a hero's status dot (#379). The design specifies
+   `animation: sh-pulse 2.4s ease-in-out infinite` on a glowing accent dot.
+   Held to opacity so it cannot cause layout shift, and stopped outright under
+   prefers-reduced-motion — the dot still reads, it just stops breathing. */
+@keyframes sh-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@utility sh-pulse {
+  animation: sh-pulse 2.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* The 2a button (#379). The comp does not use DaisyUI's `.btn` silhouette —
+   its buttons are mono, uppercase, letterspaced, 14px-radius slabs. Defined
+   once here because the shape repeats four times across the page and would
+   otherwise be four copies of the same inline style.
+   `min-height: 2.75rem` keeps the 44px touch target the repo gates on. */
+@utility sh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 1.0625rem 1.875rem;
+  border-radius: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.84375rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Raised, lit from the top-left like every other plate on the page. */
+@utility sh-btn-primary {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-secondary) 92%, #fff),
+    var(--color-secondary)
+  );
+  color: var(--color-secondary-content);
+  box-shadow:
+    0 18px 34px -12px
+      color-mix(in oklab, var(--color-secondary) 75%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.22);
+}
+
+/* The quiet twin: cut into the page rather than sitting on it. */
+@utility sh-btn-ghost {
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  box-shadow:
+    inset 0 3px 8px var(--sh-ink-shadow),
+    inset 0 -1px 0 var(--sh-ink-edge);
+}
+
+/* ============================================================================
+ * `sh-doc` — rendered documentation markup (#380, 3a)
+ *
+ * The /docs article renders HTML this app does not author, from markdown in
+ * the repo. The comp asks for "code in recessed panels"; these rules apply the
+ * depth vocabulary to tags that arrive without classes.
+ *
+ * Tables matter most. The seven source documents carry 194 table rows between
+ * them, and the reason /docs uses remark rather than the blog's regex
+ * processor is that the latter renders them as literal pipes.
+ * ========================================================================= */
+@utility sh-doc {
+  line-height: 1.7;
+
+  & h2 {
+    margin-block: 2rem 0.75rem;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  & h3 {
+    margin-block: 1.5rem 0.5rem;
+    font-size: 1.175rem;
+  }
+  & p,
+  & ul,
+  & ol {
+    margin-block: 0.75rem;
+  }
+  & ul,
+  & ol {
+    padding-inline-start: 1.5rem;
+  }
+  & ul {
+    list-style: disc;
+  }
+  & ol {
+    list-style: decimal;
+  }
+  & a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Code as a recessed panel — the comp's phrase, literally. */
+  & pre {
+    margin-block: 1rem;
+    overflow-x: auto;
+    border-radius: var(--radius-box, 1rem);
+    background: var(--color-base-100);
+    padding: 1rem 1.25rem;
+    box-shadow:
+      inset 0 3px 8px var(--sh-ink-shadow),
+      inset 0 -1px 0 var(--sh-ink-edge);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+  /* Inline code is a groove too, just a shallow one. */
+  & :not(pre) > code {
+    border-radius: 0.375rem;
+    background: var(--color-base-200);
+    padding: 0.125rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  & table {
+    display: block;
+    overflow-x: auto;
+    margin-block: 1rem;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  & th,
+  & td {
+    border: 1px solid var(--color-base-300);
+    padding: 0.5rem 0.75rem;
+    text-align: start;
+    vertical-align: top;
+  }
+  & th {
+    background: var(--color-base-200);
+    /* DaisyUI dims table headers to 5.86:1 in the dark theme (#411); the
+       global override keeps them readable and this must not undo it. */
+    color: var(--color-base-content);
+    font-weight: 600;
+  }
+
+  & blockquote {
+    margin-block: 1rem;
+    border-inline-start: 3px solid var(--color-base-300);
+    padding-inline-start: 1rem;
+  }
+  & img {
+    max-width: 100%;
+    height: auto;
+  }
+  & hr {
+    margin-block: 2rem;
+    border-color: var(--color-base-300);
+  }
+}
+
+/* The 2a nav rail (#379/#378). The comp holds the nav links inside a GROOVE
+   and lifts the current one onto a PLATE — the same three-primitive vocabulary
+   as the rest of the page, applied to navigation.
+   The inactive links stay at full `text-base-content` rather than the comp's
+   60% wash: measured, `/60` is 5.77:1, under the 7:1 gate (#21). The raised
+   pill is the active signal in the comp anyway, so nothing is lost. */
+@utility sh-rail {
+  display: flex;
+  gap: 0.375rem;
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--color-base-100);
+  box-shadow:
+    inset 0 3px 7px var(--sh-ink-shadow),
+    inset 0 -1px 0 var(--sh-ink-edge);
+}
+
+@utility sh-rail-active {
+  background: linear-gradient(
+    180deg,
+    color-mix(
+      in oklab,
+      var(--color-base-300) 95%,
+      var(--color-base-content) 8%
+    ),
+    var(--color-base-200)
+  );
+  box-shadow:
+    0 4px 10px -3px var(--sh-ink-shadow),
+    inset 0 1px 0 var(--sh-ink-edge);
+}
+
+/* The terminal's block cursor (#379). Distinct from sh-pulse: the design uses
+   `step-end` so it snaps on/off like a real cursor rather than breathing. */
+@keyframes sh-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@utility sh-blink {
+  animation: sh-blink 1.1s step-end infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Spinning Logo Animations */
+@keyframes spin-clockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-counter-clockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* Pause animation on hover */
+.pause-on-hover:hover {
+  animation-play-state: paused !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Brand mark motion — ported verbatim from the Claude Design "ScriptHammer
+   Logo v3" export, panel 8e ("Motion — gear turns, mallet strikes the
+   brackets"). Timings and keyframe stops are the designer's; do not retune
+   them here without going back to docs/design/brand-marks/.
+
+   The strike is one 1.55s beat shared by the mallet, the brackets, the sparks
+   and the whole-mark recoil; only the gear runs on its own 14s rotation.
+
+   Every group sets `transform-box: view-box` AND an explicit
+   `transform-origin`. Without both, Firefox and Safari resolve the origin
+   against the element's own bounding box rather than the SVG viewBox and
+   rotate about the wrong point — it still animates, it just animates wrongly,
+   which no assertion catches.
+
+   Reduced motion is handled twice, deliberately: the media query below covers
+   the OS setting, and src/styles/reduced-motion.css covers the in-app
+   accessibility toggle (`[data-reduce-motion='true']`). This mark renders in
+   the global nav on EVERY page, so a fallback that only honours one trigger
+   would leave the other half of users with perpetual motion they asked to
+   stop.
+   --------------------------------------------------------------------------- */
+
+@keyframes sh-mark-jolt {
+  0%,
+  36% {
+    transform: translate(0, 0);
+  }
+  39% {
+    transform: translate(-1.6px, 1.6px);
+  }
+  44% {
+    transform: translate(0.6px, -0.6px);
+  }
+  50%,
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes sh-mark-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sh-mark-anvil {
+  0%,
+  34% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  39% {
+    filter: brightness(1.85);
+    transform: scale(1.035);
+  }
+  47% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  52% {
+    filter: brightness(1.4);
+    transform: scale(1.018);
+  }
+  60%,
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+}
+
+@keyframes sh-mark-spark {
+  0%,
+  36% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes sh-mark-swing {
+  0% {
+    transform: rotate(0deg);
+  }
+  26% {
+    transform: rotate(-26deg);
+  }
+  38% {
+    transform: rotate(13deg);
+  }
+  45% {
+    transform: rotate(6deg);
+  }
+  52% {
+    transform: rotate(11deg);
+  }
+  70% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@utility sh-mark-jolt {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+  animation: sh-mark-jolt 1.55s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility sh-mark-spin {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+  animation: sh-mark-spin 14s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility sh-mark-anvil {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+  animation: sh-mark-anvil 1.55s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility sh-mark-spark {
+  transform-box: view-box;
+  transform-origin: 271px 167px;
+  animation: sh-mark-spark 1.55s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    /* The sparks exist only as part of the strike. Frozen mid-flight they read
+       as stray marks, so they are hidden outright rather than paused. */
+    opacity: 0;
+  }
+}
+
+@utility sh-mark-swing {
+  transform-box: view-box;
+  transform-origin: 159.37px 245.12px;
+  animation: sh-mark-swing 1.55s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Pausing the mark needs a descendant selector: the five animated groups are
+   nested inside the SVG, and `:hover` only matches the elements actually under
+   the pointer. The existing `.pause-on-hover` rule pauses the hovered element
+   itself, which is not the same thing here. */
+.sh-mark-pause:hover
+  :is(
+    .sh-mark-jolt,
+    .sh-mark-spin,
+    .sh-mark-anvil,
+    .sh-mark-spark,
+    .sh-mark-swing
+  ) {
+  animation-play-state: paused;
+}
+
+/* Leaflet Map Styles */
+/* Note: Leaflet CSS is imported in map components that use it */
+
+/* Fix Leaflet container sizing */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  font-family: inherit;
+}
+
+/* Dark background for map container before tiles load */
+[data-theme='scripthammer-dark'] .leaflet-container,
+[data-theme='scripthammer-forge'] .leaflet-container,
+[data-theme='dark'] .leaflet-container,
+[data-theme='dracula'] .leaflet-container,
+[data-theme='synthwave'] .leaflet-container,
+[data-theme='halloween'] .leaflet-container,
+[data-theme='forest'] .leaflet-container,
+[data-theme='black'] .leaflet-container,
+[data-theme='luxury'] .leaflet-container,
+[data-theme='business'] .leaflet-container,
+[data-theme='night'] .leaflet-container,
+[data-theme='coffee'] .leaflet-container,
+[data-theme='dim'] .leaflet-container,
+[data-theme='sunset'] .leaflet-container {
+  background-color: #1a1a2e;
+}
+
+/* Invert OSM tiles for dark mode — preserves color/detail unlike CartoDB dark_all */
+[data-theme='scripthammer-dark'] .leaflet-tile-pane,
+[data-theme='scripthammer-forge'] .leaflet-tile-pane,
+[data-theme='dark'] .leaflet-tile-pane,
+[data-theme='dracula'] .leaflet-tile-pane,
+[data-theme='synthwave'] .leaflet-tile-pane,
+[data-theme='halloween'] .leaflet-tile-pane,
+[data-theme='forest'] .leaflet-tile-pane,
+[data-theme='black'] .leaflet-tile-pane,
+[data-theme='luxury'] .leaflet-tile-pane,
+[data-theme='business'] .leaflet-tile-pane,
+[data-theme='night'] .leaflet-tile-pane,
+[data-theme='coffee'] .leaflet-tile-pane,
+[data-theme='dim'] .leaflet-tile-pane,
+[data-theme='sunset'] .leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(180deg) saturate(0.8)
+    brightness(1.1);
+}
+
+/* Smooth filter transition when switching themes */
+.leaflet-tile-pane {
+  transition: filter 0.4s ease;
+}
+
+/* Rounded map corners */
+.leaflet-container {
+  border-radius: var(--rounded-box, 0.75rem);
+  overflow: hidden;
+}
+
+/* Glass-morphism zoom controls */
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-control-zoom a {
+  border: none !important;
+  width: 44px !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  font-size: 18px !important;
+}
+
+/* Subtle attribution */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.leaflet-control-attribution:hover {
+  opacity: 1;
+}
+
+/* Fix Leaflet controls for dark mode */
+[data-theme='scripthammer-dark'] .leaflet-control,
+[data-theme='scripthammer-forge'] .leaflet-control,
+[data-theme='dark'] .leaflet-control,
+[data-theme='dracula'] .leaflet-control,
+[data-theme='synthwave'] .leaflet-control,
+[data-theme='halloween'] .leaflet-control,
+[data-theme='forest'] .leaflet-control,
+[data-theme='black'] .leaflet-control,
+[data-theme='luxury'] .leaflet-control,
+[data-theme='business'] .leaflet-control,
+[data-theme='night'] .leaflet-control,
+[data-theme='coffee'] .leaflet-control,
+[data-theme='dim'] .leaflet-control,
+[data-theme='sunset'] .leaflet-control {
+  backdrop-filter: blur(8px);
+  background: rgba(26, 26, 46, 0.75);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='scripthammer-dark'] .leaflet-control a,
+[data-theme='scripthammer-forge'] .leaflet-control a,
+[data-theme='dark'] .leaflet-control a,
+[data-theme='dracula'] .leaflet-control a,
+[data-theme='synthwave'] .leaflet-control a,
+[data-theme='halloween'] .leaflet-control a,
+[data-theme='forest'] .leaflet-control a,
+[data-theme='black'] .leaflet-control a,
+[data-theme='luxury'] .leaflet-control a,
+[data-theme='business'] .leaflet-control a,
+[data-theme='night'] .leaflet-control a,
+[data-theme='coffee'] .leaflet-control a,
+[data-theme='dim'] .leaflet-control a,
+[data-theme='sunset'] .leaflet-control a {
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+/* Fix popup styles for themes */
+.leaflet-popup-content-wrapper {
+  @apply bg-base-100 text-base-content;
+  border-radius: var(--rounded-box, 1rem);
+}
+
+.leaflet-popup-tip {
+  @apply bg-base-100;
+}
+
+/* Accessibility improvements */
+.leaflet-control-zoom a {
+  @apply transition-colors;
+}
+
+.leaflet-control-zoom a:hover {
+  @apply bg-base-300;
+}
+
+.leaflet-control-zoom a:focus {
+  @apply ring-primary ring-2 outline-none;
+}
+
+/* Fix marker positioning */
+.leaflet-marker-icon {
+  transition: none !important;
+}
+
+/* Custom location marker styles */
+.user-location-marker {
+  @apply bg-primary;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.user-location-accuracy {
+  @apply fill-primary opacity-20;
+  stroke: theme('colors.primary.DEFAULT');
+  stroke-width: 1;
+  stroke-opacity: 0.5;
+}
+
+/* ===== Syntax Highlighting Styles ===== */
+/* Line numbers styles */
+[data-theme] .line-number {
+  @apply text-base-content/30 select-none;
+  display: inline-block;
+  width: 3rem;
+  text-align: right;
+  padding-right: 1rem;
+  margin-right: 1rem;
+  border-right: 1px solid;
+  @apply border-base-300;
+}
+
+[data-theme] .code-line {
+  display: block;
+}
+
+/* Token colors that work with all themes */
+[data-theme] .token.comment,
+[data-theme] .token.prolog,
+[data-theme] .token.doctype,
+[data-theme] .token.cdata {
+  color: #6a9955; /* Green comments */
+}
+
+[data-theme] .token.punctuation {
+  color: #d4d4d4; /* Light gray */
+}
+
+[data-theme] .token.property,
+[data-theme] .token.tag,
+[data-theme] .token.constant,
+[data-theme] .token.symbol,
+[data-theme] .token.deleted {
+  color: #ce9178; /* Orange */
+}
+
+[data-theme] .token.boolean,
+[data-theme] .token.number {
+  color: #b5cea8; /* Light green */
+}
+
+[data-theme] .token.selector,
+[data-theme] .token.attr-name,
+[data-theme] .token.string,
+[data-theme] .token.char,
+[data-theme] .token.builtin,
+[data-theme] .token.inserted {
+  color: #ce9178; /* Orange for strings */
+}
+
+[data-theme] .token.operator,
+[data-theme] .token.entity,
+[data-theme] .token.url,
+[data-theme] .language-css .token.string,
+[data-theme] .style .token.string,
+[data-theme] .token.variable {
+  color: #d4d4d4; /* Light gray */
+}
+
+[data-theme] .token.atrule,
+[data-theme] .token.attr-value,
+[data-theme] .token.function,
+[data-theme] .token.class-name {
+  color: #dcdcaa; /* Yellow */
+}
+
+[data-theme] .token.keyword {
+  color: #569cd6; /* Blue */
+}
+
+[data-theme] .token.regex,
+[data-theme] .token.important {
+  color: #d16969; /* Red */
+}
+
+[data-theme] .token.important,
+[data-theme] .token.bold {
+  font-weight: bold;
+}
+
+[data-theme] .token.italic {
+  font-style: italic;
+}
+
+[data-theme] .token.entity {
+  cursor: help;
+}
+
+/* Code block container adjustments */
+[data-theme] pre[class*='language-'] {
+  @apply bg-base-200 text-base-content my-4 rounded-lg p-4;
+  overflow-x: auto;
+}
+
+[data-theme] code[class*='language-'] {
+  @apply font-mono text-sm;
+}
+
+/* Mobile-first button sizing override for status page */
+.btn-mobile-compact {
+  height: 1.5rem !important;
+  min-height: 1.5rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  font-size: 0.625rem !important;
+  line-height: 1 !important;
+}
+
+@media (width >= theme(--breakpoint-sm)) {
+  .btn-mobile-compact {
+    height: 2rem !important;
+    min-height: 2rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* HEADINGS MUST NOT TRUNCATE A WORD THEY CANNOT FIT (#473).
+ *
+ * At 320px, /docs rendered its page title as "Documentatio" — the final `n`
+ * simply gone. The h1's BOX fits the viewport; its TEXT does not: measured
+ * scrollWidth 346px inside a clientWidth of 288px, because a 13-character
+ * unbreakable word at 43.2px cannot wrap. Nothing in the app reported it,
+ * because every overflow check compares element boxes against the viewport and
+ * this box is entirely inside it — the overflow is INTERNAL.
+ *
+ * `overflow-wrap: break-word` only takes effect when a single word cannot fit
+ * on a line by itself, so it changes nothing about headings that already wrap
+ * normally. That is why this is safe to apply globally, where a margin rule
+ * would not be: 15 of 42 headings across six routes sit inside cards where
+ * spacing is deliberate (#373 §C3), but none of them want to be truncated.
+ *
+ * Deliberately no hyphenation here — that would alter where every wrapping
+ * heading breaks, which is a typographic change rather than a truncation fix.
+ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* LIST ITEMS AND INLINE CODE HAVE THE SAME PROBLEM, FOR A DIFFERENT REASON
+ * (#473, second half).
+ *
+ * The heading rule above does not reach them, and the remaining overflows are
+ * not headings. Measured on /docs/install-and-first-run at 320px: of 140 list
+ * items, five overflowed their own box — up to 318px of content inside a 264px
+ * one — every one of them computing `overflow-wrap: normal`.
+ *
+ * What overflows is never prose. It is a URL
+ * (`https://www.scripthammer.com/...`), an environment variable
+ * (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`), or a repo path
+ * (`docs/CREATING_COMPONENTS.md`) — single tokens with no break opportunity,
+ * which is exactly and only the case `break-word` acts on.
+ *
+ * `break-word`, NOT `break-all`, even though the ticket floated `break-all` for
+ * "comma-separated key material". `break-all` breaks any word at the box edge
+ * whether or not it needed to, so it would chop ordinary sentences mid-word
+ * throughout the docs. `break-word` leaves every list that already wraps
+ * untouched — the same property that made the heading rule safe to apply
+ * globally.
+ *
+ * `code` is listed separately because one of the five was an `<li>` whose three
+ * `<code>` children were the unbreakable part; a rule on the `li` alone does not
+ * give the inline child a break opportunity. */
+li,
+code {
+  overflow-wrap: break-word;
+}
+
+/* `break-word` DOES NOT AFFECT MIN-CONTENT SIZE; `anywhere` DOES (#473).
+ *
+ * `/blog/seo`'s `h2.card-title` measured 261px of text in a 240px box WITH the
+ * heading rule applied and computed, so this was never a specificity problem.
+ *
+ * #473 diagnosed it as the flex `min-width: auto` trap and prescribed
+ * `min-width: 0`. THAT WAS WRONG, and implementing it is how we know: with
+ * `min-width: 0px` computed on the element, the number did not move — still
+ * 261/240. The box was already 240px wide, so being unable to shrink was never
+ * the constraint. `min-width: 0` here is a measured no-op.
+ *
+ * What is actually happening: `.card-title` is `display: flex` and its only
+ * child is a bare text node, which becomes an ANONYMOUS flex item — one no
+ * selector can reach. A flex item's automatic minimum size comes from its
+ * content's min-content width, and `overflow-wrap: break-word` deliberately
+ * does NOT change min-content. `overflow-wrap: anywhere` does. So `anywhere`
+ * is not a stronger flavour of the same thing here; it is the only one of the
+ * two that alters the sizing the layout depends on.
+ *
+ * Measured against every alternative rather than argued:
+ *
+ *   min-width: 0                    261/240  no change
+ *   min-width: 0 on children        261/240  no change (cannot reach anonymous items)
+ *   flex-wrap: wrap                 261/240  no change (wraps items, not text)
+ *   display: block                  240/240  works, but discards the flex layout
+ *                                            DaisyUI uses for icon-plus-title cards
+ *   word-break: break-word          240/240  works; deprecated alias of this rule
+ *   overflow-wrap: anywhere         240/240  works
+ *
+ * Blast radius, measured rather than assumed — #473 flagged this as touching
+ * "every card in the product". Across all 40 routes at 320px, with
+ * screen-reader-only elements excluded, exactly ONE element overflowed its own
+ * box. `anywhere` only breaks where a line cannot otherwise fit, so titles that
+ * already wrap are untouched.
+ *
+ * Not theme-scoped: a layout-correctness fix, and the 32 stock DaisyUI themes
+ * have the same defect. */
+.card-title {
+  overflow-wrap: anywhere;
+}
+
+/* The global typography scale that used to live here is GONE (#373 §C4).
+ *
+ * It defined .page-title / .section-title / .subsection-title / .minor-heading /
+ * .status-card-title as plain, UNLAYERED rules with 38 `!important`
+ * declarations — and it had ZERO live consumers. Its only references were the
+ * arbitrary variants in BlogContent.tsx (`[&>h1]:page-title` and siblings),
+ * which produce NO CSS at all: a plain class cannot be used as a Tailwind
+ * arbitrary variant, and the shipped stylesheet contained no escaped `h1]`
+ * selector anywhere. Deleting it changed no rendered pixel.
+ *
+ * Do not reinstate it by registering these as `@utility` to make those variants
+ * build. Measured: h1 would become --text-lg, h2 and h3 would BOTH become
+ * --text-base, and blog titles render at 90px today — every heading would
+ * shrink to roughly body size, h2/h3 would collapse into one, and the
+ * `!important` would leave nothing able to override it. The inertness was
+ * protecting the blog.
+ *
+ * A real heading ladder belongs in `@theme`/`@utility` where it can cascade,
+ * and the heading-rhythm defect (#373 §C3 — preflight zeroes heading margins
+ * and nothing restores them, measured as an 8px gap under a 72px h1) is a
+ * separate fix that this deletion does not address.
+ */
+
+/* Storybook Docs: inherit DaisyUI theme background instead of hardcoded white.
+ * These selectors only exist inside Storybook's docs iframe — no production impact. */
+.sbdocs-wrapper {
+  background-color: var(--color-base-100, inherit) !important;
+  color: var(--color-base-content, inherit) !important;
+}
+
+.sbdocs-preview {
+  background-color: var(--color-base-200, inherit) !important;
+  border-color: var(--color-base-300, currentColor) !important;
+}
+
+/* Docs heading and body text inherit theme color */
+.sbdocs-wrapper h1,
+.sbdocs-wrapper h2,
+.sbdocs-wrapper h3,
+.sbdocs-wrapper h4,
+.sbdocs-wrapper p {
+  color: var(--color-base-content, inherit) !important;
+}
+
+/* Props table: themed backgrounds + text (actual class is .sb-argstableBlock) */
+.sb-argstableBlock td,
+.sb-argstableBlock th {
+  background-color: var(--color-base-100, inherit) !important;
+  color: var(--color-base-content, inherit) !important;
+  border-color: var(--color-base-300, currentColor) !important;
+}
+
+.sb-argstableBlock thead th {
+  background-color: var(--color-base-200, inherit) !important;
+}
+
+/* Controls, code, and descriptive text inside the table */
+.sb-argstableBlock td span,
+.sb-argstableBlock td code {
+  color: var(--color-base-content, inherit) !important;
+}
+
+/* Storybook loading skeleton wrapper */
+.sb-preparing-docs.sb-wrapper {
+  background-color: var(--color-base-100, inherit) !important;
+}
+
+/* Twin routes (/twins/[slug], /chatt). TwinCanvasHost adds .twin-fullscreen to
+   <body> on mount for BOTH renderers, and .twin-diorama for the diorama only;
+   both revert on unmount, so other routes are unaffected.
+
+   Until #301 this was added by TwinCanvas (the diorama) alone, so when #292
+   made the atlas the default these rules stopped applying to /chatt entirely
+   -- the flagship route was the one route with no chrome suppression. */
+
+/* The PWA-install popup (fixed top-20 right-4) lands on top of the atlas's
+   target card and the diorama's HUD alike. Neither renderer wants it. */
+body.twin-fullscreen [aria-label='Install Progressive Web App'] {
+  display: none !important;
+}
+
+/* The cookie banner is hidden for the DIORAMA ONLY. Its dock sits at
+   bottom:16 and the ~66px banner buries it. The ATLAS keeps the banner: /chatt
+   is the shared link, and a first-time visitor landing there must still be able
+   to consent to analytics. The banner (z-[60]) covers the atlas's footer strip
+   until dismissed -- accepted; it is dismissible, and consent outranks a strip
+   of credits. */
+body.twin-diorama [aria-label='Cookie consent banner'] {
+  display: none !important;
+}
+
+/* THE NAV FLOATS ON GLASS over the scene (#301).
+   Both renderers are `fixed; inset:0` with z-index:auto, so they paint at step
+   8 and the nav's z-50 at step 9 -- the scene is behind it by construction.
+   This is the atlas's own answer for its critical panels (bg-base-100/90 +
+   backdrop-blur, the tour caption and target card) applied to the nav.
+
+   No !important: globals.css is unlayered (zero @layer) and Tailwind v4 emits
+   utilities into @layer utilities -- unlayered wins regardless of specificity.
+
+   /90 rather than the HUD's /85: measured in GAMMA space (a naive
+   linear-luminance estimate wrongly condemns /85 at ~4.1:1), /90 holds both
+   shipped themes above 10:1 against the worst possible backdrop --
+   scripthammer-dark 10.33:1, scripthammer-light 10.37:1 -- where /85 leaves
+   dark at 8.71:1, a 1.24x margin over AAA that one theme tweak erases. The nav
+   is the only escape hatch from a full-screen scene; it should be the most
+   legible chrome on the page, not the least. The blur does the glass's
+   perceptual work; the transparency only has to say "there's a world back
+   there".
+
+   border-b is deliberately KEPT: a crisp opaque edge is what separates the
+   glass from the scene. shadow-sm (0 1px 2px / 0.05) is invisible over
+   imagery, so it is replaced with stage/Hud.tsx's own glass shadow. */
+body.twin-fullscreen [data-global-nav] {
+  background-color: color-mix(in oklch, var(--color-base-100) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 0.35);
+}
+
+/* Every path that removes the blur MUST remove the transparency: a 90% wash
+   over unblurred high-frequency satellite imagery is exactly the case the blur
+   was buying off. Mirrors src/styles/reduced-motion.css's OS-media-query
+   pattern. (forced-colors needs nothing -- the UA forces the background.) */
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  body.twin-fullscreen [data-global-nav],
+  body.twin-fullscreen [data-twin-footer] {
+    background-color: var(--color-base-100);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body.twin-fullscreen [data-global-nav],
+  body.twin-fullscreen [data-twin-footer] {
+    background-color: var(--color-base-100);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* The compact footer strip swap (#301). Both lines are needed and they must
+   ship together, or the page briefly shows two contentinfo landmarks.
+   The strip is display:none by default so that pre-hydration -- before
+   TwinCanvasHost's effect adds the body class -- the static shell shows the
+   normal site footer and NOT both. One switch, never a hybrid. */
+[data-twin-footer] {
+  display: none;
+}
+body.twin-fullscreen [data-twin-footer] {
+  display: flex;
+}
+body.twin-fullscreen [data-site-footer] {
+  display: none !important;
+}

@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# THE SAME TWO DEFECTS AS pre-commit, FIXED THE SAME WAY (#747).
+#
+# 1. `docker compose exec` enters the running container, whose /app is the PRIMARY
+#    checkout. From a git worktree that scanned the wrong repository entirely.
+# 2. Every non-zero exit printed "Secrets detected in repository!", so failing to
+#    RUN the scanner was reported as finding a secret. Caught by the shared hook
+#    test after pre-commit was fixed: this hook printed "gitleaks is required but
+#    was not found" and "Secrets detected" in the same breath.
+#
+# Exit codes cannot separate the two — `gitleaks` returns 1 for leaks found AND for
+# a bad config — so invocability is established before any conclusion is drawn.
+
+SCAN_CLEAN=0
+SCAN_LEAKS=1
+SCAN_UNAVAILABLE=2
+
+# THE COMPOSE SERVICE NAME IS NOT A CONSTANT (#910).
+#
+# `scripts/rebrand.sh` renames it — update_docker_compose() rewrites the service key — so a
+# fork's app service is called whatever the fork is called. A hook that greps for the
+# literal `scripthammer` matches nothing there, falls through to the warn-only branch, and
+# every fork then commits with no lint-staged and no formatting. Silently, forever: the
+# warn scrolls past in a successful commit.
+#
+# Read the name from the file that defines it. That is rename-proof by construction,
+# because docker-compose.yml is what rebrand.sh edits.
+compose_service() {
+  awk '
+    /^services:/ { in_services = 1; next }
+    in_services && /^[^[:space:]#]/ { exit }
+    in_services && /^  [A-Za-z0-9_.-]+:[[:space:]]*$/ {
+      sub(/:[[:space:]]*$/, ""); gsub(/[[:space:]]/, ""); print; exit
+    }
+  ' docker-compose.yml 2>/dev/null
+}
+
+COMPOSE_SERVICE=$(compose_service)
+[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=scripthammer
+
+in_worktree() {
+  [ "$(git rev-parse --git-dir 2>/dev/null)" != "$(git rev-parse --git-common-dir 2>/dev/null)" ]
+}
+
+run_gitleaks_full() {
+  echo "🔐 Running full repository secret scan..."
+
+  if [ ! -f .gitleaks.toml ]; then
+    echo "⚠️  .gitleaks.toml is missing — cannot scan."
+    return $SCAN_UNAVAILABLE
+  fi
+
+  # Native first: it scans THIS checkout, in a worktree and in the primary tree.
+  if command -v gitleaks >/dev/null 2>&1; then
+    gitleaks detect --source . --config .gitleaks.toml --verbose
+    [ $? -eq 0 ] && return $SCAN_CLEAN || return $SCAN_LEAKS
+  fi
+
+  if [ -x "node_modules/.bin/gitleaks" ]; then
+    node_modules/.bin/gitleaks detect --source . --config .gitleaks.toml --verbose
+    [ $? -eq 0 ] && return $SCAN_CLEAN || return $SCAN_LEAKS
+  fi
+
+  if in_worktree; then
+    echo "⚠️  No native gitleaks, and this is a git worktree."
+    echo "   Docker would scan the PRIMARY checkout, not this one (#747)."
+    return $SCAN_UNAVAILABLE
+  fi
+
+  if command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -q "$COMPOSE_SERVICE"; then
+    docker compose exec -T "$COMPOSE_SERVICE" pnpm run gitleaks
+    GL=$?
+    if [ $GL -eq 126 ] || [ $GL -eq 127 ]; then
+      echo "⚠️  Could not execute gitleaks inside the container."
+      return $SCAN_UNAVAILABLE
+    fi
+    [ $GL -eq 0 ] && return $SCAN_CLEAN || return $SCAN_LEAKS
+  fi
+
+  echo "⚠️  gitleaks not found on PATH, in node_modules/.bin, or via Docker."
+  return $SCAN_UNAVAILABLE
+}
+
+echo "🔒 Pre-push secret scanning..."
+run_gitleaks_full
+GITLEAKS_EXIT=$?
+
+# Both block; only the message differs, because they need different next actions.
+if [ $GITLEAKS_EXIT -eq $SCAN_LEAKS ]; then
+  echo "❌ Secrets detected in repository! Push blocked."
+  echo "Review the findings above and remove any secrets before pushing."
+  exit 1
+elif [ $GITLEAKS_EXIT -ne $SCAN_CLEAN ]; then
+  echo "❌ Secret scan could NOT RUN — push blocked. This is not a leak report."
+  echo "   Install gitleaks (https://github.com/gitleaks/gitleaks) or start the"
+  echo "   dev container, then push again."
+  exit 1
+fi
+
+# Run full CI validation before pushing to catch all issues
+echo "🚀 Running CI validation before push..."
+
+# Quick validation by default (faster)
+# For full validation including coverage and Storybook, use: git push --no-verify && ./scripts/validate-ci.sh
+./scripts/validate-ci.sh --quick
+
+if [ $? -ne 0 ]; then
+    echo "❌ CI validation failed. Please fix issues before pushing."
+    echo "Run './scripts/validate-ci.sh' for full validation"
+    exit 1
+fi

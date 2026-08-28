@@ -1,0 +1,966 @@
+# Quoted deliberately: an unquoted `#` after whitespace starts a YAML comment,
+# which silently truncated this name to "E2E (local Supabase) —".
+name: 'E2E (local Supabase)'
+
+permissions:
+  contents: read
+  actions: read
+
+# THIS LANE IS REQUIRED, AND IT IS WHERE A PR GETS ITS E2E COVERAGE.
+#
+# `E2E (local) result` became a required context on `main` when #739 closed
+# (2026-08-15). CLAUDE.md states it plainly: "A PR gets its E2E coverage from the
+# local lane." A PR cannot merge without this lane green.
+#
+# Until 2026-08-20 this header still described the lane as an experiment running
+# only alongside e2e.yml, and told readers not to count a green run here. Every
+# clause of that had become false, and it sat at the top of a REQUIRED workflow
+# telling readers the opposite of how merges are gated (#575). The hosted lane has
+# meanwhile been budget-blocked for weeks — its `Cloud-quota budget` job fails and
+# every downstream job is skipped — so treating THAT one as the real coverage is
+# what would now be wrong.
+#
+# `scripts/__tests__/required-checks-documented.test.js` fails if this header ever
+# disclaims its own coverage again.
+#
+# Still true, and not to be undone casually: e2e.yml is not deleted, and its
+# repo-wide mutex stays. Six `@hosted` tests can only pass there.
+#
+# THE FULL 24-SHARD MATRIX STILL EXISTS (#575 step 1), but the common PR path is
+# eight Chromium shards (#950). Firefox and WebKit run after merge on push to
+# main, on workflow_dispatch, or when the PR event already carries `full-e2e`.
+# Full mode mirrors e2e.yml exactly — same projects, same shard counts, same
+# `workers: 2` on the msg-iso entries — so parity remains meaningful there.
+#
+# What it does NOT mirror is the contention machinery. e2e.yml splits into three
+# per-browser jobs each capped at `max-parallel: 2` for one reason: to hold peak
+# load on the single shared CLOUD project down to 6 concurrent shards. Every
+# runner here brings up its own Supabase, so there is nothing to contend for and
+# all 24 can run at once. Copying the caps would import the bottleneck this
+# workflow exists to delete.
+#
+# WHY THIS EXISTS
+# Every painful property of e2e.yml traces to one fact: all 24 matrix jobs share
+# a single CLOUD Supabase project. The repo-wide mutex, `max-parallel: 2`, the
+# connection-priming curl and the up-to-50s stagger sleep are all workarounds for
+# contention on that one project. Measured cost: 68-min median, 25% of runs
+# cancelled at the 60-min job cap while queued, and #567 — CI exhausting the
+# production quota and taking prod down with it.
+#
+# A per-runner ephemeral stack has no contention, so none of those workarounds
+# are needed. Note what is ABSENT below: no `concurrency:` block at all.
+#
+# PROVEN LOCALLY 2026-08-06, while the cloud project was returning HTTP 402:
+#   local  /auth/v1/health -> 200      cloud -> 402
+#   public tables          -> 17       (identical to production)
+#   seed-test-users.ts     -> all four users created
+#   global-setup           -> "Sign-in successful", auth state saved
+#   mobile-check.spec.ts   -> 2 passed (16.4s)
+# global-setup is the exact gate that aborts on cloud with exceed_*_quota.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Commit to TEST (workflow definition still comes from the branch you dispatch)'
+        required: false
+        default: de0f7f080c8d75949e4e6c89fdf66ab7d3da8029
+  # Dispatching with --ref de0f7f0 would run THAT commit's copy of this file — the
+  # old single-shard prototype — so the widened matrix could never reach the
+  # baseline code. Checking the ref out as an INPUT instead keeps the two
+  # separable: definition from the branch, code under test from `ref`.
+  # EVERY PR AND EVERY PUSH TO MAIN, WITH NO `paths` FILTER OF ANY KIND (#575 Phase 3).
+  #
+  # The filtering happens in the `changes` job below instead, and that placement is the
+  # whole point. This workflow's aggregate becomes a REQUIRED check in Phase 5, and a
+  # required check that never reports is **pending forever**, not skipped — which is
+  # precisely why `Build` and `Validate Component Structure` are deliberately absent from
+  # this repo's required set. A `paths:`/`paths-ignore:` here would make every docs-only PR
+  # permanently unmergeable.
+  #
+  # So: trigger always, decide inside, and let the aggregate report success when there was
+  # nothing to run.
+  pull_request:
+    branches: [main]
+    # `labeled` is what makes adding `full-e2e` launch the advertised 24-shard run.
+    # Other labels still take the normal Chromium path; never skip those events, because a
+    # vacuous green required context on the same SHA could hide an earlier real failure.
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main]
+
+# DELIBERATELY NO `concurrency:` BLOCK.
+# e2e.yml serializes every run repo-wide because they contend for one cloud
+# project. Nothing is shared here, so runs may go in parallel. Re-adding a mutex
+# would reintroduce the bottleneck this workflow exists to remove.
+
+jobs:
+  # Does this change need the suite at all? (#575 Phase 3)
+  #
+  # Reads the ignore list OUT OF `e2e.yml` rather than repeating it — two lanes with two
+  # hand-maintained lists drift silently, and in the worst direction: a change that skips E2E
+  # on one lane and runs it on the other. Deriving means they cannot disagree.
+  changes:
+    name: Does this change need E2E?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+      browsers: ${{ steps.browsers.outputs.browsers }}
+      expected_shards: ${{ steps.browsers.outputs.expected_shards }}
+      browser_mode: ${{ steps.browsers.outputs.browser_mode }}
+    steps:
+      # Filter the matrix BEFORE runner allocation. A step-level browser gate would still
+      # enqueue 24 jobs and preserve the runner bottleneck #950 exists to remove.
+      - name: Select browser coverage
+        id: browsers
+        env:
+          E2E_FULL_BROWSERS: >-
+            ${{ github.event_name != 'pull_request' ||
+                contains(github.event.pull_request.labels.*.name, 'full-e2e') }}
+        run: |
+          if [ "$E2E_FULL_BROWSERS" = "true" ]; then
+            browsers='["chromium","firefox","webkit"]'
+            expected_shards=24
+            browser_mode=full
+          else
+            browsers='["chromium"]'
+            expected_shards=8
+            browser_mode=chromium
+          fi
+          {
+            echo "browsers=$browsers"
+            echo "expected_shards=$expected_shards"
+            echo "browser_mode=$browser_mode"
+          } >> "$GITHUB_OUTPUT"
+          echo "browser mode: $browser_mode ($expected_shards shards)"
+
+      - uses: actions/checkout@v5
+        with:
+          # Full history: the PR case diffs against the merge base, which a shallow
+          # clone does not contain.
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Decide
+        id: decide
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # An explicit dispatch is a deliberate request — never second-guess it.
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "  workflow_dispatch — running unconditionally"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          else
+            # push: `before` is all-zeroes on a branch's first push — fall back to the
+            # first parent so the diff is never taken against a nonexistent object.
+            BASE="${{ github.event.before }}"
+            case "$BASE" in
+              0000000*|'') BASE="$(git rev-parse HEAD^1 2>/dev/null || git rev-parse HEAD)" ;;
+            esac
+            HEAD="${{ github.sha }}"
+          fi
+          echo "  base=$BASE head=$HEAD"
+          node scripts/ci/e2e-local-changes.mjs "$BASE" "$HEAD"
+
+  e2e-local:
+    name: ${{ matrix.browser }}-${{ matrix.slice.project }} ${{ matrix.slice.shard }}
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    # 45, not 30 (#801) — and this cap BOUNDS DAMAGE, it does not guarantee completion.
+    # Saying otherwise would be the mistake #762 and #798 both made.
+    #
+    # There is no value that guarantees completion, because the quantity is a download
+    # over a mirror of unknown speed: `firefox-gen 4/6` moved 21.1 MB at 36.9 kB/s on
+    # 2026-08-18, and webkit's 114 MB at that rate is **51 minutes**. 45 would not have
+    # saved it either.
+    #
+    # What 45 buys is the ordinary cold-cache miss (a 17.7m install inside a ~25m job),
+    # which 30 was already too tight for. The real fix is the apt cache below, which
+    # removes the download rather than budgeting for it. If WARM runs ever approach this
+    # cap, the cache has stopped working — check the mirror bytes, not the duration.
+    #
+    # A job-level cap is also the one bound that cannot leave a poisoned runner behind,
+    # because the runner is destroyed with it. That is why this is the right place for a
+    # time bound and the install command is not (#798).
+    timeout-minutes: 45
+
+    strategy:
+      # NO max-parallel. See the header — the caps in e2e.yml protect a shared
+      # cloud project that does not exist here.
+      fail-fast: false
+      matrix:
+        browser: ${{ fromJSON(needs.changes.outputs.browsers) }}
+        slice:
+          - { project: msg, shard: 1/1 }
+          - { project: msg-iso, shard: 1/1, workers: 2 }
+          - { project: gen, shard: 1/6 }
+          - { project: gen, shard: 2/6 }
+          - { project: gen, shard: 3/6 }
+          - { project: gen, shard: 4/6 }
+          - { project: gen, shard: 5/6 }
+          - { project: gen, shard: 6/6 }
+
+    steps:
+      - name: Checkout the code under test
+        uses: actions/checkout@v5
+        with:
+          # Empty on pull_request → the PR head, as usual.
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Say plainly what is being tested
+        run: |
+          echo "workflow definition : ${{ github.sha }}"
+          echo "code under test     : $(git rev-parse HEAD)"
+
+      - name: Local demo env (compose + build + tests share one set of creds)
+        run: |
+          # .env.local-supabase is TRACKED and holds the well-known PUBLIC
+          # Supabase demo keys. No repository secret is used anywhere in this
+          # workflow — which is the point: CI stops holding a production
+          # service-role key at all (see #574).
+          cp .env.local-supabase .env
+          sed -i 's|host\.docker\.internal|localhost|g' .env
+          grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|TEST_USER_)' .env.local-supabase >> "$GITHUB_ENV"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
+            echo "SUPABASE_ADMIN_URL=http://localhost:54321"
+          } >> "$GITHUB_ENV"
+
+      - name: Bring up local Supabase
+        run: |
+          # THE SERVICE LIST MUST NOT ASSUME THE CHECKED-OUT CODE HAS IT.
+          #
+          # This workflow's DEFINITION comes from the branch; docker-compose.yml
+          # comes from `ref`. supabase-edge-runtime was added in c30dc06d (#598),
+          # AFTER the de0f7f0 parity baseline — so naming it unconditionally made
+          # `docker compose up` fail with "no such service" and killed all 25 jobs
+          # before a single test ran. Any service added after the baseline has the
+          # same shape, so ask the compose file rather than hard-coding.
+          SERVICES="supabase-db supabase-kong supabase-auth supabase-rest supabase-realtime supabase-storage"
+          if docker compose --profile supabase config --services 2>/dev/null | grep -qx 'supabase-edge-runtime'; then
+            # kong.yml routes /functions/v1/ at it; without it every Edge Function
+            # call is a Kong 5xx against an unresolvable upstream, which surfaces
+            # as a PRODUCT error ("Failed to retry payment") rather than as
+            # anything pointing at a missing container.
+            SERVICES="$SERVICES supabase-edge-runtime"
+            echo "EDGE_RUNTIME_PRESENT=1" >> "$GITHUB_ENV"
+          else
+            echo "EDGE_RUNTIME_PRESENT=0" >> "$GITHUB_ENV"
+            echo "::notice::this commit predates the local edge runtime (#598) — Edge Function specs cannot pass here"
+          fi
+          echo "starting: $SERVICES"
+          docker compose --profile supabase up -d $SERVICES
+
+      - name: Wait for the stack to answer
+        run: |
+          set +e   # a non-zero curl inside the loop must not kill the step
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+              -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+              http://localhost:54321/auth/v1/health)
+            [ "$code" = "200" ] && { echo "auth ready after ${i} attempt(s)"; break; }
+            sleep 3
+          done
+          [ "$code" = "200" ] || { echo "::error::local Supabase never became ready (last=$code)"; exit 1; }
+
+          # And the functions route, when this commit HAS an edge runtime. A
+          # missing one does not stop /auth/v1/health answering, so the wait above
+          # passes while every Edge Function call 5xxs — the exact way this stayed
+          # invisible.
+          #
+          # PROBE A FUNCTION THAT ACTUALLY EXISTS.
+          #
+          # This used to request `__readiness_probe__` — a name that appears
+          # nowhere else in the repo, because the function was never created. The
+          # comment here asserted that a missing function returns 404, so 4xx was
+          # read as "runtime is up". supabase/edge-runtime returns **500**:
+          #
+          #   {"error":"Function '__readiness_probe__' could not be started",
+          #    "detail":"worker boot error: failed to read path: (os error 2)",
+          #    "hint":"Expected supabase/functions/__readiness_probe__/index.ts to exist"}
+          #
+          # So the probe declared the runtime dead on every run while the runtime
+          # was healthy — reproduced locally, `create-order` answers 401 on the very
+          # same stack. It failed all 25 jobs at the gate and #575's parity matrix
+          # never executed a single test.
+          #
+          # Probing a REAL function also makes this a stronger check than before:
+          # 401 proves Kong routed, the worker booted, and the function ran far
+          # enough to reject an unauthenticated call.
+          if [ "${EDGE_RUNTIME_PRESENT:-0}" = "1" ]; then
+            PROBE_FN=create-order
+            if [ ! -f "supabase/functions/${PROBE_FN}/index.ts" ]; then
+              echo "::error::probe target supabase/functions/${PROBE_FN}/index.ts does not exist. Point PROBE_FN at a function that does — probing a name that is not there is what broke this probe in the first place."
+              exit 1
+            fi
+            for i in $(seq 1 30); do
+              fc=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+                -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+                "http://localhost:54321/functions/v1/${PROBE_FN}")
+              case "$fc" in 2*|4*) echo "edge runtime reachable after ${i} attempt(s) — ${PROBE_FN} answered HTTP $fc"; break;; esac
+              sleep 3
+            done
+            case "$fc" in
+              2*|4*) ;;
+              *) echo "::error::edge runtime never became reachable through Kong (${PROBE_FN} last=$fc) — Edge Function specs would fail as product errors"; exit 1 ;;
+            esac
+          else
+            echo "edge runtime absent at this commit — skipping its readiness probe"
+          fi
+
+      - name: Assert schema fidelity before trusting any result
+        run: |
+          # docker-compose.yml mounts the SAME monolithic migration production
+          # uses, as a file rather than a directory. If that ever silently stops
+          # applying, every test below would pass against an empty database and
+          # report green — the #396 shape. Fail loudly instead.
+          n=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+                "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")
+          echo "public tables: $n"
+          [ "$n" -ge 17 ] || { echo "::error::expected >=17 public tables, got $n — migration did not apply"; exit 1; }
+
+      - name: Setup Node + pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Seed the E2E users
+        run: pnpm tsx scripts/seed-test-users.ts
+
+      - name: Build (root-served, pointed at the local stack)
+        run: pnpm build
+        env:
+          DISABLE_BASE_PATH: 'true'
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_e2e_dummy_not_a_real_key
+          NEXT_PUBLIC_PAYPAL_CLIENT_ID: e2e_dummy_paypal_client_id
+          # Dummy, and never reached: submitToWeb3Forms() THROWS when the key is
+          # empty (web3forms.ts:95), so without this the contact form never gets
+          # as far as fetch() and its submitting state cannot be observed (#850).
+          # form-submission.spec.ts fulfils api.web3forms.com locally in
+          # beforeEach, so no request leaves the runner either way.
+          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: e2e_dummy_web3forms_key
+          # NEXT_PUBLIC_CAPTCHA_SITE_KEY is deliberately ABSENT — do not copy it
+          # from e2e.yml.
+          #
+          # `captcha.config.ts:62` derives `enabled: Boolean(siteKey)`, so setting
+          # the key is what makes the CLIENT demand a token. The local GoTrue never
+          # asked for one (docker-compose.yml sets no GOTRUE captcha vars). The
+          # first run of this workflow set it anyway, copied from e2e.yml, and
+          # every auth test failed with "Please complete the verification
+          # challenge" — a challenge nothing on the server side wanted.
+          #
+          # e2e.yml sets it for an unrelated reason: #488's 320px width gate needs
+          # the widget to actually render against the cloud stack. That reason does
+          # not apply here. `signup-mailer.yml`, which drives real auth forms
+          # against this same local stack, also omits it — follow that precedent.
+
+      # NO PLAYWRIGHT INSTALL STEP, deliberately (#829).
+      #
+      # This job used to spend a median 11.6 minutes per shard installing Chromium,
+      # Firefox and WebKit onto the runner -- 24 times per run, ~158 runner-minutes,
+      # from Microsoft's CDN and the Ubuntu apt mirror. Everything that used to live
+      # here (a cache-key derivation, an apt archive restore/save, a `setsid` install
+      # bounded on output silence, a three-attempt retry loop and a byte-accounting
+      # step) existed only to make that download survivable.
+      #
+      # It is not survivable, because it depends on two third parties being up 24
+      # times a run: #819 failed 5 shards on 2026-08-18 and 17 of 25 on 2026-08-19,
+      # every one in the install step with zero test failures.
+      #
+      # The browsers now come from the image, which already has them. The runner
+      # downloads nothing: proven locally with `--network=none`, where the runner
+      # still starts and resolves all three engines from /ms-playwright.
+      #
+      # This is also what CLAUDE.md asks for -- 'Docker-first development is
+      # MANDATORY' -- and CI was the one place that ignored it.
+      - name: Run ${{ matrix.browser }}-${{ matrix.slice.project }} ${{ matrix.slice.shard }}
+        run: |
+          npx serve out -l 3000 &
+          npx wait-on http://localhost:3000 --timeout 60000
+          # JSON as well as line: parity is decided on COUNTS, and the line
+          # reporter's summary is not machine-readable. `|| true` so a failing
+          # shard still uploads its results — a parity run that discards the
+          # numbers from the shards that failed cannot diagnose the mismatch,
+          # which is the only reason to do the run at all. The parity job below
+          # is what fails the workflow.
+          # Mirrors e2e.yml:791-801 exactly. `workers` is a CLI FLAG, not an env
+          # var the config reads — playwright.config.ts hardcodes `workers: 1` on
+          # CI (:88) and only the per-job `--workers` flag lifts the iso shards to
+          # 2. Passing it as an unread env var would silently run msg-iso serially,
+          # changing results on the one project whose whole point is parallelism —
+          # and quietly breaking the parity comparison this run exists to make.
+          WORKERS_FLAG=""
+          if [ -n "$WORKERS" ]; then
+            WORKERS_FLAG="--workers=$WORKERS"
+          fi
+          # `@hosted` = needs a REAL Supabase project (#725). Six tests in
+          # tests/e2e/security/oauth-csrf.spec.ts wait for a redirect to github.com /
+          # google.com, which a local stack never performs — 18 of the 19 failures this
+          # lane reported once #732 let it report anything. They are excluded here and
+          # still run in e2e.yml, which is unfiltered.
+          #
+          # A CLI FLAG, NOT `playwright.config.ts`. Both lanes load the same config and
+          # name the same projects, so a project-level `grepInvert` would hide these from
+          # the HOSTED lane too — the one place they can actually pass. A top-level config
+          # `grep` is worse: it filters the `setup` project as well, and setup dying is
+          # exactly what once produced 24 green jobs with 0 tests executed.
+          # RUN FROM THE IMAGE THAT ALREADY HAS THE BROWSERS (#829). No install step
+          # precedes this, by design.
+          #
+          # --network=host is load-bearing, not incidental. The app is served on
+          # localhost:3000 and Supabase's Kong is published on 127.0.0.1:54321 --
+          # AND that URL is compiled into the static bundle at build time (see the
+          # Build step above). A bridge network would make `localhost` mean the
+          # container's own loopback and force rebuilding the bundle against a
+          # service name. The MCP Playwright server uses --network=host for the
+          # same reason.
+          #
+          # --user keeps results.json and playwright-report/ owned by `runner`.
+          # Root-owned outputs break the upload steps below -- the same trap the
+          # apt cache hit when its copies landed root-owned.
+          #
+          # ./node_modules/.bin/playwright, not `pnpm exec`: pnpm is not in the
+          # image, and corepack would download it per shard -- reintroducing a
+          # network fetch this change exists to remove.
+            # One definition, shared by every lane (#829). The docker-run rationale
+            # --network=host, --user, ./node_modules/.bin/playwright, and the
+            # env-file filter whose `=` must not bind to the prefixes -- lives in
+            # the script, because it was needed identically at ten call sites and
+            # the one place it was written by hand is the one place it was wrong.
+            scripts/ci/playwright-in-container.sh test \
+              --project=${{ matrix.browser }}-${{ matrix.slice.project }} --shard=${{ matrix.slice.shard }} \
+              $WORKERS_FLAG \
+              --grep-invert='@hosted' \
+              --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
+        env:
+          CI: 'true'
+          SKIP_WEBSERVER: 'true'
+          BASE_URL: http://localhost:3000
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+          # #861. This lane is the required one, and the nine tests that reached
+          # `main` running zero assertions were all found here. `annotate` stays the
+          # default everywhere else so a developer running one spec is not blocked
+          # by an offender in a file they did not touch.
+          ZERO_ASSERTION_GATE_MODE: block
+          # Without these three the suite falls back to the workspace `.env`,
+          # whose hostnames are container-side, and dies 300 lines later as
+          # `getaddrinfo EAI_AGAIN supabase-kong` inside globalSetup (#830).
+          # Naming them here keeps that assertion ARMED for this lane — moving
+          # the check into the shared script without this line would have
+          # silently disarmed the very protection #830 added.
+          PLAYWRIGHT_REQUIRED_ENV: NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY
+          WORKERS: ${{ matrix.slice.workers }}
+          # EVERY JOB MUST DO ITS OWN FULL SETUP (#575).
+          #
+          # auth.setup.ts:146 gates the second half of setup on
+          # `!CI || AUTH_SETUP_JOB === 'true'`. e2e.yml can leave it unset on its
+          # matrix because it runs ONE dedicated Auth Setup job and hands
+          # storage-state-auth-b.json to the shards as an artifact. That is
+          # impossible here: every runner brings up its own Supabase with its own
+          # users, so a state minted on another runner is worthless.
+          #
+          # Unset, the gate is false on all 24 jobs and silently skips User B's
+          # storage state, encryption-key creation, display-name backfill, the
+          # PRIMARY↔TERTIARY/SECONDARY connections and the seeded conversation.
+          # The parity run showed that as 52 failures with skipped drifting
+          # 194 → 215. The "User B env vars missing" log is a red herring —
+          # execution never reaches that branch, so the message never printed and
+          # the env vars were fine all along.
+          #
+          # AND THE REASON THE GATE EXISTS DOES NOT APPLY HERE. auth.setup.ts:144
+          # says it plainly: "Skip in per-shard runs to avoid 6 concurrent
+          # cleanups." That is a SHARED-BACKEND hazard — concurrent cleanups on one
+          # cloud project delete each other's fixtures mid-run, which is the #85
+          # class that cost nine rounds of flake patching. Here each job owns its
+          # own database, so 24 concurrent cleanups touch 24 separate datasets and
+          # cannot race. Setting this on e2e.yml's matrix would still be wrong.
+          #
+          # Same architectural consequence as needing chromium on every shard:
+          # per-runner stacks mean per-job setup.
+          AUTH_SETUP_JOB: 'true'
+
+      - name: This shard must have executed something, and it must have passed
+        if: always()
+        run: |
+          # `|| true` above is deliberate — a failing shard still has to upload its
+          # numbers or a mismatch cannot be diagnosed. The cost is that a shard
+          # which ran NOTHING looks exactly like one that passed.
+          #
+          # That is not hypothetical: the first full-matrix run showed 24 green
+          # jobs while firefox and webkit executed zero tests each (setup could not
+          # launch, so every dependent test was skipped rather than failed). Only
+          # the aggregate parity check noticed. A green tick per shard is read far
+          # more often than a count at the end, so make the shard itself say so.
+          #
+          # AND IT MUST FAIL ON FAILURES (#732). This step used to check only
+          # `ran == 0`, which meant `|| true` swallowed the exit code and NOTHING
+          # downstream on a normal PR restored it: run 31447148386 logged
+          # `passed 1863 · failed 21` and every job, and the run, concluded success.
+          # The old counter also called a FAILED test "ran", so 21 failures read as
+          # 21 successful executions. Counting the exit code instead would be the
+          # obvious fix and is strictly worse: it cannot tell a crash from a failure,
+          # and it reports a number instead of a name.
+          python3 - <<'EOF'
+          import json, sys
+          try:
+              d = json.load(open("results.json"))
+          except Exception as e:
+              print(f"::error::no readable results.json ({e}) — this shard reported nothing")
+              sys.exit(1)
+          ran = skipped = failed = 0
+          names = []
+          def walk(s):
+              global ran, skipped, failed
+              for spec in s.get("specs", []):
+                  for t in spec.get("tests", []):
+                      st = t.get("status")   # expected|skipped|flaky|unexpected
+                      if st == "skipped":
+                          skipped += 1
+                          continue
+                      ran += 1
+                      # `flaky` passed on retry. It is tracked in the aggregate but is
+                      # not a shard failure — that policy lives in the flaky gate.
+                      if st not in ("expected", "flaky"):
+                          failed += 1
+                          names.append(spec.get("title", "?"))
+              for c in s.get("suites", []): walk(c)
+          for s_ in d.get("suites", []): walk(s_)
+          print(f"executed {ran}, skipped {skipped}, failed {failed}")
+          if ran == 0:
+              print(f"::error::this shard executed 0 tests ({skipped} skipped) — "
+                    "a green tick here would be meaningless. Usual cause: the `setup` "
+                    "dependency could not launch, so Playwright skipped everything "
+                    "downstream instead of failing.")
+              sys.exit(1)
+          if failed:
+              for n in names[:10]:
+                  print(f"::error::failed: {n}")
+              print(f"::error::this shard had {failed} failing test(s) — see above")
+              sys.exit(1)
+          EOF
+
+      - name: No passing test may have run zero assertions (#861)
+        if: always()
+        # Separate from the step above because it answers a different question.
+        # That one asks whether tests ran and passed; this asks whether the ones
+        # that passed measured anything. results.json cannot answer it -- it
+        # carries no `steps` -- so the reporter writes its own verdict file and
+        # this reads it. Under `|| true` an exit code would be swallowed.
+        run: node scripts/ci/check-zero-assertions.mjs
+      - name: Name this shard's artifact
+        if: always()
+        id: slug
+        run: echo "id=${{ matrix.browser }}-${{ matrix.slice.project }}-$(echo '${{ matrix.slice.shard }}' | tr '/' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          # Every selected shard uploading `e2e-local-report` would collide; upload-artifact v4+
+          # errors on a duplicate name, so every shard needs its own.
+          name: e2e-local-${{ steps.slug.outputs.id }}
+          path: |
+            playwright-report/
+            results.json
+            apt-metrics.json
+          retention-days: 3
+
+      # UPLOAD THE DIAGNOSTICS WE ALREADY PAY TO CAPTURE (#766).
+      #
+      # playwright.config.ts collects a trace on first retry, a video on failure and a
+      # screenshot on failure, all into `outputDir: 'test-results/'` — and that
+      # directory was in no upload path. The failure output even prints
+      # `pnpm exec playwright show-trace test-results/…/trace.zip`, naming a file the
+      # run then discards. That cost real time on #757, where three occurrences were
+      # diagnosed from log text because the trace it advertised did not exist.
+      #
+      # ONLY ON FAILURE, deliberately. On a green run this directory is noise, and
+      # uploading it from every selected shard would trade one waste for another. The
+      # artifact is worth having exactly when someone is about to go looking for it.
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-local-diagnostics-${{ steps.slug.outputs.id }}
+          path: test-results/
+          retention-days: 3
+          # A green shard in a red run has nothing here; that is not an error.
+          if-no-files-found: ignore
+
+  # ==========================================================================
+  # PARITY — the only thing that makes this run worth doing (#575 step 2)
+  # ==========================================================================
+  #
+  # "All selected jobs went green" is NOT parity. A local stack that silently skipped
+  # every auth test would also report all-green — that is the #396 shape, and it
+  # is exactly what a migration that failed to apply would look like.
+  #
+  # Parity is a COUNT match against the last green cloud run before the quota
+  # died: run 31048279017, SHA de0f7f0, 2026-08-05T21:21:26Z.
+  #
+  #   passed 1807 · skipped 194 · flaky 0
+  #
+  # Those numbers are falsifiable; "it passed" is not. They are recorded in #575
+  # because the run's artifacts expire 2026-08-12T22:13Z — after which a mismatch
+  # cannot be diffed against anything until the quota refills on 2026-09-02.
+  #
+  # TWO TIERS, BECAUSE THEY ANSWER DIFFERENT QUESTIONS (#732).
+  #
+  #   Tier 1 — "did the selected suite run and pass?"  True on any commit. Every
+  #            expected shard, zero failures, above a mode-scaled floor. This is the gate.
+  #   Tier 2 — "does the full matrix match the cloud exactly?"  Only interpretable
+  #            in 24-shard mode on de0f7f0, because the baseline covers all browsers
+  #            and on any other SHA the test set has moved.
+  #
+  # They used to be one check, with tier 2's SHA guard placed FIRST — so on every
+  # commit that was not the baseline the job exited 0 before asking whether
+  # anything had failed. Combined with `|| true` on the Playwright call, that made
+  # the entire workflow incapable of failing: run 31447148386 logged
+  # `passed 1863 · failed 21` and concluded success.
+  parity:
+    # STABLE, AND DELIBERATELY NOT A PARITY NAME. This is the aggregate for the
+    # whole local lane, and the plan makes it the required context once the lane
+    # runs on every PR. Required contexts cannot be renamed without orphaning
+    # themselves, and shard names carry the shard count (`chromium 3/6`), so any
+    # re-shard would orphan those. Rename it now, while it is free.
+    name: E2E (local) result
+    needs: [changes, e2e-local]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      # MUST REPORT SUCCESS WHEN THERE WAS NOTHING TO RUN (#575 Phase 3).
+      #
+      # Every step below is gated on the same condition. Without this the job would try to
+      # download artifacts that no matrix produced and fail with "no results.json found",
+      # so a docs-only PR would be blocked by a required check for having changed only
+      # documentation — the exact outcome the unfiltered trigger exists to avoid.
+      #
+      # Gating the STEPS, not the job: a skipped job reports as `skipped`, and a required
+      # check that reports `skipped` never satisfies branch protection. This job must
+      # actually run and actually pass.
+      - name: Nothing to run — no code changed
+        if: needs.changes.outputs.run != 'true'
+        run: |
+          echo "The diff touches only paths e2e.yml also ignores (docs, markdown, .claude,"
+          echo ".specify, features, LICENSE, .gitignore, .vscode)."
+          echo "No shards were dispatched, and this check passes on purpose."
+
+      - name: Resolve which commit was actually tested
+        if: needs.changes.outputs.run == 'true'
+        id: tested
+        run: echo "sha=${{ inputs.ref || github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v6
+        if: needs.changes.outputs.run == 'true'
+        with:
+          pattern: e2e-local-*
+          path: shards
+
+      - name: Total the shards and compare
+        if: needs.changes.outputs.run == 'true'
+        env:
+          # The commit the TESTS ran against — not github.sha, which is the branch
+          # carrying this workflow file. Comparing the wrong one would either skip
+          # the check on a real parity run or fail every PR against a baseline that
+          # does not describe it.
+          TESTED_SHA: ${{ steps.tested.outputs.sha }}
+          EXPECTED_SHARDS: ${{ needs.changes.outputs.expected_shards }}
+          BROWSER_MODE: ${{ needs.changes.outputs.browser_mode }}
+        run: |
+          set -uo pipefail
+          python3 - <<'EOF'
+          import json, os, pathlib, sys
+
+          # STALE SINCE THE @hosted SPLIT (#725), and only tier 2 reads it. On the cloud
+          # run these numbers describe, all 21 oauth-csrf executions passed; this lane now
+          # excludes 18 of them, so a re-run on de0f7f0 would total 1789 passed, not 1807.
+          # Tier 2 fires only on that SHA, so this is a note rather than a code change —
+          # but anyone who does run that comparison needs the corrected number, and the
+          # baseline itself cannot be regenerated (artifacts expired; quota until 09-02).
+          BASE = {"passed": 1807, "skipped": 194, "flaky": 0}
+          BASE_SHA = "de0f7f080c8d75949e4e6c89fdf66ab7d3da8029"
+          browser_mode = os.environ.get("BROWSER_MODE", "")
+          try:
+              expected_shards = int(os.environ["EXPECTED_SHARDS"])
+          except (KeyError, ValueError):
+              print("::error::EXPECTED_SHARDS is missing or invalid — browser selection did not report a usable plan")
+              sys.exit(1)
+          expected_by_mode = {"chromium": 8, "full": 24}
+          if expected_by_mode.get(browser_mode) != expected_shards:
+              print(f"::error::inconsistent browser plan: mode={browser_mode!r}, expected_shards={expected_shards}")
+              sys.exit(1)
+
+          # Preserve the existing 1700/24 anti-vacuity threshold and scale it for the
+          # selected matrix. ceil(1700 * 8 / 24) = 567; the measured Chromium slice on
+          # run 32584683318 reported 683 passing/flaky tests, so this keeps real margin.
+          # This is a "did the suite actually run" floor, not a parity number. Full-mode
+          # parity is tier 2 below.
+          #
+          # UNCHANGED by the @hosted split (#725), and the reason is worth stating because
+          # it is counter-intuitive: the six excluded tests were FAILING locally, so they
+          # were counted in `failed`, never in `passed`. Removing them subtracts nothing
+          # from this total.
+          FULL_FLOOR = 1700
+          FLOOR = (FULL_FLOOR * expected_shards + 23) // 24
+
+          files = sorted(pathlib.Path("shards").rglob("results.json"))
+          if not files:
+              print("::error::no results.json found — every shard failed before reporting")
+              sys.exit(1)
+
+          tot = {"passed": 0, "skipped": 0, "flaky": 0, "failed": 0}
+
+          def walk(suite):
+              for spec in suite.get("specs", []):
+                  for t in spec.get("tests", []):
+                      st = t.get("status")          # expected|skipped|flaky|unexpected
+                      if st == "expected":   tot["passed"]  += 1
+                      elif st == "skipped":  tot["skipped"] += 1
+                      elif st == "flaky":    tot["flaky"]   += 1
+                      else:                  tot["failed"]  += 1
+              for child in suite.get("suites", []):
+                  walk(child)
+
+          for f in files:
+              try:
+                  data = json.loads(f.read_text())
+              except json.JSONDecodeError:
+                  print(f"::warning::{f} is not valid JSON — shard produced no usable result")
+                  continue
+              for s in data.get("suites", []):
+                  walk(s)
+
+          print(f"browser mode: {browser_mode}")
+          print(f"shards reporting: {len(files)}/{expected_shards}")
+          print(f"  passed  {tot['passed']:>5}")
+          print(f"  skipped {tot['skipped']:>5}")
+          print(f"  flaky   {tot['flaky']:>5}")
+          print(f"  failed  {tot['failed']:>5}")
+
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              with open(summary, "a") as fh:
+                  fh.write(f"### E2E local — {browser_mode} mode\n\n")
+                  if browser_mode == "full":
+                      fh.write("| | local | cloud baseline |\n|---|---|---|\n")
+                      for k in ("passed", "skipped", "flaky"):
+                          mark = "OK" if tot[k] == BASE[k] else "DIFF"
+                          fh.write(f"| {k} | {tot[k]} | {BASE[k]} | {mark} |\n")
+                      fh.write(f"| failed | {tot['failed']} | 0 | |\n")
+                  else:
+                      fh.write("| metric | value |\n|---|---:|\n")
+                      fh.write(f"| shards | {len(files)} / {expected_shards} |\n")
+                      for k in ("passed", "skipped", "flaky", "failed"):
+                          fh.write(f"| {k} | {tot[k]} |\n")
+
+          # ── TIER 1: the always-on gate (#732) ────────────────────────────────
+          #
+          # True on ANY commit. This used to sit BELOW the baseline-SHA check, so
+          # every run on any other SHA hit `sys.exit(0)` and the whole workflow
+          # could not fail: run 31447148386 reported `failed 21` and concluded
+          # success. The escape hatch was right about ONE thing only — that COUNT
+          # parity is uninterpretable off the baseline — and wrong to take
+          # "did anything fail" down with it. Those are separate questions, so
+          # they are now separate tiers.
+          problems = []
+          if len(files) != expected_shards:
+              problems.append(f"only {len(files)} of {expected_shards} shards reported")
+          if tot["failed"]:
+              problems.append(f"{tot['failed']} test(s) failed")
+          # A floor, not an equality: the test set legitimately grows. It catches
+          # the shape an equality cannot — a run that goes green by silently
+          # executing almost nothing. Per CLAUDE.md's #396 rule this is NEVER
+          # lowered to make a run pass; if the suite really shrinks, say why here.
+          if tot["passed"] < FLOOR:
+              problems.append(
+                  f"only {tot['passed']} passed, floor is {FLOOR} — the suite did not "
+                  "really run; do not lower the floor to make this green"
+              )
+          if problems:
+              for p in problems:
+                  print(f"::error::{p}")
+              sys.exit(1)
+
+          # ── TIER 2: count parity, only interpretable for a full baseline run ─
+          if browser_mode != "full":
+              print("")
+              print(f"Artifact totals OK: {expected_shards}/{expected_shards} shards, 0 failures, above the floor.")
+              print("The shard matrix's OWN verdict is a separate step after this one")
+              print("— these totals cannot see a shard that failed after reporting (#934).")
+              print("COUNT PARITY not evaluated — Chromium PR mode is intentionally an")
+              print("8-shard subset, while the cloud baseline describes all 24 shards.")
+              sys.exit(0)
+
+          on_baseline = os.environ.get("TESTED_SHA", "") == BASE_SHA
+          if not on_baseline:
+              print("")
+              print(f"Artifact totals OK: {expected_shards}/{expected_shards} shards, 0 failures, above the floor.")
+              print("The shard matrix's OWN verdict is a separate step after this one")
+              print("— these totals cannot see a shard that failed after reporting (#934).")
+              print("COUNT PARITY not evaluated — the cloud numbers describe")
+              print(f"{BASE_SHA[:8]}; on any other commit the test set has moved and a")
+              print("difference is uninterpretable. Re-run on that SHA to decide parity.")
+              sys.exit(0)
+
+          bad = [k for k in BASE if tot[k] != BASE[k]]
+          if bad:
+              print(f"::error::parity MISMATCH on {bad} — do not switch e2e.yml")
+              sys.exit(1)
+          print("PARITY: local matches the cloud baseline exactly.")
+          EOF
+
+      # ── THE VERDICT THE SHARDS ALREADY REACHED (#934) ────────────────────
+      #
+      # Everything above reconstructs a verdict from uploaded artifacts. This asks the
+      # shards. They are different questions, and until now only the reconstructed one
+      # was asked — so this REQUIRED context concluded `success` on a run whose own
+      # matrix concluded `failure`, and PR #928 merged with three shards red.
+      #
+      # HOW THAT PASSED, from the aggregate's own log in run 32560171118:
+      #
+      #     shards reporting: 24/24
+      #       passed   2035   baseline 1807
+      #       failed      0
+      #
+      # `chromium/firefox/webkit gen 2/6` had each executed ZERO tests and failed on the
+      # zero-test detector, which was doing its job. Every condition above still passed:
+      # `Upload results` is `if: always()`, so a failing shard still uploads a valid
+      # results.json describing nothing; a shard with no tests has no FAILING tests; and
+      # Playwright redistributed the work, so the total went UP, clearing the floor.
+      #
+      # The blast radius is wider than that one detector. EVERY anti-vacuity guard in this
+      # lane runs `if: always()` after the tests, so none of their verdicts reach the
+      # artifacts — including check-zero-assertions.mjs (#861), whose whole subject is tests
+      # that pass while measuring nothing. Those are `expected` in results.json, so the
+      # totals count them as PASSED. The guards built to stop vacuous green were invisible
+      # to the check that decides whether green means anything.
+      #
+      # A STEP, NOT A JOB-LEVEL `if:`, for the reason every other condition here is a step:
+      # branch protection is never satisfied by a `skipped` job, so this must run and pass
+      # on a docs-only PR. Gated on `changes` so it does — when the matrix is skipped its
+      # result is `skipped`, which is correct there and must not fail.
+      #
+      # Deliberately LAST: the totals print first, so a future reader sees the numbers that
+      # looked fine and then the verdict that did not.
+      - name: The shards themselves must have passed
+        if: needs.changes.outputs.run == 'true'
+        run: |
+          result='${{ needs.e2e-local.result }}'
+          echo "shard matrix concluded: $result"
+          if [ "$result" != "success" ]; then
+            echo "::error::the E2E shard matrix concluded '$result', so this check fails."
+            echo "::error::The totals above may look clean — they are reconstructed from"
+            echo "::error::uploaded artifacts and cannot see a shard that failed AFTER"
+            echo "::error::writing a valid report (a zero-test shard, a zero-assertion"
+            echo "::error::verdict, any post-upload step). Open the red shard job; its own"
+            echo "::error::log names the cause. Do not relax this to make a run green."
+            exit 1
+          fi
+
+      # Queue time and execution time were previously collapsed into one "E2E is slow"
+      # number (#950). This is observational only: telemetry must never strand the required
+      # check if GitHub's own API is unavailable.
+      - name: Report queue and execution timing
+        # Failed-job reruns carry successful jobs forward with their old timestamps, so
+        # combining them would publish plausible-looking but false queue statistics.
+        if: needs.changes.outputs.run == 'true' && github.run_attempt == '1'
+        continue-on-error: true
+        uses: actions/github-script@v8
+        env:
+          E2E_BROWSER_MODE: ${{ needs.changes.outputs.browser_mode }}
+          E2E_EXPECTED_SHARDS: ${{ needs.changes.outputs.expected_shards }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = context.runId;
+            const attemptNumber = Number(process.env.GITHUB_RUN_ATTEMPT || '1');
+            const { data: run } = await github.rest.actions.getWorkflowRunAttempt({
+              owner,
+              repo,
+              run_id: runId,
+              attempt_number: attemptNumber,
+            });
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRunAttempt,
+              {
+                owner,
+                repo,
+                run_id: runId,
+                attempt_number: attemptNumber,
+                per_page: 100,
+              }
+            );
+
+            const changes = jobs.find((job) => job.name === 'Does this change need E2E?');
+            const shards = jobs.filter(
+              (job) => /^(chromium|firefox|webkit)-(msg|gen)/.test(job.name) &&
+                job.started_at && job.completed_at
+            );
+            const expected = Number(process.env.E2E_EXPECTED_SHARDS);
+            if (!changes?.started_at || !changes.completed_at || shards.length !== expected) {
+              throw new Error(
+                `timing inputs incomplete: changes=${changes?.started_at || 'missing'}/` +
+                  `${changes?.completed_at || 'missing'}, ` +
+                  `shards=${shards.length}/${expected}`
+              );
+            }
+
+            const workflowStartedAt = new Date(run.run_started_at).getTime();
+            const readyAt = new Date(changes.completed_at).getTime();
+            const minutes = (milliseconds) => milliseconds / 60000;
+            const queue = shards.map((job) =>
+              minutes(Math.max(0, new Date(job.started_at).getTime() - readyAt))
+            );
+            const execution = shards.map((job) =>
+              minutes(new Date(job.completed_at).getTime() - new Date(job.started_at).getTime())
+            );
+            const stats = (values) => {
+              const sorted = [...values].sort((a, b) => a - b);
+              const middle = Math.floor(sorted.length / 2);
+              const median = sorted.length % 2
+                ? sorted[middle]
+                : (sorted[middle - 1] + sorted[middle]) / 2;
+              return [sorted[0], median, sorted.at(-1)].map((value) => value.toFixed(1));
+            };
+            const [queueMin, queueMedian, queueMax] = stats(queue);
+            const [runMin, runMedian, runMax] = stats(execution);
+            const initialQueue = minutes(
+              Math.max(0, new Date(changes.started_at).getTime() - workflowStartedAt)
+            ).toFixed(1);
+            const firstShardAt = Math.min(
+              ...shards.map((job) => new Date(job.started_at).getTime())
+            );
+            const firstShardDelay = minutes(
+              Math.max(0, firstShardAt - workflowStartedAt)
+            ).toFixed(1);
+
+            await core.summary
+              .addHeading('E2E local timing', 3)
+              .addRaw(
+                `${process.env.E2E_BROWSER_MODE} mode · ${expected} shards · ` +
+                  `initial queue ${initialQueue} min · ` +
+                  `first shard ${firstShardDelay} min after workflow start\n\n`
+              )
+              .addTable([
+                [
+                  { data: 'minutes', header: true },
+                  { data: 'min', header: true },
+                  { data: 'median', header: true },
+                  { data: 'max', header: true },
+                ],
+                ['shard queue after changes', queueMin, queueMedian, queueMax],
+                ['shard execution', runMin, runMedian, runMax],
+              ])
+              .write();

@@ -1,0 +1,142 @@
+name: Component Structure Validation
+
+# NO TRIGGER `paths:` FILTER, DELIBERATELY (#870, pattern from #869).
+#
+# A `paths:` filter means this reports NOTHING on an unrelated PR — and a required check
+# that never reports is PENDING FOREVER, not skipped. That is exactly why CLAUDE.md lists
+# `Validate Component Structure` among the checks that cannot be required as written, and
+# why a broken component structure could reach main behind three green checks.
+#
+# Filtering now happens in the `changes` job below, and the always-reporting `result` job
+# at the bottom is the context to require. Pinned by
+# scripts/__tests__/component-structure-requirable.test.js.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  changes:
+    name: Does this change need structure validation?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history: the PR case diffs against the merge base, which a shallow
+          # clone does not contain.
+          fetch-depth: 0
+
+      - name: Decide
+        id: decide
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "  ${{ github.event_name }} — running unconditionally"
+            exit 0
+          fi
+          node scripts/ci/component-structure-changes.mjs \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}"
+
+  validate:
+    name: Validate Component Structure
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Run component structure validation
+        run: pnpm run validate:structure
+
+      - name: Generate audit report
+        if: failure()
+        run: |
+          node scripts/audit-components.js --path src/components --format json > component-audit.json
+          node scripts/audit-components.js --path src/components --format markdown > component-audit.md
+
+      - name: Upload audit report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: component-audit-report
+          path: |
+            component-audit.json
+            component-audit.md
+
+      - name: Comment PR with audit results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('component-audit.md', 'utf8');
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: `## ❌ Component Structure Validation Failed\n\n${report}\n\n### How to fix\n\nRun the following command locally:\n\`\`\`bash\npnpm run migrate:components\n\`\`\``
+            });
+
+      - name: Check compliance rate
+        if: always()
+        run: |
+          # Run audit script directly to get clean JSON output
+          REPORT=$(node scripts/audit-components.js --path src/components --format json)
+          COMPLIANCE_RATE=$(echo "$REPORT" | jq '.summary.complianceRate')
+
+          if [ "$COMPLIANCE_RATE" -lt 100 ]; then
+            echo "⚠️ Component compliance rate is ${COMPLIANCE_RATE}%"
+            echo "Run 'pnpm run migrate:components' to fix non-compliant components"
+          else
+            echo "✅ All components are compliant!"
+          fi
+
+  # The always-reporting aggregate. THIS is the context to require, not `validate` —
+  # this one reports on every PR, including those that skip the suite.
+  result:
+    name: Component Structure result
+    runs-on: ubuntu-latest
+    needs: [changes, validate]
+    if: always()
+    steps:
+      - name: Verdict
+        run: |
+          set -euo pipefail
+          RAN="${{ needs.changes.outputs.run }}"
+          RESULT="${{ needs.validate.result }}"
+          echo "  changes.run=$RAN  validate.result=$RESULT"
+
+          if [ "$RAN" != "true" ]; then
+            echo "  no component-relevant paths changed — suite skipped, reporting green"
+            exit 0
+          fi
+
+          # `cancelled` is NOT a pass: a cancelled run observed nothing, and calling that
+          # green is the #396 shape this whole issue is about.
+          case "$RESULT" in
+            success) echo "  component structure validated"; exit 0 ;;
+            *) echo "  validation did not pass (result=$RESULT)"; exit 1 ;;
+          esac

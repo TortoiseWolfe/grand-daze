@@ -1,0 +1,1277 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    # Lever 4: docs / planning / editor / license-only changes can't affect the
+    # browser build or any E2E flow, so they skip the (~1hr) suite. `schedule`
+    # and `workflow_dispatch` below ignore path filters → the weekly full run and
+    # the manual button remain the safety net. NOT ignored on purpose: `.github/**`
+    # (this workflow lives here — a workflow edit must still be E2E-tested) and
+    # `supabase/functions/**` (an E2E flow could indirectly hit a deployed function).
+    #
+    # The repo-tooling entries at the bottom are NAMED INDIVIDUALLY, never as
+    # `scripts/**`. Most of scripts/ genuinely bears on the browser build —
+    # generate-sitemap.js, sync-wireframes.sh and sync-cesium.sh all run in
+    # `prebuild`, and strip-css-script-tags.mjs runs in `build`. A blanket ignore
+    # would stop testing the thing that produced #348 and #548, and nothing would
+    # fail to tell you. Only files E2E cannot reach belong here; verify with
+    # `grep -rl <file> tests/e2e/` and the prebuild/build chains before adding one.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.claude/**'
+      - '.specify/**'
+      - 'features/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.vscode/**'
+      # Repo tooling — no Playwright spec references these, e2e.yml never invokes
+      # them, and none is in the prebuild/build chain. They are gated by
+      # `test:scripts` inside the required `Test (20.x)` check instead.
+      - 'scripts/audit-components.js'
+      - 'scripts/validate-structure.js'
+      - 'scripts/rebrand.sh'
+      # This is a manually invoked Management API uploader. Changing the CLI
+      # cannot change the static browser build or deployed Edge Function code.
+      - 'scripts/supabase/set-edge-function-secrets.ts'
+      - 'scripts/__tests__/**'
+      - 'tests/rebrand/**'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.claude/**'
+      - '.specify/**'
+      - 'features/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.vscode/**'
+      # Keep in sync with the push block above — see the comment there for why
+      # these are named individually rather than as `scripts/**`.
+      - 'scripts/audit-components.js'
+      - 'scripts/validate-structure.js'
+      - 'scripts/rebrand.sh'
+      - 'scripts/supabase/set-edge-function-secrets.ts'
+      - 'scripts/__tests__/**'
+      - 'tests/rebrand/**'
+  schedule:
+    - cron: '0 6 * * 1' # Monday 6 AM UTC — full 3-browser run
+  workflow_dispatch:
+    inputs:
+      budget_override:
+        description: >-
+          Reason for bypassing the cloud-quota circuit breaker (#567). Leave empty
+          to respect the budget. A bare "true" is not accepted — state why, because
+          the reason is the audit trail.
+        required: false
+        type: string
+      full_browsers:
+        description: >-
+          Also run Firefox and WebKit (24 jobs instead of 8). Off by default.
+          Cross-browser used to run on every push to main, which made the
+          post-merge run 62% of all Supabase load for the whole repo (#643).
+          It now runs on the weekly cron, on a `full-e2e`-labelled PR, or here.
+          NOT gated on `event_name != 'pull_request'`: 9 of 10 recent dispatches
+          were the watchdog bot, and an event-name gate hands a bot the 24-job
+          matrix.
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  # Repo-wide mutex: every E2E run shares one Supabase project, and concurrent
+  # runs race each other's beforeAll cleanupOldMessages hooks (run 25769955636
+  # on 2026-05-13 was cancelled at 60 min after PR #88's run, started 3 min
+  # later, wiped its data). Serialize across all refs; do not cancel a running
+  # job to make room for a queued one.
+  group: e2e-supabase-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+jobs:
+  # ============================================
+  # STEP 0: Cloud-quota circuit breaker (#567)
+  # ============================================
+  #
+  # THE `concurrency` MUTEX ABOVE IS NOT A LIMIT. It serializes runs; it does not
+  # cap them. On 2026-08-05 thirty full runs queued politely and then each executed
+  # in full — orderly, not fewer. 44 runs across 3.9 days consumed an entire month
+  # of the Supabase free tier (egress, MAU and realtime all exceeded) and took
+  # production down until the billing cycle reset.
+  #
+  # This job is the actual cap. `build` needs it, and every other job traces back
+  # to `build`, so there is no path around it.
+  #
+  # It fails CLOSED: if the run history cannot be read, it blocks. A quota guard
+  # that opens on error is one an error can bypass.
+  #
+  # To bypass deliberately, dispatch with a reason — the reason is the audit trail:
+  #   gh workflow run e2e.yml -f budget_override='verifying the #575 cutover'
+  budget:
+    name: Cloud-quota budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check recent E2E run rate against the quota budget
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          E2E_BUDGET_OVERRIDE: ${{ inputs.budget_override }}
+          # block (default) — over budget fails the build.
+          # annotate        — warn loudly and run anyway.
+          #
+          # A repo VARIABLE, not a code edit, deliberately: `.github/**` is not in
+          # `paths-ignore` above, so editing this workflow to relax the guard triggers
+          # another run of the very workflow being blocked. A variable can be flipped
+          # without touching the repo at all.
+          #
+          # Mirrors FLAKY_GATE_MODE further down this file — same pattern, same reason.
+          E2E_BUDGET_MODE: ${{ vars.E2E_BUDGET_MODE || 'block' }}
+          # #726: the guard counts Actions runs, so it cannot see WHICH backend those
+          # runs consumed. Passing the ref lets it check that the hardcoded backend
+          # epoch belongs to the project being metered — the #567 swap was exactly that
+          # situation, and nothing detected it.
+          #
+          # As of #949 a disagreement BLOCKS rather than warns, and so does leaving this
+          # unset. A fork inherits the guard with its counter reset to zero, so it runs
+          # the expensive lane precisely because it is new, against its own free-tier
+          # project, while the repo it forked from is blocked. A guard cannot claim to
+          # protect a project it is not counting for.
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          # How a fork adopts this guard for its own backend: set both, together. An
+          # epoch without a ref moves the window without establishing whose window it
+          # is. Unset here, so the constants in the script apply.
+          E2E_BUDGET_BACKEND_PROJECT_REF: ${{ vars.E2E_BUDGET_BACKEND_PROJECT_REF }}
+          # Read by the guard but NEVER passed until now, so the hardcoded epoch always
+          # won. An unset repo variable arrives as an EMPTY STRING, not as absent —
+          # which is why empty means "use the default" and opting out is spelled
+          # `none`. Wiring this up naively would have widened the counting window by 5
+          # days and counted runs billed to the deleted project.
+          E2E_BUDGET_BACKEND_EPOCH: ${{ vars.E2E_BUDGET_BACKEND_EPOCH }}
+        run: node scripts/ci/e2e-budget-guard.mjs
+
+  # ============================================
+  # STEP 1: Build once, cache for all shards
+  # ============================================
+  build:
+    name: Build
+    needs: budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+        env:
+          # The E2E suite serves this build from the ROOT (`serve out -l 3000`).
+          # DISABLE_BASE_PATH forces a basePath-less build so /_next/*.js assets
+          # resolve at /. If the build baked in the GitHub Pages basePath
+          # (/ScriptHammer), every /ScriptHammer/_next/*.js would 404 under
+          # serve-at-root, React would never hydrate, and the whole suite fails.
+          # A step-level `GITHUB_ACTIONS: false` is NOT reliable here — the
+          # runner re-injects GITHUB_ACTIONS=true into the child processes
+          # `pnpm build` spawns (scripts/detect-project.js / next.config execSync).
+          DISABLE_BASE_PATH: 'true'
+          NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+          NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${{ vars.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
+          NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: ${{ vars.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID }}
+          # Payment publishable keys must be baked into the static build so
+          # featureFlags.stripeEnabled / paypalEnabled are true and the
+          # PaymentButton / provider tabs render. Commit 77e409d added a
+          # "graceful missing-payment-config" branch that hides these controls
+          # when env vars are empty, which broke all payment E2E tests. Real
+          # keys aren't required: tests that redirect to Stripe/PayPal are
+          # test.skip'd; the rest only assert UI render + consent flow.
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_e2e_dummy_not_a_real_key
+          NEXT_PUBLIC_PAYPAL_CLIENT_ID: e2e_dummy_paypal_client_id
+          # Dummy, and never reached: submitToWeb3Forms() THROWS when the key is
+          # empty (web3forms.ts:95), so without this the contact form never gets
+          # as far as fetch() and its submitting state cannot be observed (#850).
+          # form-submission.spec.ts fulfils api.web3forms.com locally in
+          # beforeEach, so no request leaves the runner either way.
+          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: e2e_dummy_web3forms_key
+          # Cloudflare's PUBLIC always-passes Turnstile key (#506). Documented,
+          # inert, and not a secret — it exists so automation can render the
+          # widget. https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+          #
+          # Until now this var appeared ONLY in deploy.yml, and CaptchaWidget
+          # returns null without it (captcha.config.ts derives `enabled` from the
+          # key). So every E2E build since #353 rendered NO widget — which is how
+          # #488's 320px overflow shipped, and why a width gate added here would
+          # have been green whether or not the defect existed (#396's pattern).
+          #
+          # Measured on a root build carrying this key, /sign-in at 320px:
+          #   size: 'compact' (shipped)  -> 150x140, 0 elements past the viewport
+          #   size: 'normal'  (pre-#488) -> 300x65, 28 elements past the viewport
+          # The key renders WITHOUT an iframe — geometry lives on #cf-turnstile's
+          # own inline style — so a gate must measure the element, not wait for a
+          # frame.
+          #
+          # Deliberately NOT set for signup-mailer.yml (its own build; it drives
+          # real auth forms against local Supabase where captcha is off) nor for
+          # the basePath job below (its own build, and the `basepath` project
+          # does not measure this).
+          NEXT_PUBLIC_CAPTCHA_SITE_KEY: 1x00000000000000000000AA
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-output
+          path: out/
+          retention-days: 1
+
+  # ============================================
+  # STEP 2: Smoke tests (~2 min) - FAST FEEDBACK
+  # ============================================
+  smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: build
+    # Fork-PR guard: GitHub withholds repo secrets (Supabase URL/keys, TEST_USER_*)
+    # from pull_request runs opened from a FORK, so the E2E prerequisite check
+    # fails fast with "missing environment variables" — a false red that has
+    # nothing to do with the contributor's change. Skip the secret-dependent E2E
+    # jobs on fork PRs (they show neutral, not failed); maintainers verify E2E
+    # after pulling the branch into this repo. Same-repo branch PRs, push, cron,
+    # and workflow_dispatch always have secrets and run normally. This condition
+    # is repeated on every job below that needs secrets (basepath, rate-limiting,
+    # auth-setup, e2e) — Actions has no YAML-anchor support for jobs.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No install step (#829): the browsers come from the image.
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: out/
+
+      - name: Start server
+        run: |
+          set -euo pipefail
+          npx serve out -l 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+
+          # Brief grace period for the child to spawn; wait-on does the real polling.
+          sleep 2
+
+          # Verify serve didn't already exit (port in use, missing out/, etc.).
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            exit 1
+          fi
+
+          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
+          # with backgrounded jobs.
+          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            echo "--- listening sockets ---"
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "--- serve process state ---"
+            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
+            echo "--- direct curl attempt ---"
+            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
+            exit 1
+          fi
+
+          echo "serve is responding on http://localhost:3000"
+
+      - name: Run smoke tests (sign-up only - auth tests run after auth-setup)
+        run: |
+          scripts/ci/playwright-in-container.sh test \
+            tests/e2e/auth/sign-up.spec.ts \
+            --project=signup \
+            --no-deps \
+            --reporter=list,./tests/e2e/reporters/assertion-count-reporter.ts \
+            --timeout=30000
+        env:
+          CI: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
+          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+
+      - name: Smoke test summary
+        if: always()
+        run: echo "## Smoke Tests Complete" >> "$GITHUB_STEP_SUMMARY"
+
+  # ============================================
+  # STEP 2b: basePath project-site smoke (#157)
+  # A GitHub Pages project-site fork needs a /RepoName basePath; the class of
+  # bug where auth redirects / hand-built URLs escape that prefix is invisible
+  # to the root-anchored suite. This job builds a DEDICATED basePath-prefixed
+  # export and serves it under /ScriptHammer, then runs the `basepath` project
+  # (tests/e2e/basepath/**) against it. Self-contained: builds its own artifact
+  # (the shared build-output is root-path), chromium-only, one fast spec.
+  # ============================================
+  basepath:
+    name: basePath Project-Site Smoke
+    runs-on: ubuntu-latest
+    needs: build
+    # Fork-PR guard (see smoke job): skip on fork PRs where secrets are withheld.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No install step (#829): the browsers come from the image.
+
+      - name: Build basePath-prefixed export
+        run: bash scripts/serve-basepath.sh build
+        env:
+          BASE_PATH: /ScriptHammer
+          # The prefixed build must NOT be zeroed by the CNAME/DISABLE_BASE_PATH
+          # path — NEXT_PUBLIC_BASE_PATH (set by the script) wins in next.config.
+          NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+          NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${{ vars.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}
+          NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: ${{ vars.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_e2e_dummy_not_a_real_key
+          NEXT_PUBLIC_PAYPAL_CLIENT_ID: e2e_dummy_paypal_client_id
+          # Dummy, and never reached: submitToWeb3Forms() THROWS when the key is
+          # empty (web3forms.ts:95), so without this the contact form never gets
+          # as far as fetch() and its submitting state cannot be observed (#850).
+          # form-submission.spec.ts fulfils api.web3forms.com locally in
+          # beforeEach, so no request leaves the runner either way.
+          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: e2e_dummy_web3forms_key
+
+      - name: Start server (symlink under /ScriptHammer)
+        run: |
+          set -euo pipefail
+          BASE_PATH=/ScriptHammer bash scripts/serve-basepath.sh serve 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+          sleep 2
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            cat serve.log || true
+            exit 1
+          fi
+          if ! npx wait-on http://localhost:3000/ScriptHammer/sign-up/ --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — prefixed serve never bound within 60s"
+            cat serve.log || true
+            ss -tlnp 2>/dev/null || true
+            exit 1
+          fi
+          echo "serve is responding on http://localhost:3000/ScriptHammer/"
+
+      - name: Run basePath project
+        run: |
+          scripts/ci/playwright-in-container.sh test \
+            --project=basepath \
+            --no-deps \
+            --reporter=list,./tests/e2e/reporters/assertion-count-reporter.ts \
+            --timeout=30000
+        env:
+          CI: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000/ScriptHammer
+          # The smoke spec intercepts the signup POST (no real user/email), but
+          # the shared globalSetup hard-requires these to validate prerequisites
+          # before ANY project runs — so supply the same set the smoke job uses.
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+
+      - name: basePath summary
+        if: always()
+        run: echo "## basePath Project-Site Smoke Complete" >> "$GITHUB_STEP_SUMMARY"
+
+  # ============================================
+  # STEP 3: Rate-limiting tests (ordered, clean IP)
+  # ============================================
+  rate-limiting:
+    name: Rate-Limiting Tests
+    runs-on: ubuntu-latest
+    needs: smoke
+    # Fork-PR guard (see smoke job): skip on fork PRs where secrets are withheld.
+    # (smoke already skips on forks and this needs it, but keep the guard explicit.)
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No install step (#829): the browsers come from the image.
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: out/
+
+      - name: Start server
+        run: |
+          set -euo pipefail
+          npx serve out -l 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+
+          # Brief grace period for the child to spawn; wait-on does the real polling.
+          sleep 2
+
+          # Verify serve didn't already exit (port in use, missing out/, etc.).
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            exit 1
+          fi
+
+          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
+          # with backgrounded jobs.
+          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            echo "--- listening sockets ---"
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "--- serve process state ---"
+            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
+            echo "--- direct curl attempt ---"
+            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
+            exit 1
+          fi
+
+          echo "serve is responding on http://localhost:3000"
+
+      - name: Run rate-limiting tests (ordered)
+        run: scripts/ci/playwright-in-container.sh test --project=rate-limiting --project=brute-force --project=signup --reporter=list,./tests/e2e/reporters/assertion-count-reporter.ts --trace=on-first-retry
+        env:
+          CI: true
+          PLAYWRIGHT_BROWSER: chromium
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
+          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+
+  # ============================================
+  # STEP 4: Auth Setup (runs ONCE, shares state)
+  # ============================================
+  auth-setup:
+    name: Auth Setup
+    runs-on: ubuntu-latest
+    needs: smoke
+    # Fork-PR guard (see smoke job): skip on fork PRs where secrets are withheld.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No install step (#829): the browsers come from the image.
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: out/
+
+      - name: Start server
+        run: |
+          set -euo pipefail
+          npx serve out -l 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+
+          # Brief grace period for the child to spawn; wait-on does the real polling.
+          sleep 2
+
+          # Verify serve didn't already exit (port in use, missing out/, etc.).
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            exit 1
+          fi
+
+          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
+          # with backgrounded jobs.
+          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            echo "--- listening sockets ---"
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "--- serve process state ---"
+            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
+            echo "--- direct curl attempt ---"
+            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
+            exit 1
+          fi
+
+          echo "serve is responding on http://localhost:3000"
+
+      - name: Run auth setup
+        run: scripts/ci/playwright-in-container.sh test --project=setup --reporter=list,./tests/e2e/reporters/assertion-count-reporter.ts --timeout=180000
+        env:
+          CI: true
+          AUTH_SETUP_JOB: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
+          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+
+      - name: Upload auth state
+        uses: actions/upload-artifact@v6
+        with:
+          name: auth-state
+          # Include both the primary (USER_A / PRIMARY) and User B (TERTIARY)
+          # pre-authenticated fixtures. Multi-user messaging and security
+          # specs load storage-state-auth-b.json into a second browser
+          # context instead of calling performSignIn live, which cumulatively
+          # exceeded Supabase GoTrue's 5-attempt brute-force lockout.
+          path: |
+            tests/e2e/fixtures/storage-state-auth.json
+            tests/e2e/fixtures/storage-state-auth-b.json
+          retention-days: 1
+
+  # ============================================
+  # STEP 5: Full E2E tests (sharded, parallel)
+  # ============================================
+  e2e:
+    name: E2E (${{ matrix.project }} ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    needs: [smoke, rate-limiting, auth-setup]
+    # Fork-PR guard (see smoke job): skip on fork PRs where secrets are withheld.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      # Lever 1: the 3 browser jobs now run CONCURRENTLY (the firefox/webkit
+      # `needs:` chain was dropped — #116 per-test fixture isolation removed the
+      # cross-test data races the serialization protected against). max-parallel
+      # is 2 (not 3) so peak concurrent Supabase load is 2 shards × 3 browsers = 6,
+      # half the historically-dangerous 9 that overwhelmed the free tier
+      # ("Sign-in failed: Request rate limit reached" on webkit). Validated via
+      # workflow_dispatch before merge; if rate limits recur, restore one `needs:`
+      # (re-serialize webkit) rather than raising max-parallel.
+      max-parallel: 2
+      matrix:
+        include:
+          # ===== CHROMIUM (7 shards) =====
+          # msg runs as a single shard, not 2, because two concurrent msg
+          # shards hit the same shared user-pair + conversation and race
+          # each other's beforeAll `messages.delete()`. Serializing the
+          # messaging tests within ONE shard per browser eliminates the
+          # cross-shard data race we spent 9 rounds patching piecemeal.
+          - { project: chromium-msg, browser: chromium, shard: 1/1 }
+          # #116 Phase 2 — per-test fixture-isolation specs run as their OWN
+          # parallel slice at workers>1 (each test owns its data; no shared-user
+          # race). This is the CI validation gate: prove the cloud free-tier
+          # sustains parallel signups before converting the rest. workers:2 is
+          # conservative — raise only after this proves green & flake-free.
+          - {
+              project: chromium-msg-iso,
+              browser: chromium,
+              shard: 1/1,
+              workers: 2,
+            }
+          - { project: chromium-gen, browser: chromium, shard: 1/6 }
+          - { project: chromium-gen, browser: chromium, shard: 2/6 }
+          - { project: chromium-gen, browser: chromium, shard: 3/6 }
+          - { project: chromium-gen, browser: chromium, shard: 4/6 }
+          - { project: chromium-gen, browser: chromium, shard: 5/6 }
+          - { project: chromium-gen, browser: chromium, shard: 6/6 }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No install step (#829): the browsers come from the image.
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: out/
+
+      - name: Download auth state
+        uses: actions/download-artifact@v8
+        with:
+          name: auth-state
+          path: tests/e2e/fixtures/
+
+      - name: Start server
+        run: |
+          set -euo pipefail
+          npx serve out -l 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+
+          # Brief grace period for the child to spawn; wait-on does the real polling.
+          sleep 2
+
+          # Verify serve didn't already exit (port in use, missing out/, etc.).
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            exit 1
+          fi
+
+          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
+          # with backgrounded jobs.
+          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            echo "--- listening sockets ---"
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "--- serve process state ---"
+            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
+            echo "--- direct curl attempt ---"
+            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
+            exit 1
+          fi
+
+          echo "serve is responding on http://localhost:3000"
+        env:
+          CI: true
+
+      - name: Prime Supabase connection pool
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          # Wake Supabase free tier and warm the connection pool.
+          # Without this, the first query from each shard takes 10-30s.
+          curl -sf "${SUPABASE_URL}/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            > /dev/null 2>&1 || true
+          echo "✓ Supabase connection pool primed"
+
+      - name: Stagger shards within batch to reduce Supabase contention
+        env:
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          SHARD_NUM=$(echo "$SHARD" | cut -d/ -f1)
+          # max-parallel: 8 already serializes browsers. Within each batch
+          # of 8, stagger by 5-10 seconds to spread the initial connection
+          # burst on Supabase.
+          if echo "$PROJECT" | grep -q "msg"; then
+            DELAY=$(((SHARD_NUM - 1) * 10))
+          else
+            DELAY=$(((SHARD_NUM - 1) * 5))
+          fi
+          echo "$PROJECT shard $SHARD_NUM: waiting ${DELAY}s"
+          sleep $DELAY
+
+      - name: Run E2E tests (${{ matrix.project }} ${{ matrix.shard }})
+        env:
+          CI: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          DEBUG: pw:api
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
+          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}
+          # Per-job worker override (only set for the *-msg-iso slice). Empty
+          # for every other job → Playwright uses the config default (workers:1
+          # on CI). Routed via env per workflow-injection guidance.
+          WORKERS: ${{ matrix.workers }}
+        run: |
+          # --no-deps: skip the 'setup' project dependency. The auth-setup
+          # job already ran setup once (with chromium) and uploaded the
+          # auth-state artifact, which we downloaded above. Without --no-deps,
+          # Playwright tries to re-run setup with the matrix browser, which
+          # fails because firefox/webkit shards don't install chromium.
+          WORKERS_FLAG=""
+          if [ -n "$WORKERS" ]; then
+            WORKERS_FLAG="--workers=$WORKERS"
+          fi
+          scripts/ci/playwright-in-container.sh test \
+            --project="$PROJECT" \
+            --shard="$SHARD" \
+            --reporter=blob,./tests/e2e/reporters/assertion-count-reporter.ts \
+            --trace=on-first-retry \
+            --no-deps \
+            $WORKERS_FLAG
+
+      - name: Upload blob report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: blob-report-${{ matrix.project }}-${{ strategy.job-index }}
+          path: blob-report/
+          retention-days: 1
+
+  # ============================================
+  # STEP 5b: Firefox E2E (runs concurrently with chromium + webkit — Lever 1)
+  # ============================================
+  e2e-firefox:
+    name: E2E (${{ matrix.project }} ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    # Lever 1: depends only on the build/auth artifacts (same as e2e/chromium),
+    # NOT on the chromium job — so all 3 browsers run in parallel.
+    needs: [smoke, rate-limiting, auth-setup]
+    # Cross-browser is OPT-IN (#643). It used to run on every push to main, which
+    # made the post-merge run 62% of all Supabase load in the repo — main was 46%
+    # of runs, and this is the only place firefox/webkit ever executed. It now
+    # runs on the weekly cron, on a `full-e2e`-labelled same-repo PR (e.g.
+    # messaging error-string handling — see the real Safari "Load failed" retry
+    # bug fixed in 7fb7563), or on a deliberate dispatch. Chromium still gates
+    # every PR and still runs post-merge, so a merged commit is never untested.
+    #
+    # NO `always()` HERE — deleting it is the point (#640). It was added by
+    # 5da9cef9 for the serial chain (firefox needed chromium, webkit needed
+    # firefox) so one red browser would not cancel the others. 9807b6d8 deleted
+    # that chain and never touched this `if:`. What it did instead was override
+    # the `needs:` skip, so a budget-blocked push started 16 jobs that died at
+    # "Download build", never reached "Run E2E tests", and were counted as spent
+    # quota because their conclusion was `failure` rather than `skipped`. That is
+    # 32 of 88 counted runs in one cycle. Fork PRs lack secrets, hence the
+    # same-repo check.
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.full_browsers) ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       contains(github.event.pull_request.labels.*.name, 'full-e2e'))
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      # Lever 1: max-parallel 2 (was 3) — browsers now run concurrently, so the
+      # per-browser cap is lower to keep peak Supabase load at 6 shards, not 9.
+      max-parallel: 2
+      matrix:
+        include:
+          # msg runs as a single shard (see chromium matrix note above).
+          - { project: firefox-msg, browser: firefox, shard: 1/1 }
+          # #116 Phase 2 — per-test fixture-isolation slice at workers>1.
+          - {
+              project: firefox-msg-iso,
+              browser: firefox,
+              shard: 1/1,
+              workers: 2,
+            }
+          - { project: firefox-gen, browser: firefox, shard: 1/6 }
+          - { project: firefox-gen, browser: firefox, shard: 2/6 }
+          - { project: firefox-gen, browser: firefox, shard: 3/6 }
+          - { project: firefox-gen, browser: firefox, shard: 4/6 }
+          - { project: firefox-gen, browser: firefox, shard: 5/6 }
+          - { project: firefox-gen, browser: firefox, shard: 6/6 }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # No install step (#829): the browsers come from the image.
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: out/
+      - name: Download auth state
+        uses: actions/download-artifact@v8
+        with:
+          name: auth-state
+          path: tests/e2e/fixtures/
+      - name: Start server
+        run: |
+          set -euo pipefail
+          npx serve out -l 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+
+          # Brief grace period for the child to spawn; wait-on does the real polling.
+          sleep 2
+
+          # Verify serve didn't already exit (port in use, missing out/, etc.).
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            exit 1
+          fi
+
+          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
+          # with backgrounded jobs.
+          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            echo "--- listening sockets ---"
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "--- serve process state ---"
+            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
+            echo "--- direct curl attempt ---"
+            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
+            exit 1
+          fi
+
+          echo "serve is responding on http://localhost:3000"
+        env:
+          CI: true
+      - name: Prime Supabase connection pool
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          curl -sf "${SUPABASE_URL}/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            > /dev/null 2>&1 || true
+      - name: Stagger shards within batch
+        env:
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          SHARD_NUM=$(echo "$SHARD" | cut -d/ -f1)
+          if echo "$PROJECT" | grep -q "msg"; then
+            DELAY=$(((SHARD_NUM - 1) * 10))
+          else
+            DELAY=$(((SHARD_NUM - 1) * 5))
+          fi
+          sleep $DELAY
+      - name: Run E2E tests
+        env:
+          CI: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          DEBUG: pw:api
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
+          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}
+          # Per-job worker override (set only for the *-msg-iso slice). Empty
+          # elsewhere → config default (workers:1 on CI). Routed via env.
+          WORKERS: ${{ matrix.workers }}
+        run: |
+          WORKERS_FLAG=""
+          if [ -n "$WORKERS" ]; then
+            WORKERS_FLAG="--workers=$WORKERS"
+          fi
+          scripts/ci/playwright-in-container.sh test \
+            --project="$PROJECT" \
+            --shard="$SHARD" \
+            --reporter=blob,./tests/e2e/reporters/assertion-count-reporter.ts \
+            --trace=on-first-retry \
+            --no-deps \
+            $WORKERS_FLAG
+      - name: Upload blob report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: blob-report-${{ matrix.project }}-${{ strategy.job-index }}
+          path: blob-report/
+          retention-days: 1
+
+  # ============================================
+  # STEP 5c: WebKit E2E (runs concurrently with chromium + firefox — Lever 1)
+  # ============================================
+  e2e-webkit:
+    name: E2E (${{ matrix.project }} ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    # Lever 1: depends only on build/auth artifacts, NOT firefox — all 3 parallel.
+    needs: [smoke, rate-limiting, auth-setup]
+    # Opt-in cross-browser and no `always()` — see e2e-firefox above for both, in
+    # full. Same gate deliberately: weekly cron, a `full-e2e`-labelled same-repo
+    # PR, or an explicit dispatch. Never on a bare push, and never on a bot
+    # dispatch that did not ask for it.
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.full_browsers) ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       contains(github.event.pull_request.labels.*.name, 'full-e2e'))
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      # Lever 1: max-parallel 2 (was 3) — browsers now run concurrently, so the
+      # per-browser cap is lower to keep peak Supabase load at 6 shards, not 9.
+      max-parallel: 2
+      matrix:
+        include:
+          # msg runs as a single shard (see chromium matrix note above).
+          - { project: webkit-msg, browser: webkit, shard: 1/1 }
+          # #116 Phase 2 — per-test fixture-isolation slice at workers>1.
+          - { project: webkit-msg-iso, browser: webkit, shard: 1/1, workers: 2 }
+          - { project: webkit-gen, browser: webkit, shard: 1/6 }
+          - { project: webkit-gen, browser: webkit, shard: 2/6 }
+          - { project: webkit-gen, browser: webkit, shard: 3/6 }
+          - { project: webkit-gen, browser: webkit, shard: 4/6 }
+          - { project: webkit-gen, browser: webkit, shard: 5/6 }
+          - { project: webkit-gen, browser: webkit, shard: 6/6 }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # No install step (#829): the browsers come from the image.
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: out/
+      - name: Download auth state
+        uses: actions/download-artifact@v8
+        with:
+          name: auth-state
+          path: tests/e2e/fixtures/
+      - name: Start server
+        run: |
+          set -euo pipefail
+          npx serve out -l 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          echo "serve started, PID=$SERVE_PID"
+
+          # Brief grace period for the child to spawn; wait-on does the real polling.
+          sleep 2
+
+          # Verify serve didn't already exit (port in use, missing out/, etc.).
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            exit 1
+          fi
+
+          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
+          # with backgrounded jobs.
+          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
+            echo "--- serve.log ---"
+            cat serve.log || true
+            echo "--- listening sockets ---"
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "--- serve process state ---"
+            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
+            echo "--- direct curl attempt ---"
+            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
+            exit 1
+          fi
+
+          echo "serve is responding on http://localhost:3000"
+        env:
+          CI: true
+      - name: Prime Supabase connection pool
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          curl -sf "${SUPABASE_URL}/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            > /dev/null 2>&1 || true
+      - name: Stagger shards within batch
+        env:
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          SHARD_NUM=$(echo "$SHARD" | cut -d/ -f1)
+          if echo "$PROJECT" | grep -q "msg"; then
+            DELAY=$(((SHARD_NUM - 1) * 10))
+          else
+            DELAY=$(((SHARD_NUM - 1) * 5))
+          fi
+          sleep $DELAY
+      - name: Run E2E tests
+        env:
+          CI: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          DEBUG: pw:api
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
+          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
+          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
+          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
+          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
+          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}
+          # Per-job worker override (set only for the *-msg-iso slice). Empty
+          # elsewhere → config default (workers:1 on CI). Routed via env.
+          WORKERS: ${{ matrix.workers }}
+        run: |
+          WORKERS_FLAG=""
+          if [ -n "$WORKERS" ]; then
+            WORKERS_FLAG="--workers=$WORKERS"
+          fi
+          scripts/ci/playwright-in-container.sh test \
+            --project="$PROJECT" \
+            --shard="$SHARD" \
+            --reporter=blob,./tests/e2e/reporters/assertion-count-reporter.ts \
+            --trace=on-first-retry \
+            --no-deps \
+            $WORKERS_FLAG
+      - name: Upload blob report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: blob-report-${{ matrix.project }}-${{ strategy.job-index }}
+          path: blob-report/
+          retention-days: 1
+
+  # ============================================
+  # STEP 6: Merge reports and generate summary
+  # ============================================
+  report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs: [e2e, e2e-firefox, e2e-webkit]
+    # Run only if at least one shard actually RAN — success or failure (#663).
+    #
+    # This was `always()`, which also fires when every shard was SKIPPED. That is
+    # the normal state whenever the cloud-quota breaker (#567) trips: it skips all
+    # 16 shards, no blob reports are uploaded, and this job then dies on
+    #   Error: Directory does not exist: .../all-blob-reports
+    # Observed on run 31343482645 and on every quota-blocked PR since. The result
+    # is a permanently red `Test Report` that means nothing — and a check that
+    # always means nothing is how people learn to skim past red checks.
+    #
+    # `Download blob reports` cannot be the guard: actions/download-artifact only
+    # WARNS on zero matches and never creates the directory, so the failure lands
+    # two steps later in `Merge reports`. The guard has to be here, at the job.
+    #
+    # Failure must still be covered — a failing shard is exactly when the merged
+    # report matters most — so this is not `success()`. `!cancelled()` is required
+    # to stop GitHub wrapping the expression in an implicit `success()`, and the
+    # `>-` folded form avoids the YAML tag-indicator error that a bare leading `!`
+    # would raise.
+    #
+    # All three shard jobs are listed even though firefox/webkit currently cannot
+    # run without chromium: that coupling is a property of their `if:` conditions,
+    # not of this job, and it should not silently become load-bearing here.
+    if: >-
+      !cancelled() &&
+      (needs.e2e.result == 'success' || needs.e2e.result == 'failure' ||
+      needs.e2e-firefox.result == 'success' ||
+      needs.e2e-firefox.result == 'failure' ||
+      needs.e2e-webkit.result == 'success' ||
+      needs.e2e-webkit.result == 'failure')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: blob-report-*
+          path: all-blob-reports
+          merge-multiple: true
+
+      - name: Merge reports
+        run: pnpm exec playwright merge-reports --reporter=html,github ./all-blob-reports
+
+      - name: Flaky-count honesty gate (#300)
+        if: always()
+        env:
+          # annotate-first: surface flakes loudly (one job-summary table + one
+          # annotation per flake) WITHOUT redding main while #300's four known
+          # flakes are still open. `retries: 2` reports a flake as a PASS, which
+          # is how four rode into main behind green ticks; this makes them
+          # unmissable. Flip to "block" once #300 is clear so no NEW flake can
+          # ride in behind a green tick again.
+          FLAKY_GATE_MODE: annotate
+        run: |
+          # Own json merge (separate from the html/github merge above) → stdout →
+          # file. The json reporter with no outputFile writes clean JSON to
+          # stdout; the redirect captures it. Robust — no dependency on
+          # PLAYWRIGHT_JSON_OUTPUT_NAME. merge-reports reads the blobs read-only,
+          # so a second pass is safe.
+          pnpm exec playwright merge-reports --reporter=json ./all-blob-reports > flaky-report.json
+          node scripts/check-flaky-count.mjs flaky-report.json
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Generate summary
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HAS_FULL_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'full-e2e') }}
+        run: |
+          echo "## E2E Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$EVENT_NAME" = "pull_request" ] && [ "$HAS_FULL_LABEL" != "true" ]; then
+            echo "**PR Mode**: Chromium only (8 jobs). Add the \`full-e2e\` label to also run Firefox + WebKit." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "**Full Mode**: Chromium + Firefox + WebKit (24 jobs total)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download the **playwright-report** artifact for detailed results." >> "$GITHUB_STEP_SUMMARY"

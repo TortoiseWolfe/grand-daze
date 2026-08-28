@@ -1,0 +1,259 @@
+# Post-deploy production @smoke suite (#288, item 2).
+#
+# #287 proved the whole test suite can be green while the DEPLOYED product is
+# unusable (placeholder OAuth client_ids, site_url=localhost, dead SMTP). This
+# job hits the LIVE origin AFTER each deploy (and daily) and asserts the deployed
+# thing a customer touches works: providers enabled, OAuth authorize redirects
+# carry real client_ids (#287 detector), sign-in loads with zero console errors,
+# and canonical origin + github.io redirect. (This suite caught a real prod defect
+# on its first run — #348, a CSS emitted as <script> — fixed in the same PR.)
+#
+# All checks are READ-ONLY against prod (no signup / user creation). Like
+# conformance.yml it needs no shared-backend mutex — nothing is mutated.
+
+name: Production Smoke
+
+on:
+  # Fire AFTER a successful deploy (the missing post-deploy verification).
+  workflow_run:
+    workflows: ['Deploy to GitHub Pages']
+    types: [completed]
+  # Daily drift/uptime detection.
+  schedule:
+    - cron: '30 15 * * *'
+  workflow_dispatch:
+
+# NOTE: no `pull_request` trigger — this is a POST-DEPLOY monitor that tests the
+# LIVE origin. A PR's changes aren't deployed yet, so running it on a PR would
+# assert against the OLD deploy and red the PR for something it hasn't shipped.
+# It runs after Deploy completes (where the PR's changes ARE live), on a daily
+# cron, and on demand. Validate suite changes locally or via workflow_dispatch.
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Production @smoke (live origin)
+    # Post-deploy runs proceed only if the deploy succeeded; other triggers always run.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://scripthammer.com
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # THE UNSTYLED-PRODUCTION DETECTOR. First, because it is the failure this site
+      # has actually shipped most often and the only one a visitor cannot work around.
+      #
+      # Production has gone unstyled SEVEN times — #438, #467, #476, #548, #650 and
+      # twice since. Every single time the detector was the owner opening a browser
+      # and seeing a white page with a giant logo. That is not monitoring; that is a
+      # person doing a check's job, and being asked to screenshot it as proof.
+      #
+      # Nothing already in place can see it:
+      #   - the rest of this @smoke suite fetches CURRENT html, whose CSS is fresh by
+      #     construction, so the failure is structurally invisible to it;
+      #   - `check-stale-html.mjs` proves retention works, but against a SIMULATED
+      #     deploy in CI — it never touches the real site;
+      #   - `retain-previous-assets.mjs` PRINTS "retained 40 asset(s)" and is believed.
+      #     Nothing has ever verified those 40 are reachable afterwards.
+      #
+      # This reads the ledger the deploy just published and asserts every promised
+      # file is actually served. A 404 there means someone holding that HTML is
+      # looking at an unstyled page right now.
+      - name: Retained assets are still served (unstyled-production detector)
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+        run: node scripts/ci/check-retained-assets.mjs "${SITE:-https://scripthammer.com}"
+
+      # The step above guards the MITIGATION; this one guards the CURE (#635).
+      #
+      # Cloudflare now fronts GitHub Pages and applies the cache contract a
+      # content-hashed build needs: documents revalidate, hashed assets last a year.
+      # That configuration lives in a dashboard, not in this repository, so nothing
+      # here would notice if a rule were deleted, a token rotated, or the zone moved
+      # — production would silently go back to `max-age=600` and the eighth
+      # occurrence would become the ninth.
+      #
+      # Note `check-stale-html.mjs` canNOT cover this: it serves itself over
+      # 127.0.0.1 with a hardcoded `max-age=600` and never touches the live site.
+      - name: Cache contract is still served (Cloudflare rules still in place)
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          # Explicit, and load-bearing (#970). The script defaults this OFF so a fork
+          # is not failed for lacking a Cloudflare edge it never had; this repo DOES
+          # have one, and losing it silently is the #635 regression this job exists to
+          # catch. check-cache-headers.test.js fails if this line disappears.
+          REQUIRE_EDGE: 'true'
+        # No `:-` fallback: a fork with NEXT_PUBLIC_DEPLOY_URL unset used to measure
+        # ScriptHammer's site and report green. The script now refuses an empty base.
+        run: node scripts/ci/check-cache-headers.mjs "$SITE"
+
+      # The third dashboard-resident control, alongside the two above (#393).
+      #
+      # The CSP was authored in layout.tsx under `metadata.other`, which renders
+      # `<meta name="Content-Security-Policy">` — inert, because browsers honour
+      # only `<meta http-equiv>` or the header. Ten directives, maintained for
+      # months, enforced never. It is now a real header set by a Cloudflare
+      # Transform Rule, which means it lives in a dashboard and can vanish exactly
+      # as silently as the cache rules could.
+      #
+      # Nothing else can see it: the CSP is not in the built output any more, so
+      # no unit test or build check can tell whether production has one.
+      - name: CSP is still delivered as a real header (Cloudflare rule still in place)
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+        run: node scripts/ci/check-csp-header.mjs "${SITE:-https://scripthammer.com}"
+
+      # The FOURTH dashboard-resident control (#822), and the one whose failure is
+      # silent in both directions.
+      #
+      # DMARC, SPF, the DKIM key and the inbound MX all live in Cloudflare, not in
+      # this tree — the same shape as the cache rules above. But mail fails quietly:
+      # lose the MX and admin@ stops receiving, so the security policy (#881) goes
+      # back to dropping vulnerability reports with nobody here seeing anything.
+      # Lose the DKIM key and transactional mail stops aligning, which is invisible
+      # while p=none and surfaces later as quarantined payment receipts.
+      #
+      # The intended policy is declared IN the script, so raising enforcement is a
+      # one-line reviewable change this check then enforces against live DNS.
+      - name: Mail policy still matches the intent declared in the repo (#822)
+        env:
+          MAIL_DOMAIN: scripthammer.com
+        run: node scripts/ci/check-mail-policy.mjs "$MAIL_DOMAIN"
+
+      # Runs BEFORE the browser suite: it is cheap, and if production is pointed at
+      # the wrong backend every test below is meaningless.
+      #
+      # WHY THIS EXISTS. On 2026-08-07 production served a bundle pointing at a
+      # Supabase project that had been DELETED, for hours, behind entirely green
+      # checks. The deploy reads `vars.*`; the operator was setting `gh secret set`.
+      # Same names, two stores, and secrets are write-only so the divergence was
+      # invisible to inspection.
+      #
+      # Nothing caught it because every check asked the BACKEND whether it was alive.
+      # It was — just not the one the bundle called. The only assertion that could
+      # have caught it is this one: what the deployed JavaScript actually points at,
+      # compared against what we intended to deploy.
+      - name: Deployed bundle points at the intended Supabase project
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          WANT: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WANT:-}" ]; then
+            echo "::error::vars.NEXT_PUBLIC_SUPABASE_URL is empty — the build has no backend"
+            exit 1
+          fi
+          html=$(curl -fsS --max-time 30 "${SITE}/pricing/")
+          found=""
+          for chunk in $(printf '%s' "$html" | grep -oE '/_next/static/chunks/[^"]+\.js' | sort -u); do
+            hit=$(curl -fsS --max-time 30 "${SITE}${chunk}" \
+                  | grep -oE 'https://[a-z0-9]+\.supabase\.co' | sort -u || true)
+            [ -n "$hit" ] && found="$found $hit"
+          done
+          found=$(printf '%s' "$found" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ')
+          echo "intended: $WANT"
+          echo "in bundle:$found"
+          if [ -z "$found" ]; then
+            echo "::error::no Supabase URL found in any deployed chunk — the build shipped without a backend"
+            exit 1
+          fi
+          case " $found " in
+            *" $WANT "*) echo "match" ;;
+            *) echo "::error::deployed bundle targets$found but vars.NEXT_PUBLIC_SUPABASE_URL is $WANT"; exit 1 ;;
+          esac
+
+      # WHY THIS EXISTS. On 2026-08-07 production was found serving a Stripe TEST
+      # publishable key (#629). Every purchasable package — a $3,500 build among
+      # them — ran a test-mode transaction. A buyer completed intake, entered a
+      # card and reached a success screen; no money moved. Every internal signal
+      # said "sold", because within test mode the sale genuinely succeeded. The
+      # only place the difference shows is a bank account, and nothing checks that.
+      #
+      # EXPECTED MODE IS A REPO VARIABLE, defaulting to `test`. Hard-failing on
+      # `pk_test_` today would red this suite on every deploy until Stripe business
+      # verification completes — which is real, but permanent red is how a suite
+      # stops being read, and it would mask the checks below it. Instead the guard
+      # asserts the deployed mode MATCHES the declared intent, so it catches an
+      # unexpected key change in either direction right now, and becomes the
+      # live-key gate the moment `PAYMENT_MODE_EXPECTED` is set to `live`.
+      #
+      # Set it to `live` as part of going live. That is the whole ceremony.
+      - name: Deployed bundle ships the expected Stripe key mode
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          EXPECTED: ${{ vars.PAYMENT_MODE_EXPECTED || 'test' }}
+        run: |
+          set -uo pipefail
+          html=$(curl -fsS --max-time 30 "${SITE}/checkout/?sku=svc-site") || {
+            echo "::error::could not fetch the checkout page"; exit 1; }
+          found=""
+          for chunk in $(printf '%s' "$html" | grep -oE '/_next/static/chunks/[^"]+\.js' | sort -u); do
+            hit=$(curl -fsS --max-time 30 "${SITE}${chunk}" \
+                  | grep -oE 'pk_(test|live)_' | sort -u || true)
+            [ -n "$hit" ] && found="$found $hit"
+          done
+          found=$(printf '%s' "$found" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ')
+          echo "expected mode : $EXPECTED"
+          echo "in bundle     :$found"
+
+          if [ -z "$found" ]; then
+            echo "::error::no Stripe publishable key found in any deployed chunk — checkout cannot charge at all"
+            exit 1
+          fi
+          case "$found" in
+            *"pk_${EXPECTED}_"*) echo "match — production is in ${EXPECTED} mode" ;;
+            *) echo "::error::production ships$found but PAYMENT_MODE_EXPECTED is '${EXPECTED}'. If this is the go-live deploy, set the repo variable; if not, the wrong key shipped."; exit 1 ;;
+          esac
+          if [ "$EXPECTED" = "test" ]; then
+            echo "::warning::Production is in Stripe TEST mode — no customer can pay. Tracked in #629."
+          fi
+
+      # WHY THIS EXISTS. `/schedule` is where the pricing page's "Book a call" link lands,
+      # and the whole page is env-driven: src/config/calendar.config.ts:21 reads
+      # NEXT_PUBLIC_CALENDAR_URL and an empty value makes CalendarEmbed.tsx:78 render
+      # "Calendar URL not configured" where the booking widget belongs. Clear the repo
+      # variable and the deploy still goes green, the link still works, and only the
+      # destination degrades — silently, on the one CTA that books revenue.
+      #
+      # EQUALITY, NOT PRESENCE. The script asserts the CONFIGURED url reached the bundle,
+      # not that some calendly.com link is in there. A presence check passes on a stale
+      # literal, on a URL left by a previous owner, and on a fork that never changed the
+      # default — all green, all booking into somebody else's calendar.
+      #
+      # It walks /checkout as well as /schedule on purpose: /schedule loads CalendarEmbed
+      # via next/dynamic with ssr:false, so its calendar chunk is not referenced in that
+      # page's HTML, while /checkout reaches the same config through BookingStep.tsx:36.
+      - name: Deployed bundle books at the intended calendar
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          WANT: ${{ vars.NEXT_PUBLIC_CALENDAR_URL }}
+        run: node scripts/ci/check-calendar-configured.mjs
+
+      # No install step (#829): the browsers come from the image. This lane used to
+      # apt-install chromium on the runner, which is how a post-deploy monitor could
+      # fail for reasons having nothing to do with the deploy it was monitoring.
+      - name: Run the production @smoke suite
+        run: scripts/ci/playwright-in-container.sh test --config playwright.smoke.config.ts

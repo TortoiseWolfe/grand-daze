@@ -1,0 +1,112 @@
+name: Supabase Keep-Alive
+
+# Supabase Cloud free-tier projects auto-pause after 7 days without activity.
+# 5-day cadence leaves a safety margin.
+#
+# WHY THIS WAS REWRITTEN (2026-08-07)
+# The previous version pinged ONE project — whatever `vars.NEXT_PUBLIC_SUPABASE_URL`
+# happened to hold. Every other project the owner runs was outside its scope and
+# paused on schedule with nothing to prevent it. Five were found paused at once,
+# across a SECOND Supabase account this workflow had no idea existed.
+#
+# It also failed silently in the way that matters most: for a period it was priming
+# a project that had been DELETED, and a keepalive that errors looks exactly like a
+# keepalive nobody reads. Its failure step printed a message and exited 1 — correct,
+# but nothing routes a scheduled-run failure anywhere a human sees it.
+#
+# So: a LIST of project refs, the Management API rather than the anon-key data path
+# (it answers even when a project is quota-restricted, which the data API does not),
+# and a summary that names every project and its outcome so the log is readable at a
+# glance rather than requiring a dig.
+#
+# WHICH PROJECTS ARE IN THE LIST (2026-08-19, #572)
+# `vars.SUPABASE_KEEPALIVE_REFS` was narrowed from three refs to one. The two that
+# were removed had been failing with `HTTP 544` — a Supabase GATEWAY error, not an
+# auth failure, so the token was fine and the projects themselves were unreachable at
+# query time. They belong to the second account and are not being kept warm on
+# purpose. They had accounted for 9 of the last 20 runs failing.
+#
+# That matters beyond tidiness: a keepalive that is red most months is a keepalive
+# nobody reads, and the one project that genuinely needs the ping was being announced
+# in the same breath as two that were never going to answer. Do not re-add a ref here
+# without first confirming it responds — a ref that cannot be pinged does not get kept
+# alive by being listed, it just hides the one that can.
+
+on:
+  schedule:
+    # 3:00 AM UTC on the 1st, 6th, 11th, 16th, 21st, 26th — never more than 5 days apart
+    - cron: '0 3 1,6,11,16,21,26 * *'
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping every project
+        env:
+          # Comma-separated project refs. A repo VARIABLE, not a secret: refs are not
+          # sensitive, and a secret cannot be read back to check what it holds — which
+          # is precisely how this repo ended up deploying against a deleted project.
+          REFS: ${{ vars.SUPABASE_KEEPALIVE_REFS }}
+          # Projects span two Supabase accounts, so two tokens. Each ref is tried with
+          # each token; whichever authenticates wins.
+          TOKEN_A: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          TOKEN_B: ${{ secrets.SUPABASE_ACCESS_TOKEN_ALT }}
+        run: |
+          set -uo pipefail
+
+          if [ -z "${REFS:-}" ]; then
+            echo "::error::vars.SUPABASE_KEEPALIVE_REFS is empty — nothing is being kept alive"
+            exit 1
+          fi
+
+          fail=0
+          summary=""
+          processed_refs=0
+
+          for ref in $(printf '%s' "$REFS" | tr ',' ' '); do
+            [ -z "$ref" ] && continue
+            processed_refs=$((processed_refs + 1))
+            ok=0
+            for tok in "${TOKEN_A:-}" "${TOKEN_B:-}"; do
+              [ -z "$tok" ] && continue
+              # A query is real database activity. A status GET is not — the whole
+              # point is to touch the database so Supabase does not consider it idle.
+              code=$(curl -s -o /tmp/out.json -w '%{http_code}' --max-time 60 -X POST \
+                "https://api.supabase.com/v1/projects/${ref}/database/query" \
+                -H "Authorization: Bearer ${tok}" \
+                -H 'Content-Type: application/json' \
+                -d '{"query":"select 1 as keepalive"}')
+              if [ "$code" = "200" ] || [ "$code" = "201" ]; then ok=1; break; fi
+            done
+
+            if [ "$ok" = "1" ]; then
+              echo "  OK    $ref"
+              summary="${summary}\n| \`${ref}\` | ✅ pinged |"
+            else
+              # Named explicitly: "one project failed" is not actionable, and the
+              # reason this rewrite exists is that nobody could tell WHICH.
+              echo "::error::keepalive failed for ${ref} (last HTTP ${code:-none}) — it may be paused, deleted, or the token lacks access"
+              echo "  FAIL  $ref"
+              summary="${summary}\n| \`${ref}\` | ❌ FAILED |"
+              fail=1
+            fi
+          done
+
+          # `REFS=", ,"` is not shell-empty, but produces no loop iterations.
+          # A keepalive that reports success after pinging nothing is worse than a
+          # red scheduled run: it lets every project pause while looking healthy.
+          if [ "$processed_refs" -eq 0 ]; then
+            echo "::error::vars.SUPABASE_KEEPALIVE_REFS contains no usable project refs — nothing is being kept alive"
+            fail=1
+          fi
+
+          {
+            echo "### Supabase keep-alive"
+            echo ""
+            echo "| project | result |"
+            echo "|---|---|"
+            printf '%b\n' "$summary"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit $fail
