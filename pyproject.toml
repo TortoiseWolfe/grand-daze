@@ -1,4 +1,4 @@
-# ScriptHammer Python tooling configuration
+# Grand Daze Python tooling configuration
 
 [tool.ruff]
 # Target Python 3.12 (matching .speckit/specify-cli)

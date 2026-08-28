@@ -35,7 +35,7 @@
 //
 // USAGE
 //   TURNSTILE_SECRET=0x... node scripts/check-captcha.mjs
-//   ... --base https://scripthammer.com --site-key 0x4AAA...
+//   ... --base https://grand-daze.com --site-key 0x4AAA...
 //
 // EXIT CODES
 //   0  every verifiable link holds — safe to enable
@@ -49,7 +49,7 @@ function arg(name, fallback) {
   return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 }
 
-const BASE = arg('base', process.env.CHECK_BASE || 'https://scripthammer.com');
+const BASE = arg('base', process.env.CHECK_BASE || 'https://grand-daze.com');
 const SITE_KEY = arg('site-key', process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY);
 const SECRET = process.env.TURNSTILE_SECRET;
 

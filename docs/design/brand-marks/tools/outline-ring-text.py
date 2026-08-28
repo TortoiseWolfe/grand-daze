@@ -22,7 +22,7 @@ from fontTools.pens.svgPathPen import SVGPathPen
 
 FONT_SIZE = 38.0
 TEXT_LENGTH = 300.0
-TEXT = "SCRIPTHAMMER.COM"
+TEXT = "GRANDDAZE.COM"
 
 font = TTFont("/f/Oswald-Bold.ttf")
 upem = font["head"].unitsPerEm

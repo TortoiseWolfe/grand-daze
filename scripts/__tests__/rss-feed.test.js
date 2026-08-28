@@ -19,7 +19,7 @@ const BLOG_DATA_PATH = path.join(ROOT, 'src/lib/blog/blog-data.json');
 const BLOG_DIR = path.join(ROOT, 'public/blog');
 
 function makeTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'scripthammer-rss-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'grand-daze-rss-'));
 }
 
 function sourcePosts() {

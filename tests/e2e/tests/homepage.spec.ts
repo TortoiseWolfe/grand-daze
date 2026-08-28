@@ -64,7 +64,7 @@ test.describe('Homepage Navigation', () => {
   test('the install block shows the Docker path, never npx', async ({
     page,
   }) => {
-    // The 2a comp puts `npx create-scripthammer my-app` here. That package
+    // The 2a comp puts `npx create-grand-daze my-app` here. That package
     // does not exist in this repo and `npx` is on CLAUDE.md's forbidden list,
     // so the most prominent element on the page would fail for anyone who
     // pasted it. Owner's ruling (#380): Docker only. This test is what keeps

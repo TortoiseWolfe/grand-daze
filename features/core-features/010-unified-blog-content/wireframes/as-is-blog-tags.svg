@@ -61,7 +61,7 @@
     <text x="100" y="340" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f2937">Recent posts</text>
     <line x1="100" y1="352" x2="1180" y2="352" stroke="#b8a080"/>
 
-    <text x="100" y="380" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#8b5cf6">Welcome to ScriptHammer</text>
+    <text x="100" y="380" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#8b5cf6">Welcome to Grand Daze</text>
     <text x="100" y="400" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">intro · 2025-09-15 · 5 min</text>
 
     <text x="100" y="432" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#8b5cf6">Set up Supabase auth in 10 minutes</text>
@@ -108,7 +108,7 @@
 
     <line x1="16" y1="264" x2="344" y2="264" stroke="#b8a080"/>
     <text x="16" y="290" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1f2937">Recent posts</text>
-    <text x="16" y="318" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#8b5cf6">Welcome to ScriptHammer</text>
+    <text x="16" y="318" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#8b5cf6">Welcome to Grand Daze</text>
     <text x="16" y="336" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">intro · 5 min</text>
     <text x="16" y="364" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#8b5cf6">Supabase auth 101</text>
     <text x="16" y="382" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">supabase · 10 min</text>
@@ -157,5 +157,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Tag links navigate to /blog/tags/[tag] — see the next wireframe for that page.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:22 | Blog Tags Index (as-is /blog/tags) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:22 | Blog Tags Index (as-is /blog/tags) | Grand Daze</text>
 </svg>

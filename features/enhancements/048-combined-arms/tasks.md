@@ -18,7 +18,7 @@
 
 **⚠️ GATE**: T012 is the kill-criterion evaluation. It MUST pass before any Phase 1 ticket starts.
 
-- [ ] T001 [INFRA] Scaffold the match server: `game-server/package.json` (Node 22 / TypeScript strict), `game-server/tsconfig.json`, `game-server/Dockerfile`, and a `match-server` service in `docker-compose.yml` (own port, no dependency on the `scripthammer` app container). One match = one process (PRD A.4).
+- [ ] T001 [INFRA] Scaffold the match server: `game-server/package.json` (Node 22 / TypeScript strict), `game-server/tsconfig.json`, `game-server/Dockerfile`, and a `match-server` service in `docker-compose.yml` (own port, no dependency on the `grand-daze` app container). One match = one process (PRD A.4).
   - **Acceptance**: `docker compose up match-server` boots, healthcheck endpoint answers, `docker compose exec match-server pnpm test` runs.
   - **Test**: Vitest wired inside the container; CI job builds the image.
 - [ ] T002 [INFRA] Implement the 30 Hz authoritative fixed-tick loop in `game-server/src/tick.ts`: fixed timestep with drift correction, tick counter, per-tick phase hooks (input → simulate → snapshot). Server owns all truth (NFR-002).
@@ -65,7 +65,7 @@
 
 **⚠️ GATE**: every ticket below DEPENDS on T012 = GO.
 
-- [ ] T013 [P] [US1] Bake the MVP map source: author `sites/north-shore.json` (Coolidge Park / Frazier Ave, ~600×600 m box) and run `docker compose exec scripthammer pnpm bake` reusing the #232 parameterized-bake + #229 lidar-heights pipeline; commit the site config + baked artifacts. Add explicit `!` allowlist entries to `.gitignore` for `sites/north-shore.json` + `public/twins/north-shore/` (repo privacy default gitignores `sites/*` — this public-parkland site is deliberately allowlisted like chatt).
+- [ ] T013 [P] [US1] Bake the MVP map source: author `sites/north-shore.json` (Coolidge Park / Frazier Ave, ~600×600 m box) and run `docker compose exec grand-daze pnpm bake` reusing the #232 parameterized-bake + #229 lidar-heights pipeline; commit the site config + baked artifacts. Add explicit `!` allowlist entries to `.gitignore` for `sites/north-shore.json` + `public/twins/north-shore/` (repo privacy default gitignores `sites/*` — this public-parkland site is deliberately allowlisted like chatt).
   - **Acceptance**: bake produces `terrain.json` + streets/buildings for the box; artifacts committed and visible to CI (CI builds the committed tree — no local-only data).
   - **Test**: rebake verifies semantically (manifest modulo fetchedAt/site, drape byte-identity per repo bake lessons); `git check-ignore` confirms the allowlist.
 - [ ] T014 [US1] Terrain adapter in `src/lib/combined-arms/map/heightmap.ts` + `game-server/src/map/heightmap.ts`: convert baked `terrain.json` into the shared game-resolution heightmap (identical sampling on both sides — server is authoritative for ground truth); baked streets/buildings parsed into cover-primitive placements per Appendix C graybox rules (~40 cover primitives per lane, crouch + stand heights, two elevation changes per lane). DEPENDS: T013.
@@ -108,7 +108,7 @@
   - **Acceptance**: a solo player + 31 bots produces a complete match — captures, flips, bleed, and a 0-ticket ending — unattended.
   - **Test**: headless full-match simulation test asserting match reaches a winner within 30 min sim time.
 - [ ] T027 [P] [US1] Pa11y coverage: add the COMBINED ARMS menu + deploy routes to `config/pa11yci.json` allowlist; in-match canvas route stays excluded with an inline canvas-not-auditable note (047 T002 precedent). DEPENDS: T021.
-  - **Acceptance**: `docker compose exec scripthammer pnpm test:a11y` exit 0 with menu/deploy audited; canvas route documented as excluded.
+  - **Acceptance**: `docker compose exec grand-daze pnpm test:a11y` exit 0 with menu/deploy audited; canvas route documented as excluded.
   - **Test**: the Pa11y run itself + config review.
 - [ ] T028 [US1] **Phase 1 slice checkpoint**: bot-filled 16v16 on north-shore end-to-end — capture CP B, verify the US1 Independent Test ((a) meter rates, (b) deploy-screen flip within one RTT on all clients, (c) ticket drain + bleed per the tuning table, (d) 0 tickets = loss), plus US2 Independent Test (leader spawn + 8 s denial, both flag variants). DEPENDS: T017–T027.
   - **Acceptance**: both Independent Tests pass live; recorded as the Phase 1 exit note in this file.

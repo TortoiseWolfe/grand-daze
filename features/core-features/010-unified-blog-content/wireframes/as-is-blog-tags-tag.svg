@@ -138,5 +138,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Each card links back to /blog/[slug]. Tag pages share exact card markup with /blog for consistency.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:23 | Blog Tag (as-is /blog/tags/[tag]) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:23 | Blog Tag (as-is /blog/tags/[tag]) | Grand Daze</text>
 </svg>

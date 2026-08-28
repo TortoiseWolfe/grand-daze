@@ -32,15 +32,15 @@ import {
 } from '../fixtures/test-users';
 
 const SENDER = {
-  email: 'dotnet-lp-sender@scripthammer.test',
+  email: 'dotnet-lp-sender@grand-daze.test',
   password: 'DotnetLpSender1!',
 };
 const RECIPIENT = {
-  email: 'dotnet-lp-recipient@scripthammer.test',
+  email: 'dotnet-lp-recipient@grand-daze.test',
   password: 'DotnetLpRecip1!',
 };
 const OUTSIDER = {
-  email: 'dotnet-lp-outsider@scripthammer.test',
+  email: 'dotnet-lp-outsider@grand-daze.test',
   password: 'DotnetLpOut1!',
 };
 

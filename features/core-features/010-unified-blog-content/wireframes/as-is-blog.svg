@@ -22,7 +22,7 @@
       <rect x="0"   y="0" width="390" height="210" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
       <rect x="0"   y="0" width="390" height="90" rx="8" fill="#8b5cf6"/>
       <text x="20" y="52" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">[cover image]</text>
-      <text x="20" y="120" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1f2937">Welcome to ScriptHammer</text>
+      <text x="20" y="120" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1f2937">Welcome to Grand Daze</text>
       <text x="20" y="144" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">A modern Next.js template with batteries</text>
       <text x="20" y="162" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">included and thoughtful defaults.</text>
       <text x="20" y="192" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6">2025-09-15 · 5 min read · intro</text>
@@ -84,7 +84,7 @@
     <!-- Single column stack -->
     <rect x="16" y="138" width="328" height="150" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
     <rect x="16" y="138" width="328" height="60" rx="8" fill="#8b5cf6"/>
-    <text x="28" y="218" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">Welcome to ScriptHammer</text>
+    <text x="28" y="218" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">Welcome to Grand Daze</text>
     <text x="28" y="242" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Modern template with defaults</text>
     <text x="28" y="272" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6">2025-09-15 · 5 min</text>
 
@@ -144,5 +144,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">No client-side pagination in current build; full catalog on one page.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:20 | Blog (as-is /blog) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:20 | Blog (as-is /blog) | Grand Daze</text>
 </svg>

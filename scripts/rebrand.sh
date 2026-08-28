@@ -158,11 +158,11 @@ PRESERVE_SSH=false
 PRESERVE_ATTRIBUTION=false
 
 # Original project name to search for
-ORIGINAL_NAME="ScriptHammer" # rebrand:keep
-ORIGINAL_NAME_LOWER="scripthammer" # rebrand:keep
-ORIGINAL_COMPONENT_NAME="ScriptHammer" # rebrand:keep
-ORIGINAL_NAME_UPPER="SCRIPTHAMMER" # rebrand:keep
-ORIGINAL_OWNER="TortoiseWolfe"
+ORIGINAL_NAME="Grand Daze" # rebrand:keep
+ORIGINAL_NAME_LOWER="grand-daze" # rebrand:keep
+ORIGINAL_COMPONENT_NAME="GrandDaze" # rebrand:keep
+ORIGINAL_NAME_UPPER="GRANDDAZE" # rebrand:keep
+ORIGINAL_OWNER="tortoisewolfe"
 
 # One immutable view of the repository is shared by content replacement, path
 # planning, and the postcondition. Without it, the first mv makes git's cached

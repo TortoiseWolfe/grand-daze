@@ -1,9 +1,9 @@
 /**
- * "SCRIPTHAMMER.COM" twice around the gear ring, BAKED TO PATHS.
+ * "GRANDDAZE.COM" twice around the gear ring, BAKED TO PATHS.
  *
- * Generated from public/scripthammer-wordmark.svg, which
+ * Generated from public/grand-daze-wordmark.svg, which
  * docs/design/brand-marks/tools/outline-ring-text.py derives from
- * docs/design/brand-marks/rebalanced/scripthammer-lockup.svg. Do not hand-edit: regenerate.
+ * docs/design/brand-marks/rebalanced/grand-daze-lockup.svg. Do not hand-edit: regenerate.
  *
  * Each entry is [transform, pathData] for one glyph — the transform carries the
  * on-path position and tangent angle Chromium computed for the original

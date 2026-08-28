@@ -77,7 +77,7 @@ function assertCanonicalArtifacts({ robotsTxt, sitemapXml, origin }) {
 
 function makeGeneratorFixture() {
   const fixture = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'scripthammer-canonical-artifacts-')
+    path.join(os.tmpdir(), 'grand-daze-canonical-artifacts-')
   );
   fs.mkdirSync(path.join(fixture, 'public'), { recursive: true });
   fs.mkdirSync(path.join(fixture, 'src', 'lib', 'blog'), { recursive: true });
@@ -137,9 +137,9 @@ test('the sitemap generator gives robots and sitemap the configured canonical or
     // Deliberate negative control: the assertion must reject the exact drift
     // #504 guards against, rather than merely observing a happy-path artifact.
     const staleSitemapUrl =
-      origin === 'https://tortoisewolfe.github.io/ScriptHammer'
+      origin === 'https://tortoisewolfe.github.io/GrandDaze'
         ? 'https://wrong-origin.example/sitemap.xml'
-        : 'https://tortoisewolfe.github.io/ScriptHammer/sitemap.xml';
+        : 'https://tortoisewolfe.github.io/GrandDaze/sitemap.xml';
     const fallbackRobots = artifacts.robotsTxt.replace(
       `${origin}/sitemap.xml`,
       staleSitemapUrl

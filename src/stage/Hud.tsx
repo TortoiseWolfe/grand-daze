@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 // Every piece of copy (wordmark, subtitle, mode labels, palette labels,
 // caption, provenance) arrives via props. This component owns ZERO
 // project-specific strings, so it (and its visual style) can be lifted
-// back into ScriptHammer core as a reusable "3D Stage HUD" alongside
+// back into Grand Daze core as a reusable "3D Stage HUD" alongside
 // StageCore/Rig — see progress.md T20 note.
 
 export interface HudOption {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import SignInForm from '@/components/auth/SignInForm';
 import OAuthButtons from '@/components/auth/OAuthButtons';
-import { LayeredScriptHammerLogo } from '@/components/atomic/SpinningLogo';
+import { LayeredGrandDazeLogo } from '@/components/atomic/SpinningLogo';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -68,8 +68,8 @@ export default function SignInPage() {
       className="relative isolate overflow-hidden"
       style={{
         // The design writes this stop as the literal `oklch(28.51% 0.067
-        // 281.32)`, which is scripthammer-dark's own `--color-base-300` — the
-        // mock's wrapper carried `data-theme="scripthammer-dark"`, so that
+        // 281.32)`, which is grand-daze-dark's own `--color-base-300` — the
+        // mock's wrapper carried `data-theme="grand-daze-dark"`, so that
         // value was theme-SPECIFIC. Lifting it as a literal put a dark purple
         // blob in the middle of the light theme, dragging the headline's
         // contrast down with it. Referencing the token instead makes the wash
@@ -94,11 +94,11 @@ export default function SignInPage() {
               }}
             >
               <div className="h-[76%] w-[76%]">
-                <LayeredScriptHammerLogo pauseOnHover />
+                <LayeredGrandDazeLogo pauseOnHover />
               </div>
             </div>
             <span className="font-display text-base-content text-lg tracking-[-0.01em]">
-              SCRIPTHAMMER
+              GRANDDAZE
             </span>
           </div>
 
@@ -140,7 +140,7 @@ export default function SignInPage() {
             <p className="text-base-content text-sm">
               New here?{' '}
               {/* NOT link-secondary (#778). Measured against the hero gradient:
-                  6.07:1 on scripthammer-light, under the 7:1 this text needs.
+                  6.07:1 on grand-daze-light, under the 7:1 this text needs.
                   text-base-content measures 10.1 light / 11.81 dark. `link`
                   stays, so the UNDERLINE marks it as a link rather than colour
                   alone — which WCAG prefers regardless. */}

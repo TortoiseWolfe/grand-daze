@@ -246,7 +246,7 @@ export default function A11yDevOverlay({
       </div>
 
       {/* The empty-state line below is solid, not `/60`: measured 5.20:1 on
-          base-100 in scripthammer-light, under the 7:1 gate (#411, table in
+          base-100 in grand-daze-light, under the 7:1 gate (#411, table in
           #462). It also lost its emoji - an emoji cannot take `currentColor`
           and renders differently on every OS (#385). The sentence carries the
           meaning without it. */}

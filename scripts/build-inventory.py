@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build Inventory - Spec inventory builder for ScriptHammer features
+Build Inventory - Spec inventory builder for Grand Daze features
 
 Generates structured inventory of all feature specifications with metadata.
 Usage: python3 scripts/build-inventory.py [command] [options]
@@ -306,7 +306,7 @@ def cmd_export(specs: list[dict], args) -> dict:
 
     export_data = {
         "generated": datetime.now(timezone.utc).isoformat(),
-        "project": "ScriptHammer",
+        "project": "Grand Daze",
         "total_specs": len(specs),
         "specs": specs,
     }

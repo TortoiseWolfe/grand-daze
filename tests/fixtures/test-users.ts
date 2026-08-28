@@ -66,15 +66,15 @@ export interface TestUser {
  */
 export const TEST_USERS = {
   userA: {
-    email: 'test-user-a@scripthammer.test',
+    email: 'test-user-a@grand-daze.test',
     password: 'TestPassword123!',
   },
   userB: {
-    email: 'test-user-b@scripthammer.test',
+    email: 'test-user-b@grand-daze.test',
     password: 'TestPassword456!',
   },
   admin: {
-    email: 'test-admin@scripthammer.test',
+    email: 'test-admin@grand-daze.test',
     password: 'AdminPassword789!',
   },
 } as const;

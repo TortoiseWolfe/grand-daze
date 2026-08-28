@@ -427,7 +427,7 @@ export default function SignInForm({
       <button
         type="submit"
         // `secondary`, not `primary` (#384). The 3e mock renders the submit in
-        // the warm secondary, and on scripthammer-dark `--color-primary` is a
+        // the warm secondary, and on grand-daze-dark `--color-primary` is a
         // silver/steel (oklch 76% 0.024 258) that reads as a DISABLED control
         // on the primary action of the page. Accessible name is untouched —
         // `performSignIn` matches `getByRole('button', { name: 'Sign In' })`.

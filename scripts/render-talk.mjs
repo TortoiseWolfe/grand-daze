@@ -30,8 +30,8 @@
  * never install browsers on the host.
  *
  * USAGE
- *   docker compose exec scripthammer node scripts/render-talk.mjs why-build-one-app
- *   docker compose exec scripthammer node scripts/render-talk.mjs --all
+ *   docker compose exec grand-daze node scripts/render-talk.mjs why-build-one-app
+ *   docker compose exec grand-daze node scripts/render-talk.mjs --all
  */
 
 import { readdirSync, existsSync, readFileSync } from 'node:fs';

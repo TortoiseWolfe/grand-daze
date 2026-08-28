@@ -16,7 +16,7 @@
  *
  * Run from inside the Docker container:
  *   docker exec -e SKIP_WEBSERVER=1 -e BASE_URL=http://localhost:3000 \
- *     sh-feat-scripthammer-1 npx playwright test tests/e2e/admin/ --project=chromium
+ *     sh-feat-grand-daze-1 npx playwright test tests/e2e/admin/ --project=chromium
  */
 
 import { test, expect } from '@playwright/test';
@@ -33,7 +33,7 @@ import {
 // fixture user. See the beforeAll below (#914).
 
 // Next.js basePath — all routes must be prefixed
-// Read the basePath, never hardcode it (#914). This file said `'/ScriptHammer'` while its
+// Read the basePath, never hardcode it (#914). This file said `'/GrandDaze'` while its
 // two sibling admin specs read the env var, and the local E2E lane builds root-served with
 // DISABLE_BASE_PATH=true — so every goto below resolved to 404.html and the whole file
 // measured the not-found page.
@@ -52,7 +52,7 @@ test.describe('Admin Dashboard E2E', () => {
   //
   // This block used to sign in as `test@example.com`, a constant named ADMIN_EMAIL that
   // is not an admin: `is_admin()` reads the user_profiles.is_admin COLUMN (#240,
-  // migration:1218) and seed-test-users.ts sets it only for admin@scripthammer.com
+  // migration:1218) and seed-test-users.ts sets it only for admin@grand-daze.com
   // (scripts/seed-test-users.ts:199, inside setupAdminUser). So AdminGate redirected to
   // `/` and every assertion in this file measured the home page.
   //

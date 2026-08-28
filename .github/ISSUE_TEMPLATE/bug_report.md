@@ -25,8 +25,8 @@ assignees: ''
 
 ## Where you're running it
 
-- **Fork or upstream?** <!-- upstream TortoiseWolfe/ScriptHammer, or your own fork — say which, forks are the point of this project -->
-- **Deployed or local?** <!-- scripthammer.com, your Pages deploy, or `docker compose up` -->
+- **Fork or upstream?** <!-- upstream tortoisewolfe/GrandDaze, or your own fork — say which, forks are the point of this project -->
+- **Deployed or local?** <!-- grand-daze.com, your Pages deploy, or `docker compose up` -->
 - **Browser / OS:**
 - **Backend:** <!-- hosted Supabase, local Supabase profile, or .NET -->
 

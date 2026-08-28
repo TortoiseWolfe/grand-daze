@@ -14,7 +14,7 @@ import { CookieCategory } from './consent-types';
  *
  * Callers own their own React state; this touches the DOM and storage only.
  */
-export const DEFAULT_THEME = 'scripthammer-dark';
+export const DEFAULT_THEME = 'grand-daze-dark';
 
 /** Read the persisted theme, preferring whichever store consent allows. */
 export function readStoredTheme(): string {

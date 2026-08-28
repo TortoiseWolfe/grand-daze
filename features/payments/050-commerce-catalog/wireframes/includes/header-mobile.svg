@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg">
-<!-- ScriptHammer Mobile Header + Status Bar (INCLUDE - for template injection)
+<!-- Grand Daze Mobile Header + Status Bar (INCLUDE - for template injection)
      Position: Top of mobile mockup container (y=0, after container rect)
      Width: 360px (matches wireframe mobile container width)
      Height: 78px (status bar 28px + header bar 50px)
@@ -40,7 +40,7 @@
 
     <!-- Logo (left of center) -->
     <rect x="55" y="10" width="24" height="24" rx="4" fill="#8b5cf6"/>
-    <text x="85" y="30" fill="#374151" font-family="system-ui, sans-serif" font-size="14px" font-weight="500">ScriptHammer</text>
+    <text x="85" y="30" fill="#374151" font-family="system-ui, sans-serif" font-size="14px" font-weight="500">Grand Daze</text>
 
     <!-- Header right side: Accessibility + Settings + Avatar -->
     <g transform="translate(220, 3)">

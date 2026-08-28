@@ -5,7 +5,7 @@
 **Sprint**: Sprint 4
 **Status**: 📥 Inbox
 **Created**: 2025-09-24
-**Author**: TortoiseWolfe
+**Author**: tortoisewolfe
 
 ---
 
@@ -69,7 +69,7 @@ src/app/blog/
 title: 'Post Title'
 slug: 'post-slug'
 excerpt: 'Brief description'
-author: 'TortoiseWolfe'
+author: 'tortoisewolfe'
 publishDate: 2025-10-01
 status: 'published'
 categories: [Development, AI]

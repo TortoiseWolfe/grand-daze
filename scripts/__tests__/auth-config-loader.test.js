@@ -5,7 +5,7 @@
  *
  * Two things have to hold at once, and they pull in opposite directions:
  *
- *   1. ScriptHammer's own gate must still detect real drift — so the DEFAULT has to
+ *   1. Grand Daze's own gate must still detect real drift — so the DEFAULT has to
  *      survive interpolation exactly, byte for byte. If interpolation quietly
  *      changed a pinned value, the gate would start reporting drift that is not
  *      there, and the first response to a noisy gate is to stop believing it.
@@ -111,7 +111,7 @@ test('a parse failure names the interpolation instead of a bare column number', 
 // ── the real file ───────────────────────────────────────────────────────────
 
 test('the committed defaults resolve to a valid config with an EMPTY env', () => {
-  // What a fork inherits before configuring anything, and what ScriptHammer's own
+  // What a fork inherits before configuring anything, and what Grand Daze's own
   // gate compares prod against.
   const config = loadAuthConfig(CONFIG_PATH, {});
 
@@ -166,7 +166,7 @@ test('the drift workflow passes every FORK_OVERRIDABLE var to the runner', () =>
   // desired state against `process.env`, and GitHub does NOT put `vars.*` there on
   // its own — a step sees only what its `env:` block names. Miss this and a fork can
   // set all eight repository Variables exactly as rebrand.sh instructs and still be
-  // measured against ScriptHammer's defaults, with nothing anywhere reporting why.
+  // measured against Grand Daze's defaults, with nothing anywhere reporting why.
   //
   // Asserted from the workflow TEXT rather than by running it, because the failure is
   // a silent omission: there is no run in which a missing env line announces itself.
@@ -188,7 +188,7 @@ test('the drift workflow passes every FORK_OVERRIDABLE var to the runner', () =>
 
   // A copy-pasted line pointing at the wrong Variable resolves to '', which
   // `interpolate` treats as unset, so the field silently falls back to the
-  // ScriptHammer default and the gate reads as passing.
+  // Grand Daze default and the gate reads as passing.
   for (const [envName, varName] of passed) {
     assert.equal(
       varName,

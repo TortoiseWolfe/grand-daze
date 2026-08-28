@@ -2,7 +2,7 @@
 
 ### A Squad-Centric Large-Scale Multiplayer FPS (Battlefield 2-Inspired)
 
-**Author:** Jonathan "TurtleWolfe" Pohlner / ScriptHammer
+**Author:** Jonathan "TurtleWolfe" Pohlner / Grand Daze
 **Status:** Draft v0.1
 **Date:** July 2026
 
@@ -112,7 +112,7 @@ This is the mode you described — and the key distinction from capture-the-flag
 
 ## 6. Technical Approach
 
-**Client:** Three.js / React Three Fiber shell (menus, spawn map, squad UI in React; simulation in a plain TS/ECS layer — R3F for scene management, not per-frame game logic). WebGPU renderer with WebGL2 fallback. This keeps the project consistent with the existing ScriptHammer R3F design system for UI chrome, while acknowledging an FPS at this scale needs a custom simulation loop outside React's reconciler.
+**Client:** Three.js / React Three Fiber shell (menus, spawn map, squad UI in React; simulation in a plain TS/ECS layer — R3F for scene management, not per-frame game logic). WebGPU renderer with WebGL2 fallback. This keeps the project consistent with the existing Grand Daze R3F design system for UI chrome, while acknowledging an FPS at this scale needs a custom simulation loop outside React's reconciler.
 
 **Netcode:** authoritative server (Node/TypeScript or Rust) at 30 Hz tick, client prediction + reconciliation for local movement, snapshot interpolation (100 ms buffer) for remote entities, lag-compensated hitscan (server rewind). Transport: WebTransport (QUIC datagrams) primary, WebSocket fallback. Interest management via grid partitioning so 64 players doesn't mean 64× entity replication per client.
 

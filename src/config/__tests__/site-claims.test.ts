@@ -93,7 +93,7 @@ describe('landing-page claims', () => {
     const SURFACES = [
       'README.md',
       'CLAUDE.md',
-      'public/blog/scripthammer-intro.md',
+      'public/blog/grand-daze-intro.md',
     ];
     // THE RULE: a count must sit ADJACENT to the qualifier it describes.
     //

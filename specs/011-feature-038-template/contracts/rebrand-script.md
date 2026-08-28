@@ -22,13 +22,13 @@
 | ---- | ---------------------------------------------------------- |
 | 0    | Success                                                    |
 | 1    | Validation or rebrand failure                              |
-| 2    | Re-rebrand scenario (no ScriptHammer found), user declined |
+| 2    | Re-rebrand scenario (no Grand Daze found), user declined |
 | 3    | Git not installed or not a git repo                        |
 
 ## Output Format
 
 ```
-Rebranding ScriptHammer → MyApp
+Rebranding Grand Daze → MyApp
 Owner: myuser
 Description: My awesome app
 
@@ -41,8 +41,8 @@ Updating file contents...
   ... (200+ files)
 
 Renaming files...
-  ✓ ScriptHammerLogo.tsx → MyAppLogo.tsx
-  ✓ LayeredScriptHammerLogo.tsx → LayeredMyAppLogo.tsx
+  ✓ GrandDazeLogo.tsx → MyAppLogo.tsx
+  ✓ LayeredGrandDazeLogo.tsx → LayeredMyAppLogo.tsx
 
 Updating git remote...
   ✓ origin → github.com/myuser/my-app
@@ -78,7 +78,7 @@ of the four recorded source projections (display, slug, component, uppercase):
 
 ```
 WARNING: This repository appears to have been rebranded already.
-No unmarked case-insensitive "ScriptHammer" references found.
+No unmarked case-insensitive "Grand Daze" references found.
 
 Current project name appears to be: OtherProject
 Do you want to rebrand from "OtherProject" to "MyApp"? [y/N]
@@ -89,16 +89,16 @@ Do you want to rebrand from "OtherProject" to "MyApp"? [y/N]
 For a target named `GeoLarp`:
 
 ```
-ScriptHammer  → GeoLarp
-scripthammer  → geolarp
-Scripthammer  → Geolarp
-SCRIPTHAMMER  → GEOLARP
-ScriptHAMMER  → GeoLarp
+Grand Daze  → GeoLarp
+grand-daze  → geolarp
+Grand daze  → Geolarp
+GRANDDAZE  → GEOLARP
+Grand Daze  → GeoLarp
 ```
 
 Matches adjacent to identifier characters use an identifier-safe component
 projection. Uppercase tokens always use the uppercase component projection, so
-`SCRIPTHAMMER_TEST_DOMAIN` remains valid for a multiword display name. Lowercase
+`GRANDDAZE_TEST_DOMAIN` remains valid for a multiword display name. Lowercase
 standalone tokens use the sanitized technical slug. A same-line
 `rebrand:keep` marker is the current explicit content opt-out.
 

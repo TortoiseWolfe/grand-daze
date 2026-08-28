@@ -29,7 +29,7 @@
  *
  * Usage:
  *   node scripts/ci/check-retained-assets.mjs [base-url]
- *   BASE=https://scripthammer.com node scripts/ci/check-retained-assets.mjs
+ *   BASE=https://grand-daze.com node scripts/ci/check-retained-assets.mjs
  *
  * Exits 1 if any retained asset is gone.
  */
@@ -37,7 +37,7 @@
 const BASE = (
   process.argv[2] ||
   process.env.BASE ||
-  'https://scripthammer.com'
+  'https://grand-daze.com'
 ).replace(/\/$/, '');
 const MANIFEST = `${BASE}/_next/static/ASSET_MANIFEST.txt`;
 const AGES = `${BASE}/_next/static/ASSET_AGES.txt`;

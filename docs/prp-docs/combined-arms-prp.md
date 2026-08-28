@@ -86,7 +86,7 @@ Success looks like: ≥8 spawn-ownership flips per average match; median match 1
 
 ## Technical Approach (summary)
 
-**Client**: Three.js / React Three Fiber shell — menus, spawn map, squad UI in React; simulation in a plain TS/ECS layer (R3F for scene management, not per-frame game logic). WebGPU renderer with WebGL2 fallback. Consistent with ScriptHammer's R3F design system for UI chrome, while acknowledging an FPS at this scale needs a custom simulation loop outside React's reconciler.
+**Client**: Three.js / React Three Fiber shell — menus, spawn map, squad UI in React; simulation in a plain TS/ECS layer (R3F for scene management, not per-frame game logic). WebGPU renderer with WebGL2 fallback. Consistent with Grand Daze's R3F design system for UI chrome, while acknowledging an FPS at this scale needs a custom simulation loop outside React's reconciler.
 
 **Transport** (Appendix A.1): WebTransport (QUIC) primary — Baseline in all major browsers since Safari 26.4 (March 2026) — with WebSocket fallback for pre-26.4 Safari and QUIC-hostile networks (fallback clients get a degraded-but-playable experience; the server treats them identically).
 

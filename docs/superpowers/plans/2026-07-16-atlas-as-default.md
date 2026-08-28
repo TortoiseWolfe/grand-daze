@@ -12,16 +12,16 @@
 
 ## Global Constraints
 
-- **Docker-first.** Never run `pnpm`/`npx` on the host. Commands run as `docker compose exec -T scripthammer <cmd>`. Never `sudo`.
-- **Production builds run in their OWN container:** `docker compose run --rm builder pnpm build`. Never `docker compose exec scripthammer pnpm build` — that wipes the dev server's `.next` (#293).
-- **Commit from inside the container** so husky/lint-staged/gitleaks run: `docker compose exec -T scripthammer git commit`. Push from the host. **Never `--no-verify`.**
+- **Docker-first.** Never run `pnpm`/`npx` on the host. Commands run as `docker compose exec -T grand-daze <cmd>`. Never `sudo`.
+- **Production builds run in their OWN container:** `docker compose run --rm builder pnpm build`. Never `docker compose exec grand-daze pnpm build` — that wipes the dev server's `.next` (#293).
+- **Commit from inside the container** so husky/lint-staged/gitleaks run: `docker compose exec -T grand-daze git commit`. Push from the host. **Never `--no-verify`.**
 - **Touch targets:** `min-h-11 min-w-11` (44px) per CLAUDE.md. `min-h-0` is a defect.
 - **Query params are read via `new URLSearchParams(window.location.search)`, NEVER `useSearchParams`** — the latter forces a Suspense bailout under `output: 'export'` (`TwinCanvasHost.tsx:51-56`).
 - **E2E asserts DOM chrome, never `canvas`.** CI has no guaranteed WebGL; a canvas assertion `test.skip()`s into a false green (#288).
 - **Verify with unpiped exit codes.** `node --check file | head` returns _head's_ status. Never grep piped tool output for a verdict.
 - **Restore generated churn before committing:** `git checkout -- public/manifest.json` (the build rewrites `start_url`/`scope`).
-- Dev URL: `http://127.0.0.1:3002/ScriptHammer/`. Playwright MCP connects to `http://127.0.0.1:3002`, never `host.docker.internal`.
-- HMR does not reliably pick up `src/twin/cesium/` changes — `docker compose restart scripthammer` + a `?cb=N` buster before judging.
+- Dev URL: `http://127.0.0.1:3002/GrandDaze/`. Playwright MCP connects to `http://127.0.0.1:3002`, never `host.docker.internal`.
+- HMR does not reliably pick up `src/twin/cesium/` changes — `docker compose restart grand-daze` + a `?cb=N` buster before judging.
 
 ---
 
@@ -69,8 +69,8 @@
 Run:
 
 ```bash
-docker compose exec -T scripthammer sed -n '60,140p' src/twin/cesium/overpass.ts
-docker compose exec -T scripthammer sed -n '1,60p' scripts/bake/fetch-osm.ts
+docker compose exec -T grand-daze sed -n '60,140p' src/twin/cesium/overpass.ts
+docker compose exec -T grand-daze sed -n '1,60p' scripts/bake/fetch-osm.ts
 ```
 
 Expected: you can quote `LiveBuilding`, `OverpassBox`, `atlasBoxFor`, `fetchLiveBuildings`, and see that `fetchOsm` hardcodes `osm.json`. `buildWideBuildings` must return exactly `LiveBuilding[]` — same field names, same types.
@@ -147,7 +147,7 @@ describe('buildWideBuildings', () => {
 
 - [ ] **Step 3: Run it and watch it fail**
 
-Run: `docker compose exec -T scripthammer pnpm vitest run scripts/bake/__tests__/build-wide-buildings.test.ts`
+Run: `docker compose exec -T grand-daze pnpm vitest run scripts/bake/__tests__/build-wide-buildings.test.ts`
 Expected: FAIL — `Failed to resolve import "../build-wide-buildings"`.
 
 - [ ] **Step 4: Implement `buildWideBuildings`**
@@ -213,7 +213,7 @@ export function buildWideBuildings(
 
 - [ ] **Step 5: Run the tests until green**
 
-Run: `docker compose exec -T scripthammer pnpm vitest run scripts/bake/__tests__/build-wide-buildings.test.ts`
+Run: `docker compose exec -T grand-daze pnpm vitest run scripts/bake/__tests__/build-wide-buildings.test.ts`
 Expected: PASS, 5 tests.
 
 - [ ] **Step 6: Parameterize `fetchOsm`'s output filename**
@@ -261,12 +261,12 @@ Where the wide terrain is copied (`:496-503`), add the wide-buildings write — 
 
 - [ ] **Step 10: Run the bake and verify the artifact SEMANTICALLY**
 
-Run the bake (find the command: `docker compose exec -T scripthammer cat package.json | grep -A2 '"bake'`).
+Run the bake (find the command: `docker compose exec -T grand-daze cat package.json | grep -A2 '"bake'`).
 
 Then:
 
 ```bash
-docker compose exec -T scripthammer node -e '
+docker compose exec -T grand-daze node -e '
 const b=require("./public/twins/chatt/buildings-wide.json");
 console.log("count:", b.length);
 console.log("has lonLat:", Array.isArray(b[0].lonLat));
@@ -281,15 +281,15 @@ Per `lesson_bake_byte_comparability_prettier`: verify **semantically**, not by b
 
 - [ ] **Step 11: Point `fetchLiveBuildings` at the baked artifact, keep `?live`**
 
-In `src/twin/cesium/overpass.ts`, `fetchLiveBuildings` keeps its exact signature and return type. Default path: fetch `<assetUrl>/twins/<slug>/buildings-wide.json` and return it. When `new URLSearchParams(window.location.search).has('live')`, take the existing Overpass path instead. Use `getAssetUrl` from `@/config/project.config` for the URL — never a literal (basePath is `''` in prod, `/ScriptHammer` locally).
+In `src/twin/cesium/overpass.ts`, `fetchLiveBuildings` keeps its exact signature and return type. Default path: fetch `<assetUrl>/twins/<slug>/buildings-wide.json` and return it. When `new URLSearchParams(window.location.search).has('live')`, take the existing Overpass path instead. Use `getAssetUrl` from `@/config/project.config` for the URL — never a literal (basePath is `''` in prod, `/GrandDaze` locally).
 
 - [ ] **Step 12: Verify in the browser — the network tab is the assertion**
 
 ```bash
-docker compose restart scripthammer
+docker compose restart grand-daze
 ```
 
-Wait for 200, then load `http://127.0.0.1:3002/ScriptHammer/chatt/?atlas&cb=1` in Playwright MCP and check:
+Wait for 200, then load `http://127.0.0.1:3002/GrandDaze/chatt/?atlas&cb=1` in Playwright MCP and check:
 
 - The HUD's building count is in the thousands.
 - **No request to `overpass-api.de`** in `browser_network_requests`. That is the whole point of this task.
@@ -299,8 +299,8 @@ Wait for 200, then load `http://127.0.0.1:3002/ScriptHammer/chatt/?atlas&cb=1` i
 
 ```bash
 git checkout -- public/manifest.json
-docker compose exec -T scripthammer git add scripts/bake src/twin/cesium/overpass.ts public/twins/chatt/buildings-wide.json
-docker compose exec -T scripthammer git commit -m "feat(#292): bake the atlas's wide buildings, so the default path needs no public API
+docker compose exec -T grand-daze git add scripts/bake src/twin/cesium/overpass.ts public/twins/chatt/buildings-wide.json
+docker compose exec -T grand-daze git commit -m "feat(#292): bake the atlas's wide buildings, so the default path needs no public API
 
 The atlas queried Overpass at runtime on EVERY page load — an unthrottled 43km2
 query against a free community API whose usage policy forbids heavy automated
@@ -332,7 +332,7 @@ stays available behind ?live."
 
 - [ ] **Step 1: Find the nav item**
 
-Run: `docker compose exec -T scripthammer grep -rn "'Twin'\|\"Twin\"\|>Twin<" src/components src/config --include=*.tsx --include=*.ts`
+Run: `docker compose exec -T grand-daze grep -rn "'Twin'\|\"Twin\"\|>Twin<" src/components src/config --include=*.tsx --include=*.ts`
 Expected: one nav definition. Note its file:line — you edit it in Step 5.
 
 - [ ] **Step 2: Write the failing test**
@@ -378,7 +378,7 @@ describe('selectRenderer', () => {
 
 - [ ] **Step 3: Run it and watch it fail**
 
-Run: `docker compose exec -T scripthammer pnpm vitest run src/twin/__tests__/renderer-select.test.ts`
+Run: `docker compose exec -T grand-daze pnpm vitest run src/twin/__tests__/renderer-select.test.ts`
 Expected: FAIL — cannot resolve `../renderer-select`.
 
 - [ ] **Step 4: Implement and wire it**
@@ -424,29 +424,29 @@ At the file:line from Step 1, change the label `Twin` → `3D Map`. Leave the hr
 
 - [ ] **Step 6: Run the tests**
 
-Run: `docker compose exec -T scripthammer pnpm vitest run src/twin/__tests__/renderer-select.test.ts`
+Run: `docker compose exec -T grand-daze pnpm vitest run src/twin/__tests__/renderer-select.test.ts`
 Expected: PASS, 7 tests.
 
 - [ ] **Step 7: Drive both renderers in the browser**
 
 ```bash
-docker compose restart scripthammer
+docker compose restart grand-daze
 ```
 
 Via Playwright MCP at `http://127.0.0.1:3002`:
 
-- `/ScriptHammer/chatt/?cb=1` → the **atlas** (panel reads "Atlas — chatt").
-- `/ScriptHammer/chatt/?diorama&cb=2` → the **diorama** (text "Chattanooga Mini" present).
-- `/ScriptHammer/chatt/?ortho&cb=3` → the **diorama**.
-- `/ScriptHammer/chatt/?atlas&cb=4` → the **atlas** (alias still works).
+- `/GrandDaze/chatt/?cb=1` → the **atlas** (panel reads "Atlas — chatt").
+- `/GrandDaze/chatt/?diorama&cb=2` → the **diorama** (text "Chattanooga Mini" present).
+- `/GrandDaze/chatt/?ortho&cb=3` → the **diorama**.
+- `/GrandDaze/chatt/?atlas&cb=4` → the **atlas** (alias still works).
 - Screenshot the first two. **Look at them** — `textContent` returns obscured text as happily as visible text.
 
 - [ ] **Step 8: Commit**
 
 ```bash
 git checkout -- public/manifest.json
-docker compose exec -T scripthammer git add src/twin/ src/components src/config
-docker compose exec -T scripthammer git commit -m "feat(#292): the atlas is the default renderer; ?diorama opts out
+docker compose exec -T grand-daze git add src/twin/ src/components src/config
+docker compose exec -T grand-daze git commit -m "feat(#292): the atlas is the default renderer; ?diorama opts out
 
 The atlas is the better view of the city and the one worth landing on. This is
 the roadmap's own endgame ('flip ?atlas to default'), pulled forward.
@@ -482,7 +482,7 @@ Hides the diorama dock + tilt-shift behind ?diorama until ported."
 
 - [ ] **Step 1: Confirm the breakage before fixing it — this is the control**
 
-Run: `docker compose exec -T scripthammer pnpm exec playwright test tests/e2e/twins.spec.ts --project=chromium --reporter=list`
+Run: `docker compose exec -T grand-daze pnpm exec playwright test tests/e2e/twins.spec.ts --project=chromium --reporter=list`
 Expected: **FAILURES** on the wordmark specs. If everything passes, Task 2 did not land — stop and check, because a green here means the flip is not in effect and the retarget below would be meaningless.
 
 - [ ] **Step 2: Retarget the diorama specs**
@@ -502,7 +502,7 @@ Update the file's header comment (`:1-14`) — it describes the diorama as the d
 
 - [ ] **Step 3: Run them green**
 
-Run: `docker compose exec -T scripthammer pnpm exec playwright test tests/e2e/twins.spec.ts --project=chromium --reporter=list`
+Run: `docker compose exec -T grand-daze pnpm exec playwright test tests/e2e/twins.spec.ts --project=chromium --reporter=list`
 Expected: PASS.
 
 - [ ] **Step 4: Add the atlas coverage that has never existed**
@@ -550,14 +550,14 @@ test.describe('/chatt — the atlas is the default (#292)', () => {
 
 - [ ] **Step 5: Run the whole file**
 
-Run: `docker compose exec -T scripthammer pnpm exec playwright test tests/e2e/twins.spec.ts --project=chromium --reporter=list`
+Run: `docker compose exec -T grand-daze pnpm exec playwright test tests/e2e/twins.spec.ts --project=chromium --reporter=list`
 Expected: PASS. Read the summary line for `flaky` — a retry-recovered pass is not a pass.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-docker compose exec -T scripthammer git add tests/e2e/twins.spec.ts
-docker compose exec -T scripthammer git commit -m "test(#292): retarget the twin E2E to ?diorama, and cover the atlas at last
+docker compose exec -T grand-daze git add tests/e2e/twins.spec.ts
+docker compose exec -T grand-daze git commit -m "test(#292): retarget the twin E2E to ?diorama, and cover the atlas at last
 
 The default flip breaks this suite by design: the atlas renders 'Atlas — chatt'
 and the string 'Chattanooga Mini' appears nowhere in it, nor do More controls /
@@ -624,7 +624,7 @@ Add `shouldAutoStart` to the file's existing import from `../tour`.
 
 - [ ] **Step 2: Run it and watch it fail**
 
-Run: `docker compose exec -T scripthammer pnpm vitest run src/twin/cesium/__tests__/tour.test.ts`
+Run: `docker compose exec -T grand-daze pnpm vitest run src/twin/cesium/__tests__/tour.test.ts`
 Expected: FAIL — `shouldAutoStart is not a function`.
 
 - [ ] **Step 3: Implement it**
@@ -650,7 +650,7 @@ export function shouldAutoStart(o: {
 
 - [ ] **Step 4: Run the tests**
 
-Run: `docker compose exec -T scripthammer pnpm vitest run src/twin/cesium/__tests__/tour.test.ts`
+Run: `docker compose exec -T grand-daze pnpm vitest run src/twin/cesium/__tests__/tour.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Promote the button**
@@ -700,7 +700,7 @@ useEffect(() => {
 
 - [ ] **Step 8: Capture the OG image**
 
-With the atlas live, use Playwright MCP: resize to 1200×630, load `/ScriptHammer/chatt/?notour&cb=9`, hide the chrome, screenshot, save as JPEG < 300KB at `public/chatt-atlas-og.jpg`.
+With the atlas live, use Playwright MCP: resize to 1200×630, load `/GrandDaze/chatt/?notour&cb=9`, hide the chrome, screenshot, save as JPEG < 300KB at `public/chatt-atlas-og.jpg`.
 
 ```js
 // hide chrome so the card is the city, not the UI
@@ -750,26 +750,26 @@ export default function ChattPage() {
 
 ```bash
 docker compose run --rm builder pnpm build
-docker compose exec -T scripthammer node -e '
+docker compose exec -T grand-daze node -e '
 const h=require("fs").readFileSync("out/chatt/index.html","utf8");
 for (const m of h.match(/<meta (property|name)="(og|twitter):[a-z:]+" content="[^"]*"/g) || []) console.log(m);
 console.log(h.match(/<link rel="canonical"[^>]*>/)[0]);
 '
 ```
 
-Expected: `og:title` = "Chattanooga in 3D — open-source city atlas | ScriptHammer"; `og:url` = `https://scripthammer.com/chatt/`; `og:image` = `https://scripthammer.com/chatt-atlas-og.jpg`; **canonical** = `https://scripthammer.com/twins/chatt/`. If canonical shows `/chatt/`, the override is missing — that is the SEO regression.
+Expected: `og:title` = "Chattanooga in 3D — open-source city atlas | Grand Daze"; `og:url` = `https://grand-daze.com/chatt/`; `og:image` = `https://grand-daze.com/chatt-atlas-og.jpg`; **canonical** = `https://grand-daze.com/twins/chatt/`. If canonical shows `/chatt/`, the override is missing — that is the SEO regression.
 
-Then in the browser (`docker compose restart scripthammer` first):
+Then in the browser (`docker compose restart grand-daze` first):
 
-- `/ScriptHammer/chatt/?cb=1` → tour **auto-plays**; caption appears.
+- `/GrandDaze/chatt/?cb=1` → tour **auto-plays**; caption appears.
 - **Drag the globe mid-tour** → tour stops, camera yields. This is the Step 7 hazard — verify by hand.
 - **Click Play** → tour starts and _keeps running_ (the click's own `pointerdown` must not cancel it).
-- `/ScriptHammer/chatt/?notour&cb=2` → still globe, no auto-play, Play button prominent.
+- `/GrandDaze/chatt/?notour&cb=2` → still globe, no auto-play, Play button prominent.
 - Screenshot. **Look at it.**
 
 - [ ] **Step 11: Guard the new image with the existing test**
 
-`tests/e2e/tests/broken-links.spec.ts:281` already fetches each page's `og:image` and fails on status ≥ 400 — but only for `['/', '/blog', '/blog/scripthammer-intro']`. Add `'/chatt'` to that array so a broken card fails CI.
+`tests/e2e/tests/broken-links.spec.ts:281` already fetches each page's `og:image` and fails on status ≥ 400 — but only for `['/', '/blog', '/blog/grand-daze-intro']`. Add `'/chatt'` to that array so a broken card fails CI.
 
 - [ ] **Step 12: Full validation**
 
@@ -780,8 +780,8 @@ Expected: all green, including the chunk-parse gate.
 
 ```bash
 git checkout -- public/manifest.json
-docker compose exec -T scripthammer git add src/twin/cesium src/app/chatt/page.tsx public/chatt-atlas-og.jpg tests/e2e/tests/broken-links.spec.ts
-docker compose exec -T scripthammer git commit -m "feat(#292): the tour plays itself, and /chatt gets its own card
+docker compose exec -T grand-daze git add src/twin/cesium src/app/chatt/page.tsx public/chatt-atlas-og.jpg tests/e2e/tests/broken-links.spec.ts
+docker compose exec -T grand-daze git commit -m "feat(#292): the tour plays itself, and /chatt gets its own card
 
 The tour was the best thing on the page and the hardest control to find — a
 btn-xs min-h-0 chip, fifth in a row of near-identical chips, below the 44px
@@ -809,9 +809,9 @@ content while 'fixing' SEO."
 ## Verification (whole arc)
 
 1. `./scripts/validate-ci.sh --quick` green.
-2. Prod after deploy: `/chatt/` renders the atlas; `/chatt/?diorama` renders the diorama; `og:url` = `https://scripthammer.com/chatt/`; canonical = `/twins/chatt/`.
+2. Prod after deploy: `/chatt/` renders the atlas; `/chatt/?diorama` renders the diorama; `og:url` = `https://grand-daze.com/chatt/`; canonical = `/twins/chatt/`.
 3. **No `overpass-api.de` request** on the default path — the reason Task 1 came first.
-4. Card preview: paste `https://scripthammer.com/chatt/` into a social debugger and confirm the atlas image, not the homepage.
+4. Card preview: paste `https://grand-daze.com/chatt/` into a social debugger and confirm the atlas image, not the homepage.
 
 ## Out of scope
 

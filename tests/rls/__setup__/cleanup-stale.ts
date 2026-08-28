@@ -1,5 +1,5 @@
 /**
- * Vitest globalSetup hook that scrubs stale *@scripthammer.test users +
+ * Vitest globalSetup hook that scrubs stale *@grand-daze.test users +
  * their FK-blocking dependent rows before pnpm test:rls runs (#50).
  *
  * Wired in vitest.rls.config.ts. Skips silently when
@@ -10,7 +10,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { cleanupStaleScripthammerUsers } from './cleanup-stale-impl';
+import { cleanupStaleGranddazeUsers } from './cleanup-stale-impl';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -34,7 +34,7 @@ export async function setup() {
       console.warn(`[rls cleanup-stale] ${msg}`, meta ?? ''),
   };
 
-  const summary = await cleanupStaleScripthammerUsers(client, consoleLogger);
+  const summary = await cleanupStaleGranddazeUsers(client, consoleLogger);
 
   if (summary.usersRemoved > 0 || summary.errorsLogged > 0) {
     console.log(

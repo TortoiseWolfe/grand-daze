@@ -6,7 +6,7 @@
  * prioritizes NEXT_PUBLIC_DEPLOY_URL, so these emitted artifacts must too.
  *
  * This intentionally does not derive an origin from public/CNAME: that file
- * uses www.scripthammer.com while the canonical application origin is the
+ * uses www.grand-daze.com while the canonical application origin is the
  * apex. A generated URL at the wrong host is the same SEO failure in a new
  * place. The fallback keeps forks working when they have not set a custom
  * domain, and callers print its source so the fallback is visible in build
@@ -40,12 +40,12 @@ function resolveSiteUrl(env = process.env) {
   }
 
   const owner = (
-    env.NEXT_PUBLIC_PROJECT_OWNER || 'TortoiseWolfe'
+    env.NEXT_PUBLIC_PROJECT_OWNER || 'tortoisewolfe'
   ).toLowerCase();
   // DETECTED, not guessed (#962).
   //
   // This segment is a GitHub Pages project path, and those are CASE-SENSITIVE —
-  // verified live: tortoisewolfe.github.io/ScriptHammer/ is 200 and /scripthammer/
+  // verified live: tortoisewolfe.github.io/GrandDaze/ is 200 and /grand-daze/
   // is 404. So it must be the repository's actual name; neither the display name
   // nor a slugified approximation of it will do.
   //
@@ -59,7 +59,7 @@ function resolveSiteUrl(env = process.env) {
   // to be spelled out. Slugifying instead would have broken THIS repo, whose
   // Pages path really is capitalised; the E2E sitemap spec caught exactly that.
   const name =
-    env.NEXT_PUBLIC_PROJECT_NAME || detectedProjectName() || 'ScriptHammer';
+    env.NEXT_PUBLIC_PROJECT_NAME || detectedProjectName() || 'Grand Daze';
   const basePath = env.NEXT_PUBLIC_BASE_PATH;
 
   return {

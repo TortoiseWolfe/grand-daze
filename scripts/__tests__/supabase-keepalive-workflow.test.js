@@ -59,7 +59,7 @@ function pingScript() {
 /** Run the workflow body locally with curl forced to a successful HTTP 200. */
 function runKeepalive(refs, script = pingScript()) {
   const work = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'scripthammer-keepalive-')
+    path.join(os.tmpdir(), 'grand-daze-keepalive-')
   );
   const bin = path.join(work, 'bin');
   const summary = path.join(work, 'summary.md');

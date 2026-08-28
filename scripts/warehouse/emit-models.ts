@@ -13,7 +13,7 @@
 // decision recorded in .gitignore (chatt is published, 2026-07-10). The
 // runtime treats models.json as an optional asset — absent file ⇒ layer off.
 //
-// Run:  docker compose exec scripthammer pnpm exec tsx scripts/warehouse/emit-models.ts [--site chatt]
+// Run:  docker compose exec grand-daze pnpm exec tsx scripts/warehouse/emit-models.ts [--site chatt]
 
 import {
   readFileSync,

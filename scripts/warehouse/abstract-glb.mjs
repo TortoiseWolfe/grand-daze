@@ -23,7 +23,7 @@
  *      intermediate copy; the dir is gitignored/local-only)
  *      sites/_warehouse/report.json                  (before/after stats)
  *
- * Run:  docker compose exec scripthammer node scripts/warehouse/abstract-glb.mjs [--site chatt] [--only <slug>] [--force]
+ * Run:  docker compose exec grand-daze node scripts/warehouse/abstract-glb.mjs [--site chatt] [--only <slug>] [--force]
  */
 
 import { readdir, readFile, writeFile, stat, mkdir } from 'node:fs/promises';

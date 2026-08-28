@@ -1377,7 +1377,7 @@ function TwinCanvasInner({
     const l = locusRef.current;
     if (!l) return;
     // Derive the prefix from the live URL rather than build config — this has to be right
-    // on the project site (/ScriptHammer/...) and on the root domain alike.
+    // on the project site (/GrandDaze/...) and on the root domain alike.
     const basePath = window.location.pathname.replace(/\/[^/]*\/?$/, '');
     const text = markerBlock({ ...l, basePath, slug });
     const done = () => {

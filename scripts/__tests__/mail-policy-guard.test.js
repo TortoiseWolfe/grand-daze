@@ -35,7 +35,7 @@ const SMOKE = path.join(ROOT, '.github', 'workflows', 'smoke.yml');
 
 /** A zone in the state this repo intends. Each case below breaks exactly one thing. */
 const HEALTHY = {
-  dmarc: ['v=DMARC1; p=none; rua=mailto:admin@scripthammer.com'],
+  dmarc: ['v=DMARC1; p=none; rua=mailto:admin@grand-daze.com'],
   spf: ['v=spf1 include:_spf.mx.cloudflare.net ~all'],
   dkim: ['v=DKIM1; k=rsa; p=MIIBIjAN'],
   mx: ['10 route1.mx.cloudflare.net.'],
@@ -70,7 +70,7 @@ describe('the mail-policy guard (#822)', () => {
     const { evaluate } = await import(`file://${CHECKER}`);
     const f = evaluate({
       ...HEALTHY,
-      dmarc: ['v=DMARC1; p=reject; rua=mailto:admin@scripthammer.com'],
+      dmarc: ['v=DMARC1; p=reject; rua=mailto:admin@grand-daze.com'],
     });
     assert.equal(f.length, 1);
     assert.match(f[0], /intends p=none/);
@@ -118,7 +118,7 @@ describe('the mail-policy guard (#822)', () => {
     );
     assert.equal(
       INTENDED.dmarcRua,
-      'admin@scripthammer.com',
+      'admin@grand-daze.com',
       'aggregate reports must go to an address that receives — see #881'
     );
   });

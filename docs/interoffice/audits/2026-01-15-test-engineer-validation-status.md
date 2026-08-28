@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-ScriptHammer is a spec-first planning template with no application code. Test infrastructure consists of wireframe validation tools only. Application tests (vitest/React) will be created during implementation phase.
+Grand Daze is a spec-first planning template with no application code. Test infrastructure consists of wireframe validation tools only. Application tests (vitest/React) will be created during implementation phase.
 
 ## Validation Results
 

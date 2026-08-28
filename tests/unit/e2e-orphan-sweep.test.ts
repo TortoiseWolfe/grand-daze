@@ -54,9 +54,9 @@ const old = (id: string, email: string): U => ({
 });
 
 const env = {
-  TEST_USER_PRIMARY_EMAIL: 'scripthammer.e2e+test-primary@gmail.com',
-  TEST_USER_SECONDARY_EMAIL: 'scripthammer.e2e+test-secondary@gmail.com',
-  TEST_USER_TERTIARY_EMAIL: 'scripthammer.e2e+test-tertiary@gmail.com',
+  TEST_USER_PRIMARY_EMAIL: 'grand-daze.e2e+test-primary@gmail.com',
+  TEST_USER_SECONDARY_EMAIL: 'grand-daze.e2e+test-secondary@gmail.com',
+  TEST_USER_TERTIARY_EMAIL: 'grand-daze.e2e+test-tertiary@gmail.com',
 };
 
 const run = (users: U[][], opts = {}) =>
@@ -71,8 +71,8 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
   it('deletes orphaned isolates older than the age guard', async () => {
     const s = await run([
       [
-        old('u1', 'scripthammer.e2e+iso-pay-123@gmail.com'),
-        old('u2', 'scripthammer.e2e+scroll-fixture-456@gmail.com'),
+        old('u1', 'grand-daze.e2e+iso-pay-123@gmail.com'),
+        old('u2', 'grand-daze.e2e+scroll-fixture-456@gmail.com'),
       ],
     ]);
 
@@ -84,13 +84,13 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
   // SAFETY 1 — prefix scoping. Owner accounts and genuine sign-ups share the
   // table; a matcher that broadened to "any test-looking address" would delete
   // real users irreversibly.
-  it('never touches accounts outside the scripthammer.e2e+ prefix', async () => {
+  it('never touches accounts outside the grand-daze.e2e+ prefix', async () => {
     const s = await run([
       [
         old('owner', 'jonpohlner@gmail.com'),
         old('real', 'someone@justinjoneslaw.net'),
-        old('vitest', 'provider-contract-a@scripthammer.test'),
-        old('admin', 'admin@scripthammer.com'),
+        old('vitest', 'provider-contract-a@grand-daze.test'),
+        old('admin', 'admin@grand-daze.com'),
       ],
     ]);
 
@@ -103,10 +103,10 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
   it('never deletes the three named fixtures', async () => {
     const s = await run([
       [
-        old('p', 'scripthammer.e2e+test-primary@gmail.com'),
-        old('s', 'scripthammer.e2e+test-secondary@gmail.com'),
-        old('t', 'scripthammer.e2e+test-tertiary@gmail.com'),
-        old('orphan', 'scripthammer.e2e+iso-999@gmail.com'),
+        old('p', 'grand-daze.e2e+test-primary@gmail.com'),
+        old('s', 'grand-daze.e2e+test-secondary@gmail.com'),
+        old('t', 'grand-daze.e2e+test-tertiary@gmail.com'),
+        old('orphan', 'grand-daze.e2e+iso-999@gmail.com'),
       ],
     ]);
 
@@ -116,7 +116,7 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
 
   it('protects the named fixtures even when env vars are unset', async () => {
     const s = await sweepOrphanedE2EUsers(
-      makeMockClient([[old('p', 'scripthammer.e2e+test-primary@gmail.com')]]),
+      makeMockClient([[old('p', 'grand-daze.e2e+test-primary@gmail.com')]]),
       { env: {}, now: NOW }
     );
 
@@ -131,10 +131,10 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
       [
         {
           id: 'fresh',
-          email: 'scripthammer.e2e+iso-live@gmail.com',
+          email: 'grand-daze.e2e+iso-live@gmail.com',
           created_at: new Date(NOW - 5 * 60 * 1000).toISOString(),
         },
-        old('stale', 'scripthammer.e2e+iso-old@gmail.com'),
+        old('stale', 'grand-daze.e2e+iso-old@gmail.com'),
       ],
     ]);
 
@@ -148,10 +148,10 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
       [
         {
           id: 'bad',
-          email: 'scripthammer.e2e+iso-a@gmail.com',
+          email: 'grand-daze.e2e+iso-a@gmail.com',
           created_at: 'nonsense',
         },
-        { id: 'none', email: 'scripthammer.e2e+iso-b@gmail.com' },
+        { id: 'none', email: 'grand-daze.e2e+iso-b@gmail.com' },
       ],
     ]);
 
@@ -163,11 +163,11 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
   // behind AND under-report — the failure looking like success.
   it('paginates until a short page', async () => {
     const full = Array.from({ length: 200 }, (_, i) =>
-      old(`a${i}`, `scripthammer.e2e+iso-a${i}@gmail.com`)
+      old(`a${i}`, `grand-daze.e2e+iso-a${i}@gmail.com`)
     );
     const s = await run([
       full,
-      [old('last', 'scripthammer.e2e+iso-last@gmail.com')],
+      [old('last', 'grand-daze.e2e+iso-last@gmail.com')],
     ]);
 
     expect(s.candidates).toBe(201);
@@ -175,7 +175,7 @@ describe('sweepOrphanedE2EUsers (#354)', () => {
   });
 
   it('dryRun reports candidates without deleting', async () => {
-    const s = await run([[old('u1', 'scripthammer.e2e+iso-1@gmail.com')]], {
+    const s = await run([[old('u1', 'grand-daze.e2e+iso-1@gmail.com')]], {
       dryRun: true,
     });
 
@@ -228,8 +228,8 @@ describe('sweepOrphanedE2EUsers — concurrent sweeps (#360)', () => {
   }
 
   const orphans = [
-    old('u1', 'scripthammer.e2e+iso-a@gmail.com'),
-    old('u2', 'scripthammer.e2e+iso-b@gmail.com'),
+    old('u1', 'grand-daze.e2e+iso-a@gmail.com'),
+    old('u2', 'grand-daze.e2e+iso-b@gmail.com'),
   ];
 
   it('counts users a concurrent sweep already removed, without warning', async () => {

@@ -35,7 +35,7 @@
     <circle cx="60" cy="150" r="20" fill="#8b5cf6"/>
     <text x="60" y="156" text-anchor="middle" fill="#e8d4b8" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">A</text>
     <text x="90" y="140" fill="#374151" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Admin (System)</text>
-    <text x="90" y="160" fill="#4b5563" font-family="system-ui, sans-serif" font-size="14">Welcome to ScriptHammer!</text>
+    <text x="90" y="160" fill="#4b5563" font-family="system-ui, sans-serif" font-size="14">Welcome to Grand Daze!</text>
     <text x="350" y="140" fill="#374151" font-family="system-ui, sans-serif" font-size="14">Now</text>
     <!-- Encrypted indicator -->
     <rect x="300" y="155" width="80" height="22" rx="4" fill="#22c55e"/>
@@ -62,7 +62,7 @@
 
     <!-- Welcome Message Content -->
     <rect x="430" y="130" width="700" height="200" rx="8" fill="#f5f0e6"/>
-    <text x="450" y="160" fill="#374151" font-family="system-ui, sans-serif" font-size="16" font-weight="bold">Welcome to ScriptHammer!</text>
+    <text x="450" y="160" fill="#374151" font-family="system-ui, sans-serif" font-size="16" font-weight="bold">Welcome to Grand Daze!</text>
     <text x="450" y="190" fill="#374151" font-family="system-ui, sans-serif" font-size="14">Your messages are protected with end-to-end encryption.</text>
     <text x="450" y="215" fill="#374151" font-family="system-ui, sans-serif" font-size="14">This means only you and the recipient can read them.</text>
     <text x="450" y="250" fill="#374151" font-family="system-ui, sans-serif" font-size="14">Key features:</text>
@@ -252,5 +252,5 @@
   <text x="140" y="940" font-family="system-ui, sans-serif" font-size="14" fill="#374151">onboarding flow | welcome email | first-time user | admin setup</text>
 
   <!-- Signature -->
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">012:01 | Welcome Message Architecture | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">012:01 | Welcome Message Architecture | Grand Daze</text>
 </svg>

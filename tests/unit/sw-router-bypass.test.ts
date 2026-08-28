@@ -3,7 +3,7 @@
  *
  * ## The bug
  * Clicking "Blog" in the nav landed the user on
- * `https://scripthammer.com/blog/index.txt` — the raw RSC flight payload —
+ * `https://grand-daze.com/blog/index.txt` — the raw RSC flight payload —
  * instead of the blog.
  *
  * Under `output: 'export'` the App Router fetches a per-route `index.txt` flight
@@ -31,7 +31,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const SCOPE = 'https://scripthammer.com/';
+const SCOPE = 'https://grand-daze.com/';
 const SW_SOURCE = readFileSync(resolve(process.cwd(), 'public/sw.js'), 'utf-8');
 
 type FetchHandler = (event: {

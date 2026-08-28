@@ -71,7 +71,7 @@ MATCH_FAKE_LAG_MS=80 MATCH_FAKE_LOSS_PCT=2 docker compose --profile game up matc
 The Appendix B constants are executable spec — these tests exist before the rules code does (Constitution II):
 
 ```bash
-docker compose exec scripthammer pnpm vitest run shared/rules shared/protocol
+docker compose exec grand-daze pnpm vitest run shared/rules shared/protocol
 ```
 
 **Expected**:
@@ -88,9 +88,9 @@ Any tuning change MUST fail here first — edit `shared/tuning.ts` and the test 
 ## 3. Bake the north-shore map (with the `sites/north-shore.json` ticket)
 
 ```bash
-docker compose exec scripthammer pnpm bake --site north-shore
+docker compose exec grand-daze pnpm bake --site north-shore
 # New sites 404 on the dev route until the container restarts (known behavior):
-docker compose restart scripthammer
+docker compose restart grand-daze
 ```
 
 **Expected**:
@@ -160,8 +160,8 @@ curl -s http://localhost:9090/debug/stats | jq '.tickMsP99, .clients[].downBytes
 ## 7. E2E + accessibility (chrome surfaces only)
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test tests/e2e/combined-arms/
-docker compose exec scripthammer pnpm test:a11y
+docker compose exec grand-daze pnpm exec playwright test tests/e2e/combined-arms/
+docker compose exec grand-daze pnpm test:a11y
 ```
 
 **Expected**:
@@ -174,8 +174,8 @@ docker compose exec scripthammer pnpm test:a11y
 ## 8. Static-export verification
 
 ```bash
-docker compose exec scripthammer pnpm run build
-docker compose exec scripthammer ls out/game/combined-arms/
+docker compose exec grand-daze pnpm run build
+docker compose exec grand-daze ls out/game/combined-arms/
 ```
 
 **Expected**:

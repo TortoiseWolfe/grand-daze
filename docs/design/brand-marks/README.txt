@@ -1,17 +1,17 @@
-ScriptHammer logo — SVG exports
+Grand Daze logo — SVG exports
 ================================
 
-scripthammer-gear.svg            The gear, with the ring wordmark
-scripthammer-script-tags.svg     The < > brackets
-scripthammer-printing-mallet.svg The mallet
-scripthammer-lockup.svg          All three assembled
+grand-daze-gear.svg            The gear, with the ring wordmark
+grand-daze-script-tags.svg     The < > brackets
+grand-daze-printing-mallet.svg The mallet
+grand-daze-lockup.svg          All three assembled
 
 All files are 400 x 400 with a 0 0 400 400 viewBox.
 
 BEFORE PRODUCTION USE — outline the ring text
 ---------------------------------------------
-scripthammer-gear.svg and scripthammer-lockup.svg contain LIVE TEXT for
-"SCRIPTHAMMER.COM", set in Oswald 700 and pulled in with a remote @import.
+grand-daze-gear.svg and grand-daze-lockup.svg contain LIVE TEXT for
+"GRANDDAZE.COM", set in Oswald 700 and pulled in with a remote @import.
 
 That works in a browser. It does NOT work in Illustrator, Figma, Inkscape,
 or inside an <img> tag — those will substitute a default sans and then
@@ -23,7 +23,7 @@ Fix once, in any vector editor:
   3. Type > Create Outlines  (Illustrator) / Outline Stroke + Flatten (Figma)
      / Path > Object to Path (Inkscape)
   4. Delete the <style>@import ...</style> block
-  5. Save as scripthammer-gear-outlined.svg
+  5. Save as grand-daze-gear-outlined.svg
 
 The other two files have no text and are safe as-is.
 

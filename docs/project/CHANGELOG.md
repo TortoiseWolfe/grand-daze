@@ -120,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Links
 
-- [GitHub Repository](https://github.com/TortoiseWolfe/ScriptHammer)
-- [Live Demo](https://www.scripthammer.com/)
-- [Storybook](https://www.scripthammer.com/storybook/)
-- [Status Dashboard](https://www.scripthammer.com/status)
+- [GitHub Repository](https://github.com/tortoisewolfe/GrandDaze)
+- [Live Demo](https://www.grand-daze.com/)
+- [Storybook](https://www.grand-daze.com/storybook/)
+- [Status Dashboard](https://www.grand-daze.com/status)

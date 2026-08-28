@@ -36,13 +36,13 @@ import { DARK_THEMES as SOURCE_DARK_THEMES } from '@/utils/theme-utils';
 // never a silent skip.
 
 // DERIVED, NOT LISTED (#915). This was 34 names typed by hand against a canonical list of
-// 35 — `scripthammer-forge` was the one missing, so the embed's colours were never checked
+// 35 — `grand-daze-forge` was the one missing, so the embed's colours were never checked
 // on a house theme the app actually ships.
 const THEMES = ALL_THEMES;
 
 // IMPORTED, NOT MIRRORED (#915). This was a hand-copied duplicate of
 // src/utils/theme-utils.ts DARK_THEMES. It had not drifted yet — 13 against 13 — but the
-// list it copied was itself missing `scripthammer-forge`, so both were wrong together and
+// list it copied was itself missing `grand-daze-forge`, so both were wrong together and
 // the mirror could never have revealed it.
 const DARK_THEMES = new Set<string>(SOURCE_DARK_THEMES);
 

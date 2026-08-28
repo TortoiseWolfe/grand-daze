@@ -295,7 +295,7 @@ function findBareComponentFiles(basePath, ignorePatterns, componentDirs = []) {
       if (base === 'index' || base.includes('.')) return false;
 
       // An internal of an already-counted component is NOT a second component.
-      // SpinningLogo/ScriptHammerLogo.tsx and MapContainer/MapContainerInner.tsx
+      // SpinningLogo/GrandDazeLogo.tsx and MapContainer/MapContainerInner.tsx
       // are private parts of SpinningLogo and MapContainer, both compliant; the
       // five-file pattern has never required a suite per internal file. Without
       // this guard the discovery reports helpers as missing components, which is

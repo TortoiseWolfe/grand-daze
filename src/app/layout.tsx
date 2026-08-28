@@ -68,7 +68,7 @@ export const metadata: Metadata = {
   // Metadata set on the root layout is inherited by every route that does not
   // override it, and `alternates.canonical` is no exception. Passing `path: '/'`
   // here was correct for the root document and catastrophic for everything under
-  // it: 83 of 100 routes shipped `<link rel="canonical" href="https://scripthammer.com/">`,
+  // it: 83 of 100 routes shipped `<link rel="canonical" href="https://grand-daze.com/">`,
   // which asks Google to index the homepage *instead of* that page. `/pricing`,
   // `/docs`, `/blog` and 80 others were each requesting their own removal.
   //

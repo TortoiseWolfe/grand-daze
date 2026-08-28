@@ -11,10 +11,10 @@
 
 // Default configuration
 const defaultConfig = {
-  projectName: 'ScriptHammer',
-  projectOwner: 'TortoiseWolfe',
+  projectName: 'Grand Daze',
+  projectOwner: 'tortoisewolfe',
   projectDescription:
-    'A production Next.js and Supabase platform with auth, payments, encrypted messaging, and an accessible offline-capable PWA',
+    'Grand Daze',
   basePath: '',
 };
 

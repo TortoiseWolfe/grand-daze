@@ -210,7 +210,7 @@ describe('Admin RPC Shape Contract — admin caller', () => {
   beforeAll(async () => {
     admin = createClient(supabaseUrl, supabaseKey);
     const { error } = await admin.auth.signInWithPassword({
-      email: process.env.SEED_ADMIN_EMAIL || 'admin@scripthammer.com',
+      email: process.env.SEED_ADMIN_EMAIL || 'admin@grand-daze.com',
       password: process.env.SEED_ADMIN_PASSWORD || 'AdminPassword123!',
     });
     if (error) {

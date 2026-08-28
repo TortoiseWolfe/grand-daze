@@ -49,7 +49,7 @@ Wireframe gate per Constitution v1.0.2 Principle III is now PASSED. These wirefr
 ### Notes
 
 - This spec covers the full PRD scope; phasing (PRD §7) governs delivery order. Phase 0's kill criterion (perceived latency) gates all subsequent work.
-- Multiplayer game servers are the first ScriptHammer feature that cannot run on GitHub Pages static hosting; the static export serves only the client shell. Server hosting is a plan-level concern, not a spec violation — the client remains a static, browser-playable artifact.
+- Multiplayer game servers are the first Grand Daze feature that cannot run on GitHub Pages static hosting; the static export serves only the client shell. Server hosting is a plan-level concern, not a spec violation — the client remains a static, browser-playable artifact.
 
 <!-- AUDIT-IMPL-STATUS-END -->
 

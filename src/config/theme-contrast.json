@@ -1,6 +1,6 @@
 [
   {
-    "theme": "scripthammer-dark",
+    "theme": "grand-daze-dark",
     "level": "AAA",
     "textRatio": 11.81,
     "textPair": "base-content on base-300",
@@ -10,7 +10,7 @@
     "skipped": []
   },
   {
-    "theme": "scripthammer-light",
+    "theme": "grand-daze-light",
     "level": "AAA",
     "textRatio": 10.1,
     "textPair": "base-content on base-300",
@@ -20,7 +20,7 @@
     "skipped": []
   },
   {
-    "theme": "scripthammer-forge",
+    "theme": "grand-daze-forge",
     "level": "AAA",
     "textRatio": 13.37,
     "textPair": "base-content on base-300",

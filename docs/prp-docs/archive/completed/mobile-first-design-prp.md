@@ -291,7 +291,7 @@ The following are NOT part of this PRP:
 
 ---
 
-**Author**: TortoiseWolfe (Human) + Claude Code (Assistant)
+**Author**: tortoisewolfe (Human) + Claude Code (Assistant)
 **Priority**: P0 - Critical UX issue affecting all mobile users
 **Estimated Effort**: 1-2 days
 **Value**: Vastly improved mobile user experience

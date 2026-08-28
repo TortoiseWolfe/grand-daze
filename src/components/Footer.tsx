@@ -1,7 +1,7 @@
 import React from 'react';
 import { FOOTER_LINKS } from '@/config/footer-links';
 
-const [CRUDGAMES, GEOLARP_SITE, SCRIPTHAMMER] = FOOTER_LINKS;
+const [CRUDGAMES, GEOLARP_SITE, GRANDDAZE] = FOOTER_LINKS;
 
 export function Footer() {
   return (
@@ -36,12 +36,12 @@ export function Footer() {
         <p className="text-base-content mt-1 text-xs">
           Built with{' '}
           <a
-            href={SCRIPTHAMMER.href}
+            href={GRANDDAZE.href}
             target="_blank"
             rel="noopener noreferrer"
             className="link-hover link"
           >
-            {SCRIPTHAMMER.label}
+            {GRANDDAZE.label}
           </a>{' '}
           template
         </p>

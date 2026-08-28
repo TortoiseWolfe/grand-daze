@@ -27,7 +27,7 @@
  * WHY THE FILES LIVE IN `src/fonts/` AND NOT `public/`. A `url()` in CSS under `src/` is
  * resolved and fingerprinted by the bundler into `_next/static/media`, which makes it
  * basePath-correct automatically. A literal `/fonts/x.woff2` under `public/` would be right
- * for the root build and 404 under the `/ScriptHammer` basePath — the #392 trap.
+ * for the root build and 404 under the `/GrandDaze` basePath — the #392 trap.
  *
  * USAGE — needs a completed build to read from, and network only insofar as that build did:
  *   docker compose run --rm -e NEXT_PUBLIC_BASE_PATH= -e DISABLE_BASE_PATH=true builder pnpm build

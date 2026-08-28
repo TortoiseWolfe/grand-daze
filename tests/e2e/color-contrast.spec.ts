@@ -68,7 +68,7 @@ interface AxeResults {
 
 // THEMES ARE DERIVED, NOT LISTED — for the same reason the routes below are (#915).
 //
-// This said "Both custom themes covered" and named two. There are three: `scripthammer-forge`
+// This said "Both custom themes covered" and named two. There are three: `grand-daze-forge`
 // shipped later and was never added, so the AAA gate has never measured one of the house
 // themes. The word "Both" WAS the completeness claim, exactly as the four-route list this
 // file already replaced was — and it went stale the same way, in the same file.

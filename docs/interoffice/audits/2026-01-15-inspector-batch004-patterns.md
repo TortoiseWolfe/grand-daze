@@ -54,12 +54,12 @@ Every batch004 wireframe missing `rx="8"` on:
 
 | Wireframe                                                 | Actual                            | Expected                                             |
 | --------------------------------------------------------- | --------------------------------- | ---------------------------------------------------- |
-| 010-unified-blog-content/01-editor-and-preview            | "ScriptHammer Wireframe v5 - ..." | "010:01 \| Unified Blog Content \| ScriptHammer"     |
-| 010-unified-blog-content/02-conflict-resolution           | "ScriptHammer Wireframe v5 - ..." | "010:02 \| Unified Blog Content \| ScriptHammer"     |
-| 016-messaging-critical-fixes/01-message-input-visibility  | "ScriptHammer v0.1 - ..."         | "016:01 \| Messaging Critical Fixes \| ScriptHammer" |
-| 016-messaging-critical-fixes/03-conversation-error-states | "ScriptHammer v0.1 - ..."         | "016:03 \| Messaging Critical Fixes \| ScriptHammer" |
+| 010-unified-blog-content/01-editor-and-preview            | "Grand Daze Wireframe v5 - ..." | "010:01 \| Unified Blog Content \| Grand Daze"     |
+| 010-unified-blog-content/02-conflict-resolution           | "Grand Daze Wireframe v5 - ..." | "010:02 \| Unified Blog Content \| Grand Daze"     |
+| 016-messaging-critical-fixes/01-message-input-visibility  | "Grand Daze v0.1 - ..."         | "016:01 \| Messaging Critical Fixes \| Grand Daze" |
+| 016-messaging-critical-fixes/03-conversation-error-states | "Grand Daze v0.1 - ..."         | "016:03 \| Messaging Critical Fixes \| Grand Daze" |
 
-**Expected Format:** `NNN:NN | Feature Name | ScriptHammer`
+**Expected Format:** `NNN:NN | Feature Name | Grand Daze`
 
 ### 4. Mobile Active State Missing Icon (G-045) - 5 wireframes
 
@@ -137,7 +137,7 @@ The Operator's QC review identified additional issues NOT detected by automated 
 ### Priority 3: Signature Format (4)
 
 ```bash
-# Regenerate with correct format: NNN:NN | Feature | ScriptHammer
+# Regenerate with correct format: NNN:NN | Feature | Grand Daze
 # Classification: PATCH or REGEN
 ```
 

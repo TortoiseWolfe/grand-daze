@@ -2,7 +2,7 @@
 # Test harness for scripts/rebrand.sh
 #
 # SAFETY: All tests run in isolated temporary directories.
-#         The actual ScriptHammer repo is NEVER modified.
+#         The actual Grand Daze repo is NEVER modified.
 #
 # Usage: ./tests/rebrand/test-rebrand.sh [test_name]
 # Run all tests: ./tests/rebrand/test-rebrand.sh
@@ -70,39 +70,39 @@ run_test() {
     echo -e "\n${YELLOW}Running${NC}: $test_name"
 }
 
-# Create temporary test directory with mock ScriptHammer structure
+# Create temporary test directory with mock Grand Daze structure
 setup_temp_dir() {
     TEMP_DIR=$(mktemp -d)
     trap "rm -rf $TEMP_DIR" EXIT
 
-    # Create mock ScriptHammer repo structure in temp dir
+    # Create mock Grand Daze repo structure in temp dir
     cd "$TEMP_DIR"
     git init -q
-    git remote add origin "https://github.com/TortoiseWolfe/ScriptHammer.git"
+    git remote add origin "https://github.com/tortoisewolfe/GrandDaze.git"
 
-    # Create essential files with ScriptHammer references
+    # Create essential files with Grand Daze references
     mkdir -p src/components
     # A repository field, because #972 was filed from a fixture that had one and the
     # template's own package.json does not. Adding a repository is an ordinary thing
     # for a fork to do, and the targeted helper that was meant to fix it was dead.
     cat > package.json <<'PKG'
 {
-  "name": "scripthammer",
-  "description": "ScriptHammer template",
+  "name": "grand-daze",
+  "description": "Grand Daze template",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TortoiseWolfe/ScriptHammer.git"
+    "url": "git+https://github.com/tortoisewolfe/GrandDaze.git"
   }
 }
 PKG
-    echo "# ScriptHammer" > README.md
+    echo "# Grand Daze" > README.md
     # public/CNAME, not ./CNAME — rebrand.sh reads "$REPO_ROOT/public/CNAME". The root-level
     # copy that used to be here meant the CNAME branch never executed in any test.
-    echo "scripthammer.com" > CNAME
+    echo "grand-daze.com" > CNAME
     mkdir -p public
-    echo "scripthammer.com" > public/CNAME
-    echo "export const projectName = 'ScriptHammer';" > src/components/Logo.tsx
-    printf 'lockfileBrand: ScriptHammer\n' > pnpm-lock.yaml
+    echo "grand-daze.com" > public/CNAME
+    echo "export const projectName = 'Grand Daze';" > src/components/Logo.tsx
+    printf 'lockfileBrand: Grand Daze\n' > pnpm-lock.yaml
 
     # A BLOG THE FORK MUST NOT REPUBLISH (#936).
     #
@@ -113,10 +113,10 @@ PKG
     # the generator's ALL-CAPS exclusion is the only thing that saves it.
     mkdir -p public/blog src/lib/blog
     mkdir -p public/blog-images/hello-world public/blog-images/template-post-one \
-        public/blog-images/scripthammer-intro
+        public/blog-images/grand-daze-intro
     : > public/blog-images/hello-world/featured.svg
     : > public/blog-images/template-post-one/featured.svg
-    : > public/blog-images/scripthammer-intro/featured.svg
+    : > public/blog-images/grand-daze-intro/featured.svg
 
     cat > public/blog/hello-world.md <<'HELLO'
 ---
@@ -128,7 +128,7 @@ categories:
   - example
 ---
 
-An example post shipped by ScriptHammer.
+An example post shipped by Grand Daze.
 HELLO
 
     cat > public/blog/template-post-one.md <<'POST1'
@@ -141,24 +141,24 @@ categories:
   - engineering
 ---
 
-ScriptHammer wrote this, not the fork.
+Grand Daze wrote this, not the fork.
 POST1
 
-    cat > public/blog/scripthammer-intro.md <<'POST2'
+    cat > public/blog/grand-daze-intro.md <<'POST2'
 ---
-title: ScriptHammer - Opinionated Next.js PWA Template
-slug: scripthammer-intro
+title: Grand Daze - Opinionated Next.js PWA Template
+slug: grand-daze-intro
 tags:
   - intro
 categories:
   - features
 ---
 
-Introducing ScriptHammer.
+Introducing Grand Daze.
 POST2
 
     cat > public/blog/CLAUDE.md <<'GUIDE'
-# Blog authoring guidance for ScriptHammer
+# Blog authoring guidance for Grand Daze
 
 Not a post. The generator excludes ALL-CAPS filenames.
 GUIDE
@@ -177,8 +177,8 @@ GUIDE
       "frontMatter": { "tags": ["template"], "categories": ["engineering"] }
     },
     {
-      "slug": "scripthammer-intro",
-      "title": "ScriptHammer - Opinionated Next.js PWA Template",
+      "slug": "grand-daze-intro",
+      "title": "Grand Daze - Opinionated Next.js PWA Template",
       "frontMatter": { "tags": ["intro"], "categories": ["features"] }
     }
   ],
@@ -200,8 +200,8 @@ INDEX
     mkdir -p src/config
     cat > src/config/project.config.ts <<'PROJCONF'
 const defaultConfig = {
-  projectName: 'ScriptHammer',
-  projectOwner: 'TortoiseWolfe',
+  projectName: 'Grand Daze',
+  projectOwner: 'tortoisewolfe',
   projectDescription:
     'A production Next.js and Supabase platform with auth, payments, encrypted messaging, and an accessible offline-capable PWA',
   basePath: '',
@@ -243,16 +243,16 @@ CITEDOC
     # starts lowercase or contains a space rebranded this into `<geoLARPLogo />` or
     # `<My Cool AppLogo />` — an intrinsic tag and a syntax error respectively — and the
     # suite stayed green.
-    cat > src/components/ScriptHammerLogo.tsx <<'LOGO'
-export interface ScriptHammerLogoProps {
+    cat > src/components/GrandDazeLogo.tsx <<'LOGO'
+export interface GrandDazeLogoProps {
   size?: number;
 }
 
-export function ScriptHammerLogo({ size = 32 }: ScriptHammerLogoProps) {
-  return <svg width={size} height={size} aria-label="ScriptHammer" />;
+export function GrandDazeLogo({ size = 32 }: GrandDazeLogoProps) {
+  return <svg width={size} height={size} aria-label="Grand Daze" />;
 }
 
-export const SimpleScriptHammer = () => <ScriptHammerLogo size={16} />;
+export const SimpleGrandDaze = () => <GrandDazeLogo size={16} />;
 LOGO
     mkdir -p src/config
     cat > src/config/footer-links.ts <<'FOOTER'
@@ -275,8 +275,8 @@ FOOTER
     echo "node_modules/" > .gitignore
     echo ".pay-verify/" >> .gitignore
     mkdir -p .pay-verify node_modules/some-dep
-    echo "ScriptHammer must survive here" > .pay-verify/artifact.json
-    echo "ScriptHammer must survive here too" > node_modules/some-dep/index.js
+    echo "Grand Daze must survive here" > .pay-verify/artifact.json
+    echo "Grand Daze must survive here too" > node_modules/some-dep/index.js
 
     # AN EXTENSIONLESS TRACKED FILE (#910, unblocked by #922).
     #
@@ -285,49 +285,49 @@ FOOTER
     # dragged in caches and a vendored virtualenv. Asking git instead makes these
     # reachable for free, which is the gain that motivates the change.
     mkdir -p .husky
-    printf '#!/bin/sh\n# ScriptHammer pre-commit hook\n' > .husky/pre-commit
+    printf '#!/bin/sh\n# Grand Daze pre-commit hook\n' > .husky/pre-commit
     chmod +x .husky/pre-commit
 
     # EVERY REAL CASE STYLE PLUS A FUTURE MIXED STYLE (#933). These are code-shaped,
     # not just prose: a replacement can remove the old word and still make an invalid
     # identifier for a project name with spaces.
     cat > src/config/case-variants.ts <<'VARIANTS'
-export const canonical = 'ScriptHammer';
-export const lower = 'scripthammer';
-export const title = 'Scripthammer';
-export const upper = 'SCRIPTHAMMER';
-export const futureMixed = 'ScriptHAMMER';
-export const scripthammerCaches = true;
-export const __scripthammer_syncQueue = true;
-export const SCRIPTHAMMER_TEST_DOMAIN = '@scripthammer.test';
-export function cleanupStaleScripthammerUsers() {}
+export const canonical = 'Grand Daze';
+export const lower = 'grand-daze';
+export const title = 'Grand daze';
+export const upper = 'GRANDDAZE';
+export const futureMixed = 'Grand Daze';
+export const granddazeCaches = true;
+export const __granddaze_syncQueue = true;
+export const GRANDDAZE_TEST_DOMAIN = '@grand-daze.test';
+export function cleanupStaleGranddazeUsers() {}
 export const keep = 'SCRIPTHAMMER + ScriptHAMMER'; // rebrand:keep
 VARIANTS
     cat > src/config/owner-map.ts <<'OWNER_MAP'
 export const authors = {
-  ['TortoiseWolfe']: true,
+  ['tortoisewolfe']: true,
 };
 OWNER_MAP
 
     # The reported live failure: the slug/file moved but every reader-facing field
     # kept the title-case spelling. The image directory is equally load-bearing —
     # rewriting this URL without moving the directory produces a broken intro post.
-    mkdir -p public/blog public/blog-images/scripthammer-intro
-    cat > public/blog/scripthammer-intro.md <<'INTRO'
+    mkdir -p public/blog public/blog-images/grand-daze-intro
+    cat > public/blog/grand-daze-intro.md <<'INTRO'
 ---
-title: Scripthammer - Opinionated Template
-ogTitle: SCRIPTHAMMER
-featuredImageAlt: ScriptHAMMER introduction
+title: Grand daze - Opinionated Template
+ogTitle: GRANDDAZE
+featuredImageAlt: Grand Daze introduction
 ---
-# Scripthammer: Introduction
-![Dashboard](/blog-images/scripthammer-intro/plain.png)
+# Grand daze: Introduction
+![Dashboard](/blog-images/grand-daze-intro/plain.png)
 INTRO
-    printf 'binary-before\0Scripthammer\0binary-after' > public/blog-images/scripthammer-intro/plain.png
+    printf 'binary-before\0Grand daze\0binary-after' > public/blog-images/grand-daze-intro/plain.png
 
     # Non-lower path styles prove the path pass is case-insensitive too.
     mkdir -p docs
-    printf '# Scripthammer badge\n' > src/components/ScripthammerBadge.tsx
-    printf '# SCRIPTHAMMER notes\n' > docs/SCRIPTHAMMER-NOTES.md
+    printf '# Grand daze badge\n' > src/components/GranddazeBadge.tsx
+    printf '# GRANDDAZE notes\n' > docs/GRANDDAZE-NOTES.md
 
     # Copy both halves of the rebrand implementation. The shell script owns the
     # workflow; the Node helper owns portable, callback-based casing and atomic
@@ -557,16 +557,16 @@ test_attribution_preserved() {
 
     local footer="$TEMP_DIR/src/config/footer-links.ts"
 
-    if grep -q "TortoiseWolfe/ScriptHammer" "$footer"; then
+    if grep -q "tortoisewolfe/GrandDaze" "$footer"; then
         log_pass "Attribution URL survives a rebrand"
     else
-        log_fail "Attribution URL" "TortoiseWolfe/ScriptHammer intact" "$(cat "$footer")"
+        log_fail "Attribution URL" "tortoisewolfe/GrandDaze intact" "$(cat "$footer")"
     fi
 
-    if grep -q "label: 'ScriptHammer'" "$footer"; then
+    if grep -q "label: 'Grand Daze'" "$footer"; then
         log_pass "Attribution label survives a rebrand"
     else
-        log_fail "Attribution label" "label: 'ScriptHammer' intact" "$(cat "$footer")"
+        log_fail "Attribution label" "label: 'Grand Daze' intact" "$(cat "$footer")"
     fi
 
     # The guard must be surgical: everything NOT marked still rebrands.
@@ -742,7 +742,7 @@ test_brand_icons() {
 # #734: the same shape as the icons above, one layer down. `auth-config.json` is
 # the DESIRED STATE `auth-config-drift.yml` compares a live Supabase project
 # against, daily. A fork that never sets its own values gets its project measured
-# against ScriptHammer's identity, and the gate fails on values that were never
+# against Grand Daze's identity, and the gate fails on values that were never
 # theirs — whereupon the rational response is to stop believing the gate.
 #
 # The script cannot know a fork's OAuth client ids or SMTP sender; they are
@@ -788,17 +788,17 @@ test_auth_config_desired_state() {
 test_rerebrand_detection() {
     run_test "test_rerebrand_detection"
 
-    # Create a DIFFERENT temp dir for this test (without ScriptHammer refs)
+    # Create a DIFFERENT temp dir for this test (without Grand Daze refs)
     local REREBRAND_TEMP
     REREBRAND_TEMP=$(mktemp -d)
     trap "rm -rf $REREBRAND_TEMP" RETURN
 
-    # Create a repo WITHOUT "ScriptHammer" references (simulating already rebranded)
+    # Create a repo WITHOUT "Grand Daze" references (simulating already rebranded)
     cd "$REREBRAND_TEMP"
     git init -q
     git remote add origin "https://github.com/testuser/other-project.git"
 
-    # Create files WITHOUT ScriptHammer (already rebranded scenario)
+    # Create files WITHOUT Grand Daze (already rebranded scenario)
     mkdir -p scripts src/components
     echo '{"name": "otherproject", "description": "Other project"}' > package.json
     echo "# OtherProject" > README.md
@@ -825,7 +825,7 @@ test_rerebrand_detection() {
 
     # One alternate-case survivor is enough to prove this is not an already-
     # rebranded tree. This pins removal of the former '< 5' heuristic.
-    printf "export const oldBrand = 'Scripthammer';\n" > src/components/legacy.ts
+    printf "export const oldBrand = 'Grand daze';\n" > src/components/legacy.ts
     git add src/components/legacy.ts >/dev/null 2>&1
     set +e
     output=$("$REREBRAND_TEMP/scripts/rebrand.sh" "MyApp" "testuser" "Test desc" --dry-run --no-icon 2>&1)
@@ -871,16 +871,16 @@ test_discovery_is_git_tracked() {
     # tracks, and its hand-maintained exclusion list was already leaking --
     # `.pay-verify/` was reached and rewritten in the real repo. A vendored
     # virtualenv was the worst case: a blind sed through it is corruption.
-    if grep -q "ScriptHammer" .pay-verify/artifact.json 2>/dev/null; then
+    if grep -q "Grand Daze" .pay-verify/artifact.json 2>/dev/null; then
         log_pass "Gitignored file untouched (.pay-verify)"
     else
-        log_fail "Gitignored file was rewritten" "ScriptHammer intact in .pay-verify/artifact.json" "$(cat .pay-verify/artifact.json 2>/dev/null)"
+        log_fail "Gitignored file was rewritten" "Grand Daze intact in .pay-verify/artifact.json" "$(cat .pay-verify/artifact.json 2>/dev/null)"
     fi
 
-    if grep -q "ScriptHammer" node_modules/some-dep/index.js 2>/dev/null; then
+    if grep -q "Grand Daze" node_modules/some-dep/index.js 2>/dev/null; then
         log_pass "Gitignored file untouched (node_modules)"
     else
-        log_fail "node_modules was rewritten" "ScriptHammer intact in node_modules/some-dep/index.js" "$(cat node_modules/some-dep/index.js 2>/dev/null)"
+        log_fail "node_modules was rewritten" "Grand Daze intact in node_modules/some-dep/index.js" "$(cat node_modules/some-dep/index.js 2>/dev/null)"
     fi
 
     # 2. AN EXTENSIONLESS TRACKED FILE MUST BE REWRITTEN. The gain that motivates
@@ -895,10 +895,10 @@ test_discovery_is_git_tracked() {
 
     # Generated lockfiles are tracked but deliberately not content-rewritten;
     # changing one without regenerating it can invalidate integrity metadata.
-    if grep -q "ScriptHammer" pnpm-lock.yaml 2>/dev/null; then
+    if grep -q "Grand Daze" pnpm-lock.yaml 2>/dev/null; then
         log_pass "Tracked lockfile content is left byte-stable"
     else
-        log_fail "Lockfile exclusion" "ScriptHammer intact in pnpm-lock.yaml" \
+        log_fail "Lockfile exclusion" "Grand Daze intact in pnpm-lock.yaml" \
             "$(cat pnpm-lock.yaml 2>/dev/null)"
     fi
 
@@ -927,7 +927,7 @@ test_case_preserving_rebrand() {
     set_case_test_identity
 
     local binary_before output status residuals old_paths key_before key_after keep_before
-    binary_before=$(git hash-object public/blog-images/scripthammer-intro/plain.png)
+    binary_before=$(git hash-object public/blog-images/grand-daze-intro/plain.png)
     keep_before=$(tail -1 src/config/case-variants.ts)
 
     # --keep-blog because this test's SUBJECT is the blog intro post: it is where the
@@ -1094,7 +1094,7 @@ test_case_preserving_rebrand() {
 # produces identical output either way: delete the branch and that suite stays
 # green.
 #
-# It only diverges for a multi-token name. `__scripthammer_syncQueue` becomes
+# It only diverges for a multi-token name. `__granddaze_syncQueue` becomes
 # `__widgetworks_syncQueue` if the branch fires and `__widget-works_syncQueue` if
 # it does not — and the latter is not an identifier at all. Prettier then reads
 # the hyphen as subtraction and rewrites it into a different valid expression, so
@@ -1220,7 +1220,7 @@ _summary_count_for() {
     setup_temp_dir
     if [ "$1" = "dual" ]; then
         mkdir -p "$TEMP_DIR/docs"
-        printf 'See https://github.com/TortoiseWolfe/ScriptHammer for ScriptHammer docs.\n' \
+        printf 'See https://github.com/tortoisewolfe/GrandDaze for Grand Daze docs.\n' \
             > "$TEMP_DIR/docs/DUAL.md"
         (cd "$TEMP_DIR" && git add -A >/dev/null 2>&1 && \
             git -c user.email=t@t.t -c user.name=t commit -qm dual >/dev/null 2>&1) || true
@@ -1232,7 +1232,7 @@ _summary_count_for() {
 ##
 # A URL pointing at the template is a CITATION, not branding (#926).
 #
-# The substitution has no notion that `github.com/OWNER/ScriptHammer/...` points
+# The substitution has no notion that `github.com/OWNER/GrandDaze/...` points
 # BACK at the template rather than being an instance of the fork's own name, so
 # every fork silently converts inherited documentation links into links to its own
 # empty tracker. Measured on a real fork: 42 issue and PR URLs retargeted, every

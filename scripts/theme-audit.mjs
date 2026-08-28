@@ -4,13 +4,13 @@
  *
  * Usage:
  *   # 1. Build storybook (if not already built)
- *   docker compose exec scripthammer npx storybook build -o /tmp/storybook-static
+ *   docker compose exec grand-daze npx storybook build -o /tmp/storybook-static
  *
  *   # 2. Start static server in background
- *   docker compose exec -d scripthammer npx http-server /tmp/storybook-static -p 9009 -s
+ *   docker compose exec -d grand-daze npx http-server /tmp/storybook-static -p 9009 -s
  *
  *   # 3. Run the audit
- *   docker compose exec scripthammer node scripts/theme-audit.mjs
+ *   docker compose exec grand-daze node scripts/theme-audit.mjs
  */
 import { chromium } from '@playwright/test';
 import { readFileSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
@@ -19,7 +19,7 @@ import { get } from 'http';
 
 const STORYBOOK_DIR = '/tmp/storybook-static';
 const OUTPUT_DIR = '/tmp/theme-audit';
-const THEMES = ['scripthammer-dark', 'scripthammer-light'];
+const THEMES = ['grand-daze-dark', 'grand-daze-light'];
 const PORT = 9009;
 const BASE_URL = `http://localhost:${PORT}`;
 
@@ -45,7 +45,7 @@ async function main() {
   if (!serverReady) {
     console.error(`Server not running on port ${PORT}. Start it first:`);
     console.error(
-      `  docker compose exec -d scripthammer npx http-server /tmp/storybook-static -p ${PORT} -s`
+      `  docker compose exec -d grand-daze npx http-server /tmp/storybook-static -p ${PORT} -s`
     );
     process.exit(1);
   }

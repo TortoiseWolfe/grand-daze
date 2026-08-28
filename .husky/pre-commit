@@ -22,7 +22,7 @@
 #
 # `scripts/rebrand.sh` renames it — update_docker_compose() rewrites the service key — so a
 # fork's app service is called whatever the fork is called. A hook that greps for the
-# literal `scripthammer` matches nothing there, falls through to the warn-only branch, and
+# literal `grand-daze` matches nothing there, falls through to the warn-only branch, and
 # every fork then commits with no lint-staged and no formatting. Silently, forever: the
 # warn scrolls past in a successful commit.
 #
@@ -39,7 +39,7 @@ compose_service() {
 }
 
 COMPOSE_SERVICE=$(compose_service)
-[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=scripthammer
+[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=grand-daze
 
 in_worktree() {
   [ "$(git rev-parse --git-dir 2>/dev/null)" != "$(git rev-parse --git-common-dir 2>/dev/null)" ]

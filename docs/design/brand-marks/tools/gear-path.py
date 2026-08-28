@@ -1,4 +1,4 @@
-"""Emit the ScriptHammer gear outline as a single evenodd <path> d attribute.
+"""Emit the Grand Daze gear outline as a single evenodd <path> d attribute.
 
 The gear in the Claude Design export is hand-authored, which is fine until you
 need to change tooth depth — there is no knob, only 196 numbers. This rebuilds
@@ -91,7 +91,7 @@ def main():
     import sys
     from pathlib import Path
 
-    src = Path(__file__).resolve().parents[1] / "scripthammer-gear.svg"
+    src = Path(__file__).resolve().parents[1] / "grand-daze-gear.svg"
     committed = re.search(r'id="gear-body"[^>]*d="([^"]+)"', src.read_text(encoding="utf-8")).group(1)
 
     regenerated = gear_path(**ORIGINAL, legacy_artifact=True)

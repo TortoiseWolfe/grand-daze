@@ -1,4 +1,4 @@
-# ScriptHammer Constitution
+# Grand Daze Constitution
 
 ## Core Principles
 

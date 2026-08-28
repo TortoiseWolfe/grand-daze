@@ -114,7 +114,7 @@ export function readThemes(root = process.cwd()) {
     }
 
     // DaisyUI ships `[data-theme=light]{...}`; globals.css declares the house themes
-    // through `@plugin "daisyui/theme" { name: 'scripthammer-light'; --color-…: … }`.
+    // through `@plugin "daisyui/theme" { name: 'grand-daze-light'; --color-…: … }`.
     // Quotes are OPTIONAL: `[data-theme=x]` and `[data-theme='x']` are the same
     // selector, and PRETTIER REWRITES the bare form into the quoted one. A parser that
     // accepted only the bare form silently ignored a real override in globals.css — the
@@ -137,7 +137,7 @@ export function readThemes(root = process.cwd()) {
 /**
  * BOTH NOTATIONS, because this repo uses both.
  *
- * DaisyUI ships `oklch()`. `scripthammer-forge` is authored in HEX, straight from the
+ * DaisyUI ships `oklch()`. `grand-daze-forge` is authored in HEX, straight from the
  * design's drawn values. An oklch-only parser skipped it silently and reported it as
  * "unknown" — a theme a visitor can select, with no verdict, and nothing saying so.
  * That is the exact shape of failure #422 is about, produced by the tool meant to

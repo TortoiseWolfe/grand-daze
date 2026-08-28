@@ -117,7 +117,7 @@ jobs:
 
       - name: Bring up the dual-provider stack (local Supabase + .NET)
         run: |
-          # Only the services test:rls actually needs — NOT scripthammer (the
+          # Only the services test:rls actually needs — NOT grand-daze (the
           # test runs on the runner, not in the app container) and not the
           # studio/mail/storage/realtime/meta extras.
           docker compose --profile supabase --profile dotnet up -d --build \

@@ -2,7 +2,7 @@
  * E2E Test: basePath-aware signup redirect (issue #157 / #154)
  *
  * This spec runs ONLY under the `basepath` Playwright project, which serves a
- * dedicated `NEXT_PUBLIC_BASE_PATH=/ScriptHammer` build under a `/ScriptHammer`
+ * dedicated `NEXT_PUBLIC_BASE_PATH=/GrandDaze` build under a `/GrandDaze`
  * prefix (see .github/workflows/e2e.yml + scripts/serve-basepath.sh). The rest
  * of the suite builds+serves at the ROOT, so this whole class of bug — auth
  * redirect URLs that must carry the GitHub Pages project-site basePath — is
@@ -12,7 +12,7 @@
  * (src/contexts/AuthContext.tsx). The Supabase JS client turns that into a
  * `redirect_to` query param on POST {SUPABASE_URL}/auth/v1/signup. On a
  * project-site build the correct value is the PREFIXED, trailing-slash callback
- * (`.../ScriptHammer/auth/callback/`). #154 fixed the construction; this pins it
+ * (`.../GrandDaze/auth/callback/`). #154 fixed the construction; this pins it
  * under a real basePath build without needing an email inbox or a real user:
  * the signup POST is intercepted and fulfilled with a stub response.
  */
@@ -20,7 +20,7 @@
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
-const BASE_PATH = '/ScriptHammer';
+const BASE_PATH = '/GrandDaze';
 
 test.describe('basePath-aware signup redirect (#157)', () => {
   test('the signup POST carries the prefixed, trailing-slash redirect_to', async ({
@@ -55,7 +55,7 @@ test.describe('basePath-aware signup redirect (#157)', () => {
     });
 
     // Navigate with the FULL prefixed path. A relative 'sign-up/' would resolve
-    // against baseURL (http://localhost:3000/ScriptHammer, no trailing slash)
+    // against baseURL (http://localhost:3000/GrandDaze, no trailing slash)
     // and drop the last segment → /sign-up/. An absolute path that includes the
     // prefix is unambiguous — baseURL supplies only the origin.
     await page.goto(`${BASE_PATH}/sign-up/`);

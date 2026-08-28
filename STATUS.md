@@ -1,4 +1,4 @@
-# ScriptHammer Status
+# Grand Daze Status
 
 **Snapshot**: 2026-05-17 · **Version**: v0.0.1 · **Stability**: Beta — Phase 0 (template hygiene) closed; E2E flake round 10 closed via concurrency mutex (#89); **Phase 0.5 (#48 Three.js Game) shipping in PR #95** (feature 047 at `/game/3d` — full SpecKit cascade complete, 21/21 E2E shards green); Family B (payment routes) is the next-leverage front
 
@@ -161,10 +161,10 @@ GitHub issues #3, #4, #5, #43 track the route work; #53 is the test-skip index.
 
 ```bash
 # Refresh truth table
-docker compose exec scripthammer node scripts/audit/refresh-truth-table.mjs  # (script TBD)
+docker compose exec grand-daze node scripts/audit/refresh-truth-table.mjs  # (script TBD)
 
 # Verify published artifacts agree with reality
-docker compose exec scripthammer node scripts/audit/verify.mjs
+docker compose exec grand-daze node scripts/audit/verify.mjs
 
 # List open audit-tracked work
 gh issue list --label gap-audit

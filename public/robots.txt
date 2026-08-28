@@ -1,4 +1,4 @@
-# ScriptHammer Robots.txt
+# Grand Daze Robots.txt
 User-agent: *
 Allow: /
 
@@ -14,4 +14,4 @@ Disallow: /profile/
 Disallow: /messages/
 Disallow: /payment-demo/
 
-Sitemap: https://scripthammer.com/sitemap.xml
+Sitemap: https://grand-daze.com/sitemap.xml

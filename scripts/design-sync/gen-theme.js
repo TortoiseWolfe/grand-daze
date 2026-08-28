@@ -3,11 +3,11 @@
  * gen-theme.js — build a scoped DaisyUI theme.css for the design-sync bundle.
  *
  * Produces theme.css containing ONLY the two brand themes
- * (scripthammer-dark + scripthammer-light) plus the brand-polish CSS,
+ * (grand-daze-dark + grand-daze-light) plus the brand-polish CSS,
  * compiled through the project's own @tailwindcss/postcss + DaisyUI v5.
  *
- * Run inside the scripthammer container so node_modules is available:
- *   docker compose exec -T scripthammer node /app/<scratchpath>/gen-theme.js
+ * Run inside the grand-daze container so node_modules is available:
+ *   docker compose exec -T grand-daze node /app/<scratchpath>/gen-theme.js
  *
  * Inputs (same dir):
  *   - classes.txt   (safelist of every class the cards use; written by gen-cards.js)
@@ -44,7 +44,7 @@ const safelist = fs.existsSync(classesPath)
   : [];
 
 // The two brand theme blocks, copied verbatim from src/app/globals.css
-// (scripthammer-dark lines 55-94, scripthammer-light lines 97-137) plus the
+// (grand-daze-dark lines 55-94, grand-daze-light lines 97-137) plus the
 // brand-polish block (lines 139-180). DaisyUI is enabled WITHOUT the 32 stock
 // themes so the bundle stays brand-scoped and small.
 const ENTRY = `
@@ -54,11 +54,11 @@ const ENTRY = `
 @source inline("${safelist.join(' ')}");
 
 @plugin "daisyui" {
-  themes: scripthammer-dark --default, scripthammer-light;
+  themes: grand-daze-dark --default, grand-daze-light;
 }
 
 @plugin "daisyui/theme" {
-  name: 'scripthammer-dark';
+  name: 'grand-daze-dark';
   default: true;
   color-scheme: dark;
   --color-base-100: oklch(22.84% 0.038 282.93);
@@ -92,7 +92,7 @@ const ENTRY = `
 }
 
 @plugin "daisyui/theme" {
-  name: 'scripthammer-light';
+  name: 'grand-daze-light';
   default: false;
   prefersdark: false;
   color-scheme: light;
@@ -127,21 +127,21 @@ const ENTRY = `
 }
 
 /* Brand polish — scoped to the custom themes only (globals.css 139-180). */
-[data-theme='scripthammer-dark'] .card,
-[data-theme='scripthammer-light'] .card {
+[data-theme='grand-daze-dark'] .card,
+[data-theme='grand-daze-light'] .card {
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.25),
     0 10px 15px -3px rgb(0 0 0 / 0.2),
     0 20px 25px -5px rgb(0 0 0 / 0.15);
 }
-[data-theme='scripthammer-dark'] .btn,
-[data-theme='scripthammer-light'] .btn {
+[data-theme='grand-daze-dark'] .btn,
+[data-theme='grand-daze-light'] .btn {
   box-shadow:
     0 2px 4px 0 rgb(0 0 0 / 0.2),
     0 1px 2px -1px rgb(0 0 0 / 0.15);
 }
-[data-theme='scripthammer-dark'] .btn:hover,
-[data-theme='scripthammer-light'] .btn:hover {
+[data-theme='grand-daze-dark'] .btn:hover,
+[data-theme='grand-daze-light'] .btn:hover {
   box-shadow:
     0 4px 8px -1px rgb(0 0 0 / 0.3),
     0 2px 4px -2px rgb(0 0 0 / 0.2);

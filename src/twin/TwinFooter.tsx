@@ -6,9 +6,9 @@ import { FOOTER_LINKS } from '@/config/footer-links';
  *
  * WHY A SECOND COMPONENT INSTEAD OF RESTYLING THE GLOBAL FOOTER.
  * Not principle — content. `Footer` is two stacked <p> of prose ("Made by
- * CRUDgames.com for geoLARP.com" / "Built with ScriptHammer template"): roughly
+ * CRUDgames.com for geoLARP.com" / "Built with Grand Daze template"): roughly
  * 430px of text at a 390px viewport. On one 44px line, nowrap clips it and wrap
- * blows the height. The only CSS escapes are dropping the ScriptHammer link on
+ * blows the height. The only CSS escapes are dropping the Grand Daze link on
  * mobile or shrinking the type below legibility. And the selectors would have
  * to reach into Footer's internal DOM (`footer > div > p:nth-child(2)`), so any
  * edit there would silently break the twin routes. This is a different

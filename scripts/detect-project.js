@@ -95,8 +95,8 @@ function getProjectInfo() {
 
   // Fallback to defaults
   return {
-    projectName: 'ScriptHammer',
-    projectOwner: 'TortoiseWolfe',
+    projectName: 'Grand Daze',
+    projectOwner: 'tortoisewolfe',
     projectHost: 'github.com',
     isGitHub: true,
     source: 'default',

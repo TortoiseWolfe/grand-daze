@@ -245,6 +245,6 @@ If a user reports "I can't see X", the test must capture actual rendered pixels,
 ---
 
 **Author**: Claude Code (learning from mistakes)
-**Reviewer**: TortoiseWolfe (the human who had to suffer through this)
+**Reviewer**: tortoisewolfe (the human who had to suffer through this)
 **Cost of This Lesson**: $200 (8 hours @ $25/hour)
 **Value of This PRP**: Prevents future $200 wastes

@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-# Docker entrypoint for ScriptHammer
+# Docker entrypoint for Grand Daze
 # Runs as node user (set by USER in Dockerfile)
 # No root operations needed at runtime
 
-echo "Initializing ScriptHammer container..."
+echo "Initializing Grand Daze container..."
 
 # Is the command we were handed the long-running dev server? The dispatch at the
 # bottom of this file asks the same question; both must agree.
@@ -62,7 +62,7 @@ echo "Dependencies are up-to-date"
 # Clean .next ONLY when we are the dev server (#293).
 #
 # This used to run unconditionally, on every container start — including
-# `docker compose run --rm scripthammer pnpm build`, which mounts the SAME .next
+# `docker compose run --rm grand-daze pnpm build`, which mounts the SAME .next
 # named volume as the ALREADY-RUNNING dev container. So a one-off build wiped the
 # live dev server's manifests and chunks out from under it, and every route
 # 500'd with ChunkLoadError / "Cannot read properties of undefined (reading
@@ -262,7 +262,7 @@ supervise_dev() {
 }
 
 # Supervise only the long-running dev server; one-shot commands
-# (docker compose run --rm scripthammer <cmd>) keep plain exec semantics.
+# (docker compose run --rm grand-daze <cmd>) keep plain exec semantics.
 if [ "$1" = "pnpm" ] && [ "$2" = "run" ] && [ "$3" = "dev" ]; then
   supervise_dev "$@"
 else

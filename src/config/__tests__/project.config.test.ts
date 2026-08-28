@@ -39,8 +39,8 @@ describe('Project Configuration', () => {
 
       const config = getProjectConfig();
 
-      expect(config.projectName).toBe('ScriptHammer');
-      expect(config.projectOwner).toBe('TortoiseWolfe');
+      expect(config.projectName).toBe('Grand Daze');
+      expect(config.projectOwner).toBe('tortoisewolfe');
       expect(config.projectDescription).toContain(
         'production Next.js and Supabase platform'
       );
@@ -287,8 +287,8 @@ describe('Project Configuration', () => {
     it('should generate a valid PWA manifest', () => {
       const manifest = generateManifest();
 
-      expect(manifest.name).toContain('ScriptHammer');
-      expect(manifest.short_name).toBe('ScriptHammer');
+      expect(manifest.name).toContain('Grand Daze');
+      expect(manifest.short_name).toBe('Grand Daze');
       expect(manifest.description).toContain(
         'production Next.js and Supabase platform'
       );
@@ -379,8 +379,8 @@ describe('Project Configuration', () => {
   describe('projectConfig singleton', () => {
     it('should export a singleton configuration object', () => {
       expect(projectConfig).toBeDefined();
-      expect(projectConfig.projectName).toBe('ScriptHammer');
-      expect(projectConfig.projectOwner).toBe('TortoiseWolfe');
+      expect(projectConfig.projectName).toBe('Grand Daze');
+      expect(projectConfig.projectOwner).toBe('tortoisewolfe');
     });
 
     it('should have all required properties', () => {
@@ -405,8 +405,8 @@ describe('Project Configuration', () => {
       const config = getProjectConfig();
 
       // Should fall back to defaults
-      expect(config.projectName).toBe('ScriptHammer');
-      expect(config.projectOwner).toBe('TortoiseWolfe');
+      expect(config.projectName).toBe('Grand Daze');
+      expect(config.projectOwner).toBe('tortoisewolfe');
     });
 
     it('should handle undefined environment variables gracefully', () => {
@@ -416,8 +416,8 @@ describe('Project Configuration', () => {
       const config = getProjectConfig();
 
       // Should fall back to defaults
-      expect(config.projectName).toBe('ScriptHammer');
-      expect(config.projectOwner).toBe('TortoiseWolfe');
+      expect(config.projectName).toBe('Grand Daze');
+      expect(config.projectOwner).toBe('tortoisewolfe');
     });
 
     it('should handle basePath with trailing slash', () => {

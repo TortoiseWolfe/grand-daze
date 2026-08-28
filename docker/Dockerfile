@@ -1,4 +1,4 @@
-# Development Dockerfile for ScriptHammer
+# Development Dockerfile for Grand Daze
 FROM node:22-slim AS base
 
 # Install pnpm and configure store.
@@ -113,7 +113,7 @@ RUN npx playwright install chromium firefox webkit \
 
 # Pre-create directories that mount as named volumes so they inherit
 # node:node ownership rather than Docker's default root:root. Without
-# this, `docker volume rm scripthammer_node_modules && docker compose up`
+# this, `docker volume rm granddaze_node_modules && docker compose up`
 # (or any fresh-clone first start) leaves the mountpoint root-owned,
 # causing EACCES when pnpm runs as node and tries to recreate .bin.
 # Mirrors the ce0e64d fix that originally landed for .next.
@@ -155,7 +155,7 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["pnpm", "run", "dev"]
 
 # NOTE (#275): the former `builder` + `runner` production stages were removed.
-# ScriptHammer deploys as a STATIC export (output: 'export' → out/ on GitHub
+# Grand Daze deploys as a STATIC export (output: 'export' → out/ on GitHub
 # Pages), so there is no long-running Node server image: the old `runner` copied
 # `.next/standalone`, which output: 'export' never emits, so it could never
 # build. Production builds run as `pnpm build` in the `dev` image via the

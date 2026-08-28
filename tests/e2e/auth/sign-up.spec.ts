@@ -27,7 +27,7 @@ import { skipIfBackendCaptchaProtected } from '../utils/captcha-guard';
  * project — unconditionally.
  *
  * Submitting makes Supabase send a REAL confirmation email through Resend. The
- * generated address plus-routes to `scripthammer.e2e@gmail.com`, a mailbox that
+ * generated address plus-routes to `grand-daze.e2e@gmail.com`, a mailbox that
  * does not exist, so every one HARD BOUNCES ("Recipient not found") and is then
  * suppressed. Measured 2026-07-26 across the account's entire history: 121 of
  * 154 sends bounced, a **78.6% bounce rate**, and 120 of those came from this

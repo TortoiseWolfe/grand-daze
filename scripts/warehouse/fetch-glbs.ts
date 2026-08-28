@@ -16,8 +16,8 @@
 // resumable: models with an existing raw GLB of the expected size are
 // skipped.
 //
-// Run:  docker compose exec scripthammer pnpm run warehouse:sync   (all stages)
-//       docker compose exec scripthammer pnpm exec tsx scripts/warehouse/fetch-glbs.ts
+// Run:  docker compose exec grand-daze pnpm run warehouse:sync   (all stages)
+//       docker compose exec grand-daze pnpm exec tsx scripts/warehouse/fetch-glbs.ts
 
 import {
   readFile,
@@ -31,7 +31,7 @@ import {
 import path from 'node:path';
 import { assignSlugs } from './lib';
 
-const USER_AGENT = 'scripthammer-twin-inventory/0.1 (jonpohlner@gmail.com)';
+const USER_AGENT = 'grand-daze-twin-inventory/0.1 (jonpohlner@gmail.com)';
 const ROOT = path.resolve('sites/_warehouse');
 const RAW = path.join(ROOT, 'raw');
 const DELAY_MS = 1500;

@@ -1,4 +1,4 @@
-# ScriptHammer Feature Implementation Order
+# Grand Daze Feature Implementation Order
 
 **Generated**: 2025-12-30
 **Last Updated**: 2026-04-26

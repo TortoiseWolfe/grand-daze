@@ -3,7 +3,7 @@
  * Stamp a real cache version into the exported service worker (#317).
  *
  * ## Why
- * `public/sw.js` hard-coded `scripthammer-v1.0.0` behind a comment claiming
+ * `public/sw.js` hard-coded `grand-daze-v1.0.0` behind a comment claiming
  * `scripts/rebrand.sh` updated it. It did not — rebrand.sh never mentions
  * sw.js — so the value never changed in the project's life. Every returning
  * visitor kept the precache built on their first visit, forever.
@@ -105,7 +105,7 @@ if (!authored) {
   process.exit(1);
 }
 
-// e.g. `scripthammer-v1.0.0` -> `scripthammer-`. The same expression the worker
+// e.g. `grand-daze-v1.0.0` -> `grand-daze-`. The same expression the worker
 // uses to derive CACHE_PREFIX, so the two agree by construction, not by discipline.
 const prefix = authored[1].replace(/-v[\d.].*$/, '') + '-';
 

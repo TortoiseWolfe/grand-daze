@@ -142,7 +142,7 @@ const SECRET_RULES: SecretRule[] = [
   // never committed, so the same withhold rule that protects SMTP and CAPTCHA has to cover
   // these or the guard has a hole in the shape of its own purpose.
   //
-  // THIS MATTERS MOST FOR FORKS, which is what ScriptHammer is for. On a project that has
+  // THIS MATTERS MOST FOR FORKS, which is what Grand Daze is for. On a project that has
   // never had the secret, applying `enabled: true` + a client id turns the provider ON with
   // no secret behind it — every OAuth sign-in then fails at the provider, which is the #287
   // shape (config looks configured, no human can sign in, tests green).

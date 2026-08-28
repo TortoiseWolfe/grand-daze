@@ -98,12 +98,12 @@ jobs:
           # scripts/supabase/auth-config-loader.js. GitHub does NOT expose `vars.*`
           # to a step automatically — without these eight lines a fork could set
           # every repository Variable exactly as rebrand.sh instructs and STILL be
-          # measured against ScriptHammer's defaults, because the runner never saw
+          # measured against Grand Daze's defaults, because the runner never saw
           # them. The override mechanism would read as configurable and behave as
           # hardcoded: a gate that cannot fail for the fork, and cannot pass either.
           #
           # Unset here resolves to '' and `interpolate` treats '' as unset, so
-          # ScriptHammer's own run still gets the pinned defaults and still detects
+          # Grand Daze's own run still gets the pinned defaults and still detects
           # real drift. Nothing is secret — see .env.example; both OAuth client ids
           # already appear in every authorize URL the browser is redirected to.
           #

@@ -32,7 +32,7 @@
  * Reporting only. It never writes anything.
  *
  * USAGE
- *   SITE=https://scripthammer.com WANT=https://calendly.com/you/30min \
+ *   SITE=https://grand-daze.com WANT=https://calendly.com/you/30min \
  *     node scripts/ci/check-calendar-configured.mjs
  */
 

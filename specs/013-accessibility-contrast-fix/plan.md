@@ -33,5 +33,5 @@ Single line change:
 
 ## Testing
 
-1. Run accessibility tests: `docker compose exec scripthammer pnpm exec playwright test accessibility`
+1. Run accessibility tests: `docker compose exec grand-daze pnpm exec playwright test accessibility`
 2. Visual check in browser across themes

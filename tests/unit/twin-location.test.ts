@@ -123,7 +123,7 @@ describe('twin location (#706)', () => {
       z: -88.71,
       near: 'Chattanooga Choo Choo Hotel',
       note: 'stairs',
-      basePath: '/ScriptHammer',
+      basePath: '/GrandDaze',
       slug: 'chatt',
     });
     // Human-readable position...
@@ -134,7 +134,7 @@ describe('twin location (#706)', () => {
     expect(block).toContain('ENU 312.4, -88.7');
     // ...AND a link that reproduces the exact spot, walk mode included.
     expect(block).toContain(
-      '/ScriptHammer/chatt/?diorama&walk&at=35.045123,-85.309876'
+      '/GrandDaze/chatt/?diorama&walk&at=35.045123,-85.309876'
     );
     // The return link must survive its own parser.
     const qs = block.slice(block.indexOf('?diorama'));

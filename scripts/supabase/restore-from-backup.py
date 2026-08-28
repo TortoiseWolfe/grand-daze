@@ -3,7 +3,7 @@
 Restore a Supabase project from a JSON backup taken by the Management API.
 
 WHY THIS EXISTS
-The ScriptHammer project has to move to a different organisation (#567 fallout:
+The Grand Daze project has to move to a different organisation (#567 fallout:
 the free-tier quota is per-USER across all orgs, and the burned org cannot host a
 working project). Moving means delete-and-recreate, and delete-and-recreate with
 21 real accounts is only defensible if the restore has been PROVEN first — against

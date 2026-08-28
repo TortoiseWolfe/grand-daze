@@ -10,7 +10,7 @@
 
   <!-- Title -->
   <text x="450" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="bold" text-anchor="middle" fill="#1f2937">
-    Traditional Setup vs ScriptHammer
+    Traditional Setup vs Grand Daze
   </text>
 
   <!-- Before Section -->
@@ -83,7 +83,7 @@
     <!-- Label -->
     <rect x="0" y="0" width="350" height="40" rx="6" fill="#dcfce7"/>
     <text x="175" y="27" font-family="system-ui" font-size="18" font-weight="600" text-anchor="middle" fill="#166534">
-      ✅ ScriptHammer (3 steps)
+      ✅ Grand Daze (3 steps)
     </text>
 
     <!-- Automated steps -->

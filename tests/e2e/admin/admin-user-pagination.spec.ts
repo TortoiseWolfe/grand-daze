@@ -12,7 +12,7 @@
  *
  * Run from inside the Docker container:
  *   docker exec -e SKIP_WEBSERVER=1 -e BASE_URL=http://localhost:3000 \
- *     scripthammer-scripthammer-1 npx playwright test tests/e2e/admin/admin-user-pagination.spec.ts --project=chromium
+ *     grand-daze-grand-daze-1 npx playwright test tests/e2e/admin/admin-user-pagination.spec.ts --project=chromium
  */
 
 import { test, expect } from '@playwright/test';
@@ -26,7 +26,7 @@ import {
 
 // ADMIN_EMAIL / ADMIN_PASSWORD are gone with the shared-user sign-in they served (#914).
 
-// Next.js basePath — empty in local dev, '/ScriptHammer' in CI/prod
+// Next.js basePath — empty in local dev, '/GrandDaze' in CI/prod
 const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 // Local-only spec (skipped in CI). The Node test process reaches local Kong via
@@ -45,7 +45,7 @@ test.describe('Admin User Pagination E2E', () => {
   //
   // This used to sign in as `test@example.com`, a constant named ADMIN_EMAIL that is not an
   // admin: `is_admin()` reads the user_profiles.is_admin COLUMN (#240, migration:1218) and
-  // seed-test-users.ts sets it only for admin@scripthammer.com. AdminGate therefore
+  // seed-test-users.ts sets it only for admin@grand-daze.com. AdminGate therefore
   // redirected to `/` and every assertion here measured the home page.
   //
   // Promoting the shared user would be the cheap fix and is wrong twice over: its session is

@@ -40,11 +40,11 @@ import {
 } from '../fixtures/test-users';
 
 const ALICE = {
-  email: 'blocked-send-alice@scripthammer.test',
+  email: 'blocked-send-alice@grand-daze.test',
   password: 'BlockedSendAlice1!',
 };
 const BOB = {
-  email: 'blocked-send-bob@scripthammer.test',
+  email: 'blocked-send-bob@grand-daze.test',
   password: 'BlockedSendBob1!',
 };
 

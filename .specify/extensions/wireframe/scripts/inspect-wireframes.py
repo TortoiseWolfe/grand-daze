@@ -2,7 +2,7 @@
 """
 SVG Wireframe Inspector v1.5
 
-Cross-SVG consistency checker for ScriptHammer wireframes.
+Cross-SVG consistency checker for Grand Daze wireframes.
 Runs AFTER validate-wireframe.py passes to check patterns across all SVGs.
 
 NEW in v1.5: G-047 key_concepts_position - expects y=940 (inside annotation panel, below user stories).
@@ -18,7 +18,7 @@ Checks for:
 - Title position consistency (x=960, y=28)
 - Signature position consistency (y=1060, bold)
 - Signature alignment consistency (x=40, left-aligned)
-- Signature format consistency (NNN:NN | Feature Name | ScriptHammer)
+- Signature format consistency (NNN:NN | Feature Name | Grand Daze)
 - Header/footer include consistency
 - Desktop/mobile mockup positioning
 - Annotation panel positioning
@@ -54,7 +54,7 @@ EXPECTED = {
         'y': 1060,
         'bold': True,
         'anchor': None,  # x=40 = left-aligned, no text-anchor
-        'format': r'^[0-9]{3}:[0-9]{2} \| .+ \| ScriptHammer$',  # NNN:NN | Feature Name | ScriptHammer
+        'format': r'^[0-9]{3}:[0-9]{2} \| .+ \| Grand Daze$',  # NNN:NN | Feature Name | Grand Daze
     },
     'desktop_mockup': {'x': 40, 'y': 60, 'width': 1280, 'height': 720},
     'mobile_mockup': {'x': 1360, 'y': 60, 'width': 360, 'height': 720},
@@ -457,7 +457,7 @@ def check_patterns(structures: List[SVGStructure]) -> List[PatternViolation]:
                     expected='x="40" (left-aligned)',
                     actual=actual_desc
                 ))
-            # Check signature format - must be "NNN:NN | Feature Name | ScriptHammer"
+            # Check signature format - must be "NNN:NN | Feature Name | Grand Daze"
             if structure.signature.text:
                 format_pattern = EXPECTED['signature']['format']
                 if not re.match(format_pattern, structure.signature.text):
@@ -468,7 +468,7 @@ def check_patterns(structures: List[SVGStructure]) -> List[PatternViolation]:
                     violations.append(PatternViolation(
                         svg_path=structure.path,
                         check='signature_format',
-                        expected='NNN:NN | Feature Name | ScriptHammer',
+                        expected='NNN:NN | Feature Name | Grand Daze',
                         actual=f'"{actual_text}"'
                     ))
         else:

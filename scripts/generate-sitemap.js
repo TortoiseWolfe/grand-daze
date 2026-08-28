@@ -165,7 +165,7 @@ ${tagPages
 function generateRobotsTxt() {
   const disallowRules = disallowedPaths.map((p) => `Disallow: ${p}`).join('\n');
 
-  const robotsTxt = `# ScriptHammer Robots.txt
+  const robotsTxt = `# Grand Daze Robots.txt
 User-agent: *
 Allow: /
 

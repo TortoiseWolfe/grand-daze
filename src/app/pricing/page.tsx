@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   // This route claims its own URL (#668).
   alternates: { canonical: '/pricing/' },
   openGraph: { url: '/pricing/' },
-  title: 'Pricing - ScriptHammer',
+  title: 'Pricing - Grand Daze',
   description:
     "We don't sell business portals without running one. Fixed-scope, fixed-price builds for local businesses, and productized packs for developers.",
 };
@@ -191,7 +191,7 @@ const DEVELOPERS: Product[] = [
       'MIT licensed, community support',
     ],
     cta: 'Clone the repo',
-    href: 'https://github.com/TortoiseWolfe/ScriptHammer',
+    href: 'https://github.com/tortoisewolfe/GrandDaze',
   },
   {
     sku: 'prd-anvil',

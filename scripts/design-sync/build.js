@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
- * build.js — one-command builder for the ScriptHammer design-sync bundle.
+ * build.js — one-command builder for the Grand Daze design-sync bundle.
  *
  * Runs the full pipeline into an output dir:
  *   1. gen-cards --classes   → classes.txt (safelist)
  *   2. gen-theme             → theme.css   (scoped DaisyUI + both brand themes)
  *   3. gen-cards             → token + component preview cards (@dsCard HTML)
  *
- * MUST run inside the scripthammer container (needs @tailwindcss/postcss + DaisyUI):
+ * MUST run inside the grand-daze container (needs @tailwindcss/postcss + DaisyUI):
  *
- *   docker compose exec -w /app scripthammer node scripts/design-sync/build.js
+ *   docker compose exec -w /app grand-daze node scripts/design-sync/build.js
  *
  * Output defaults to /tmp/ds-bundle inside the container (NOT the repo — the
  * cards + theme.css are build artifacts, not source). Override with DS_OUT:
  *
- *   DS_OUT=/tmp/my-bundle docker compose exec -w /app scripthammer \
+ *   DS_OUT=/tmp/my-bundle docker compose exec -w /app grand-daze \
  *     node scripts/design-sync/build.js
  *
  * Then, from the host, push to claude.ai with Claude Code's /design-sync

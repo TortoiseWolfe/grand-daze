@@ -58,7 +58,7 @@ Eight technical decisions resolved with rationale + alternatives. The PRD (`comb
 **Rationale**:
 
 - **License + ops fit**: Apache-2.0, Go/Pion single-binary SFU, free to self-host, deployable per region alongside match servers (PRD A.4). No per-minute vendor billing at playtest scale.
-- **Proven JS SDKs**: `livekit-client` is mature in browsers (and Unity-WebGL SDKs exist — relevant to the ScriptHammer-family Unity track later). Token-based room scoping is first-class, which is exactly the VC-3 security model.
+- **Proven JS SDKs**: `livekit-client` is mature in browsers (and Unity-WebGL SDKs exist — relevant to the Grand Daze-family Unity track later). Token-based room scoping is first-class, which is exactly the VC-3 security model.
 - **SFU beats mesh at squad size**: a 6-person mesh is 5 uplinks per client; an SFU is 1. Command channel membership (all squad leaders) makes mesh strictly worse as team size grows.
 - **Room-per-squad + JWT scoping** makes the VC-3 negative test (client with a squad-X token cannot join squad Y or another match) enforceable at the SFU, not in client code.
 

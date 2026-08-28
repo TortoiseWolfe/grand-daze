@@ -15,7 +15,7 @@
   <text x="1500" y="52" fill="#d946ef" font-family="system-ui, sans-serif" font-size="15" font-weight="bold">MOBILE</text>
 
   <defs>
-    <!-- Brand symbol: cog ring (geometry copied verbatim from public/scripthammer-logo.svg). -->
+    <!-- Brand symbol: cog ring (geometry copied verbatim from public/grand-daze-logo.svg). -->
     <symbol id="brand-cog" viewBox="0 0 400 400">
       <g transform="translate(200, 200)">
         <g fill="#c0c0c0" stroke="#888888" stroke-width="0.5">
@@ -282,5 +282,5 @@
   </g>
 
   <!-- Signature -->
-  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4b5563">047:02 | Three.js Game - Fallback | ScriptHammer</text>
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4b5563">047:02 | Three.js Game - Fallback | Grand Daze</text>
 </svg>

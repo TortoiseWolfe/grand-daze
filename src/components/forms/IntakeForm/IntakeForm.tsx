@@ -347,7 +347,7 @@ export default function IntakeForm({
 
       {/* `sh-btn sh-btn-primary` (globals.css:830, :847) — the 2a button the rest
           of the product uses, not DaisyUI's `.btn`. Two reasons this is not
-          cosmetic: `btn-primary` reads as DISABLED on scripthammer-dark
+          cosmetic: `btn-primary` reads as DISABLED on grand-daze-dark
           (SignInForm.tsx:386-391 documents the same finding), and this was the
           only primary action on the checkout that did not look like the ones on
           the home, blog and status pages.

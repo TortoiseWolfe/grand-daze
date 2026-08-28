@@ -88,7 +88,7 @@ test.describe('@smoke production deploy (#288)', () => {
   }) => {
     // GitHub Pages guarantee: the project github.io URL 301s to the custom domain.
     const gh = await request.get(
-      'https://tortoisewolfe.github.io/ScriptHammer/',
+      'https://tortoisewolfe.github.io/GrandDaze/',
       { maxRedirects: 0 }
     );
     expect(
@@ -97,8 +97,8 @@ test.describe('@smoke production deploy (#288)', () => {
     ).toBeGreaterThanOrEqual(300);
     expect(
       gh.headers()['location'] ?? '',
-      'github.io must redirect to the scripthammer.com custom domain'
-    ).toContain('scripthammer.com');
+      'github.io must redirect to the grand-daze.com custom domain'
+    ).toContain('grand-daze.com');
 
     // The canonical origin (BASE_URL) serves the real app (follow redirects).
     const home = await request.get('/sign-in');
@@ -118,7 +118,7 @@ test.describe('@smoke production deploy (#288)', () => {
    *
    * #479 fixed the same class of bug for sitemap.xml three months earlier and
    * concluded, in its own commit message, that "the canonical tags were never
-   * wrong — measured on live prod, the home page emits scripthammer.com". The
+   * wrong — measured on live prod, the home page emits grand-daze.com". The
    * home page reads NEXT_PUBLIC_DEPLOY_URL; the blog route read a different
    * variable. It was verified where it could not fail.
    *

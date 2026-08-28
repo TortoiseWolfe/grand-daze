@@ -287,7 +287,7 @@ test('Docker dependency stages copy the prepare script before pnpm install', () 
  *
  * `scripts/rebrand.sh` renames the compose service — `update_docker_compose()` rewrites the
  * service key — so a fork's app service is called whatever the fork is called. Both hooks
- * used to grep for and exec the literal `scripthammer`, which in a fork matches nothing.
+ * used to grep for and exec the literal `grand-daze`, which in a fork matches nothing.
  * `pre-commit` then fell through to its warn-only branch, so every fork committed with no
  * lint-staged and no formatting — silently, because the warning scrolls past in a
  * successful commit.
@@ -329,8 +329,8 @@ test.describe('the hooks survive a rebrand (#910)', () => {
       // that a rebrand would strand.
       const stray = src
         .split('\n')
-        .filter((l) => /scripthammer/i.test(l))
-        .filter((l) => !/COMPOSE_SERVICE=scripthammer/.test(l));
+        .filter((l) => /grand-daze/i.test(l))
+        .filter((l) => !/COMPOSE_SERVICE=grand-daze/.test(l));
       assert.deepEqual(
         stray,
         [],

@@ -23,7 +23,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const doc = findDoc(slug);
   return {
-    title: doc ? `${doc.title} - ScriptHammer` : 'Documentation - ScriptHammer',
+    title: doc ? `${doc.title} - Grand Daze` : 'Documentation - Grand Daze',
     description: doc?.hint,
     // Each doc claims its own URL (#668).
     alternates: { canonical: `/docs/${slug}/` },

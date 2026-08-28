@@ -94,5 +94,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Supabase handles state validation internally. Final redirect target: /profile (or returnUrl from session).</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:16 | OAuth Callback (as-is /auth/callback) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:16 | OAuth Callback (as-is /auth/callback) | Grand Daze</text>
 </svg>

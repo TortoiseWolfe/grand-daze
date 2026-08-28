@@ -1,15 +1,15 @@
-# Research — CoD → ScriptHammer toolkit extraction map
+# Research — CoD → Grand Daze toolkit extraction map
 
 Feasibility spike + full harvest (2026-08). Source:
 [Claude-of-Duty](https://github.com/mshumer/Claude-of-Duty) (MIT), ~65k LOC, 13
-subsystems, Three r180, 100% procedural. Assessed against ScriptHammer (R3F + drei +
+subsystems, Three r180, 100% procedural. Assessed against Grand Daze (R3F + drei +
 Three r184, Next static-export PWA) by multi-agent readers.
 
 ## The decision: harvest, not embed
 
 CoD is a genuinely modular, MIT, `three`-only, **zero-asset** mini-engine with an
 OVERWATCH service-locator (`ctx.get('id')`) + event bus and no cross-subsystem
-imports. But it runs its own imperative render loop + kernel, and **ScriptHammer is
+imports. But it runs its own imperative render loop + kernel, and **Grand Daze is
 R3F (React owns the loop)** — two loops can't share one canvas. So we harvest the
 framework-agnostic procedural primitives (the asset-free, hard-to-build things) and
 let R3F own the render/post layer.

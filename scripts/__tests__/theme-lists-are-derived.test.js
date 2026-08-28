@@ -3,7 +3,7 @@
  *
  * WHAT HAPPENED. `src/config/themes.ts` is the canonical list — 35 themes, 3 of them ours.
  * Six test files each typed a subset by hand, and every one of them missed
- * `scripthammer-forge`, which shipped after they were written:
+ * `grand-daze-forge`, which shipped after they were written:
  *
  *   color-contrast.spec.ts          2 house themes, under a comment saying "Both"
  *   cod-skeleton-hud-contrast.spec  2 house themes
@@ -43,7 +43,7 @@ const MUST_DERIVE = [
 ];
 
 /** A house theme name appearing as a string literal — the restating signature. */
-const LITERAL = /'scripthammer-(dark|light|forge)'/;
+const LITERAL = /'grand-daze-(dark|light|forge)'/;
 
 const stripComments = (src) =>
   src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
@@ -64,7 +64,7 @@ describe('theme lists are derived, not restated (#915)', () => {
       all.length >= 30,
       `only ${all.length} themes parsed — the parser is stale`
     );
-    const house = all.filter((t) => t.startsWith('scripthammer-'));
+    const house = all.filter((t) => t.startsWith('grand-daze-'));
     assert.ok(
       house.length >= 3,
       `only ${house.length} house themes parsed; forge is the one that kept getting missed`
@@ -90,7 +90,7 @@ describe('theme lists are derived, not restated (#915)', () => {
         hits.map((l) => l.trim()),
         [],
         `${rel} names a house theme as a literal. Every list that did this missed ` +
-          '`scripthammer-forge`. Import HOUSE_THEMES or THEMES from @/config/themes.'
+          '`grand-daze-forge`. Import HOUSE_THEMES or THEMES from @/config/themes.'
       );
     });
   }
@@ -114,7 +114,7 @@ describe('theme lists are derived, not restated (#915)', () => {
  * A house theme's DARKNESS must be derived from its own colours, not remembered.
  *
  * `src/utils/theme-utils.ts` DARK_THEMES drives "map tiles, Disqus, Calendly, Cal.com, and
- * Leaflet CSS" by its own docblock. `scripthammer-forge` ships `base-100: #0f0d0b` — near
+ * Leaflet CSS" by its own docblock. `grand-daze-forge` ships `base-100: #0f0d0b` — near
  * black — and was absent from that list, so on forge every one of those rendered in LIGHT
  * mode over a near-black page. It was the third house theme, and every hand-maintained theme
  * list in the repo missed it.
@@ -142,7 +142,7 @@ describe('house-theme darkness is derived from its colours (#915)', () => {
     const css = fs.readFileSync(CSS, 'utf8');
     const out = {};
     for (const theme of canonical().filter((t) =>
-      t.startsWith('scripthammer-')
+      t.startsWith('grand-daze-')
     )) {
       const block =
         new RegExp(`name:\\s*'${theme}';([\\s\\S]*?)\\n\\}`).exec(css) ??
@@ -167,7 +167,7 @@ describe('house-theme darkness is derived from its colours (#915)', () => {
   it('every house theme base-100 was parsed', () => {
     // Anti-vacuity: an unparsed theme silently drops out of the comparison below.
     const bases = houseBase100();
-    const house = canonical().filter((t) => t.startsWith('scripthammer-'));
+    const house = canonical().filter((t) => t.startsWith('grand-daze-'));
     assert.deepStrictEqual(
       house.filter((t) => bases[t] === undefined),
       [],

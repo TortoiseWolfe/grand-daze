@@ -18,10 +18,10 @@ git checkout 006-font-switcher
 docker compose up
 
 # 3. Run tests in watch mode (TDD)
-docker compose exec scripthammer pnpm test --watch
+docker compose exec grand-daze pnpm test --watch
 
 # 4. Start development server
-docker compose exec scripthammer pnpm dev
+docker compose exec grand-daze pnpm dev
 ```
 
 Visit http://localhost:3000/accessibility to see the Font Switcher in action!
@@ -107,7 +107,7 @@ it('should render font options', () => {
 ### 2. Run Test (RED)
 
 ```bash
-docker compose exec scripthammer pnpm test FontSwitcher
+docker compose exec grand-daze pnpm test FontSwitcher
 # Test fails ❌
 ```
 
@@ -123,7 +123,7 @@ export function FontSwitcher() {
 ### 4. Run Test Again
 
 ```bash
-docker compose exec scripthammer pnpm test FontSwitcher
+docker compose exec grand-daze pnpm test FontSwitcher
 # Test passes ✅
 ```
 
@@ -227,26 +227,26 @@ body {
 
 ```bash
 # Run all tests
-docker compose exec scripthammer pnpm test
+docker compose exec grand-daze pnpm test
 
 # Run specific test file
-docker compose exec scripthammer pnpm test FontSwitcher
+docker compose exec grand-daze pnpm test FontSwitcher
 
 # Run tests in watch mode
-docker compose exec scripthammer pnpm test --watch
+docker compose exec grand-daze pnpm test --watch
 
 # Check accessibility
-docker compose exec scripthammer pnpm test:a11y
+docker compose exec grand-daze pnpm test:a11y
 
 # Run Storybook
-docker compose exec scripthammer pnpm storybook
+docker compose exec grand-daze pnpm storybook
 
 # Build for production
-docker compose exec scripthammer pnpm build
+docker compose exec grand-daze pnpm build
 
 # Lint and format
-docker compose exec scripthammer pnpm lint
-docker compose exec scripthammer pnpm format
+docker compose exec grand-daze pnpm lint
+docker compose exec grand-daze pnpm format
 ```
 
 ## 🐛 Troubleshooting

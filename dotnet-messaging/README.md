@@ -1,6 +1,6 @@
 # .NET Messaging Backend (#266 / #265)
 
-An ASP.NET Core 8 + EF Core alternative backend for ScriptHammer's messaging
+An ASP.NET Core 8 + EF Core alternative backend for Grand Daze's messaging
 domain — the second implementation behind the `MessagingDataProvider` interface
 (#266). Flip `NEXT_PUBLIC_BACKEND_PROVIDER=dotnet` and the same UI + services run
 against this server instead of Supabase. First concrete step of #265 (full

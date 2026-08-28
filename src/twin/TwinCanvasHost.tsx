@@ -38,7 +38,7 @@ const AtlasViewer = dynamic(
     //
     // getAssetUrl, never a literal: production basePath is '' (public/CNAME
     // exists, so deploy.yml omits NEXT_PUBLIC_BASE_PATH), but the basepath E2E
-    // job and local .env both use '/ScriptHammer'. Only this is right in all
+    // job and local .env both use '/GrandDaze'. Only this is right in all
     // four regimes. Trailing slash matters — trailingSlash:true, and a missing
     // one yields '/cesiumWorkers/...'.
     (window as unknown as { CESIUM_BASE_URL: string }).CESIUM_BASE_URL =

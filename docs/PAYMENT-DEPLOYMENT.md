@@ -18,7 +18,7 @@ This guide helps template forkers deploy the payment integration system to their
 
 ## Prerequisites
 
-- A forked ScriptHammer repo, configured per `docs/FORKING.md`
+- A forked Grand Daze repo, configured per `docs/FORKING.md`
 - A Supabase project (free tier works for development)
 - A Stripe account (for Stripe payments — sandbox to start)
 - A PayPal Business account (for PayPal payments — sandbox to start)
@@ -116,8 +116,8 @@ This template deploys to GitHub Pages (static export). **There is no Next.js ser
 chmod 600 .env
 
 # 2. Dry-run (name-level diff; values never printed), then apply:
-docker compose exec scripthammer pnpm supabase:secrets
-docker compose exec scripthammer pnpm supabase:secrets --apply
+docker compose exec grand-daze pnpm supabase:secrets
+docker compose exec grand-daze pnpm supabase:secrets --apply
 ```
 
 This uses the `SUPABASE_ACCESS_TOKEN` + project ref already in `.env` to call `POST /v1/projects/{ref}/secrets`. It sends only the allow-listed provider secrets plus the function-side site URL:
@@ -144,7 +144,7 @@ explicitly and make it owner-only before use:
 
 ```bash
 chmod 600 scripts/supabase/edge-function-secrets.json
-docker compose exec scripthammer pnpm supabase:secrets --config \
+docker compose exec grand-daze pnpm supabase:secrets --config \
   scripts/supabase/edge-function-secrets.json
 ```
 
@@ -325,7 +325,7 @@ After sandbox smoke-test passes:
 ## Testing
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test tests/e2e/payment/
+docker compose exec grand-daze pnpm exec playwright test tests/e2e/payment/
 ```
 
 Most tests are currently `test.skip()`'d because they require either Phase 0 to ship OR sandbox keys to be configured. The skip reasons are inline in each spec file.

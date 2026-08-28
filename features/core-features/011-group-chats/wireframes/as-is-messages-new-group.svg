@@ -159,5 +159,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">On success: router.push(`/messages?conversation=${id}`) → opens new group in Messages.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:28 | New Group (as-is /messages/new-group) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:28 | New Group (as-is /messages/new-group) | Grand Daze</text>
 </svg>

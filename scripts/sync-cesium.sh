@@ -12,7 +12,7 @@
 # It finds them via `window.CESIUM_BASE_URL`, which the app sets to
 # getAssetUrl('/cesium/') — see src/twin/cesium/. Only getAssetUrl() is correct
 # across all four basePath regimes ('' on the CNAME'd production deploy, ''
-# under DISABLE_BASE_PATH, '/ScriptHammer' for the basepath E2E job and local
+# under DISABLE_BASE_PATH, '/GrandDaze' for the basepath E2E job and local
 # .env). Never hardcode the prefix.
 #
 # The npm package ships these prebuilt under Build/Cesium/, so no postinstall is
@@ -39,7 +39,7 @@ TREES=(Workers Assets ThirdParty Widgets)
 
 if [ ! -d "$SRC" ]; then
     echo "sync-cesium: $SRC not found."
-    echo "  Run \`docker compose exec scripthammer pnpm install\` first."
+    echo "  Run \`docker compose exec grand-daze pnpm install\` first."
     exit 1
 fi
 

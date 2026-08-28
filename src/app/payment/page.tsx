@@ -4,7 +4,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import PaymentHubContent from './PaymentHubContent';
 
 export const metadata: Metadata = {
-  title: 'Payments - ScriptHammer',
+  title: 'Payments - Grand Daze',
   description: 'Manage your payments and subscriptions',
   robots: {
     index: false,

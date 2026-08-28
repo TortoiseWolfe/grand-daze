@@ -180,7 +180,7 @@ describe('manifest assets', () => {
     const tsx = fs.readFileSync(
       path.join(
         ROOT,
-        'src/components/atomic/SpinningLogo/LayeredScriptHammerLogo.tsx'
+        'src/components/atomic/SpinningLogo/LayeredGrandDazeLogo.tsx'
       ),
       'utf8'
     );
@@ -240,12 +240,12 @@ describe('manifest assets', () => {
     // by the icon generator is a monogram inherited from whoever the template
     // was forked from.
     //
-    // The v3 import: the gear and lockup exports cut "SCRIPTHAMMER.COM" out of
+    // The v3 import: the gear and lockup exports cut "GRANDDAZE.COM" out of
     // the ring with live <textPath> in Oswald 700. That renders correctly only
     // where Oswald is loaded — inside an <img>, a favicon, or a vector editor
     // the renderer substitutes a default sans and squeezes it to
     // textLength="300". Measured, that is 5.5% of pixels wrong versus a correct
-    // render. public/scripthammer-wordmark.svg carries the same wordmark baked
+    // render. public/grand-daze-wordmark.svg carries the same wordmark baked
     // to paths and must stay that way.
     //
     // This used to sweep only `icon*.svg`, which left favicon.svg — the SOURCE
@@ -256,7 +256,7 @@ describe('manifest assets', () => {
       (name.startsWith('icon') ||
         name.startsWith('favicon') ||
         name.startsWith('apple-touch-icon') ||
-        name.startsWith('scripthammer-') ||
+        name.startsWith('grand-daze-') ||
         name === 'printing-mallet.svg' ||
         name === 'script-tags.svg');
 

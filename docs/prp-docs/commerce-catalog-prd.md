@@ -2,7 +2,7 @@
 
 **Repo path:** `features/payments/050-commerce-catalog/spec.md`
 **Status:** Draft — corrected against verified code 2026-08-06
-**Author:** Jonathan Pohlner (TortoiseWolfe)
+**Author:** Jonathan Pohlner (tortoisewolfe)
 **Date:** 2026-08-06
 **Depends on:** `features/payments/038–042`
 
@@ -23,7 +23,7 @@
 
 ## 1. Summary
 
-ScriptHammer has production payment **rails** — Stripe and PayPal, one-time and
+Grand Daze has production payment **rails** — Stripe and PayPal, one-time and
 recurring, Supabase Edge Functions, webhooks, offline queue, retry schedule,
 admin dashboard, RLS. What it does not have is a **catalog**: there is no
 concept of a product, a package, or a price list. Every amount is authored by
@@ -33,7 +33,7 @@ This PRD adds the missing layer: a server-authoritative product catalog, a
 public `/pricing` storefront, guest checkout, and an order record that says
 _what was bought_ alongside the existing record of _what was paid_.
 
-**The dogfooding argument:** ScriptHammer's business model is selling business
+**The dogfooding argument:** Grand Daze's business model is selling business
 portals. Selling business portals from a repo that cannot take an order for a
 $1,200 website is not a credible position. The storefront is simultaneously the
 product demo, the reference implementation forkers copy, and the thing that
@@ -293,7 +293,7 @@ plain prefilled outbound link.
 ## 5. The catalog
 
 Two lanes, one checkout. Different buyers get different language: business
-buyers get plain names, developers get the ScriptHammer flavor.
+buyers get plain names, developers get the Grand Daze flavor.
 
 ### Lane A — Services (sold to local businesses)
 

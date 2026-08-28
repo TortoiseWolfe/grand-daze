@@ -191,7 +191,7 @@ export default async function BlogPostPage({
     text: post.excerpt || post.title,
     // Deliberately WITHOUT the trailing slash, unlike postCanonicalUrl(). This
     // string is also handed to DisqusComments, whose own fallback at
-    // DisqusComments.tsx:70-72 is `https://scripthammer.com/blog/${slug}`.
+    // DisqusComments.tsx:70-72 is `https://grand-daze.com/blog/${slug}`.
     // Matching it byte for byte keeps `page.url` identical for every existing
     // thread. (Threads key on `page.identifier = slug`, so they would survive
     // either way — but there is no reason to move the URL.) See #667.
@@ -301,7 +301,7 @@ function generateArticleJsonLd(
     mainEntityOfPage: {
       // Must equal <link rel="canonical"> exactly — schema.org treats this as
       // the page's identity, and it is the field that carried the mixed-case
-      // `TortoiseWolfe.github.io` fingerprint in #665. Meta tags came out
+      // `tortoisewolfe.github.io` fingerprint in #665. Meta tags came out
       // lowercased because Next's Metadata resolver normalizes through
       // `new URL()`; JSON-LD is JSON.stringify'd raw, so it preserved the
       // original casing and exposed which code path produced it.

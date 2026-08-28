@@ -6,7 +6,7 @@ step.
     python3 scripts/supabase/backup-project.py <project-ref> [--out DIR]
 
 WHY THIS EXISTS, AND WHY IT IS NOT JUST A DATA DUMP
-On 2026-08-07 the ScriptHammer project was deleted and rebuilt in a different
+On 2026-08-07 the Grand Daze project was deleted and rebuilt in a different
 organisation (#567). The database backup was thorough and verified — 24
 `auth.users`, identical uuid sets, 17 password hashes, 0 orphans, the restore
 rehearsed against a throwaway database first. It was still not a backup of the

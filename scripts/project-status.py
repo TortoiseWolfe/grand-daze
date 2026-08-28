@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Project Status - CLI dashboard for ScriptHammer project health
+Project Status - CLI dashboard for Grand Daze project health
 
 Replaces prompt-based /status skill to reduce token usage.
 Usage: python3 scripts/project-status.py [command] [options]

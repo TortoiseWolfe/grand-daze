@@ -13,7 +13,7 @@
  *   1. supabase/migrations/999_drop_all_tables.sql
  *   2. supabase/migrations/20251006_complete_monolithic_setup.sql
  *
- * Usage: docker compose exec scripthammer pnpm run db:reset
+ * Usage: docker compose exec grand-daze pnpm run db:reset
  *
  * CAUTION: This will DELETE ALL DATA. Requires typing "RESET" to confirm.
  */
@@ -324,7 +324,7 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════════');
   console.log('');
   console.log('Test credentials:');
-  console.log(`  Admin:    admin@scripthammer.com (ScriptHammer)`);
+  console.log(`  Admin:    admin@grand-daze.com (Grand Daze)`);
   console.log(
     `  Primary:  test@example.com / ${process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!'}`
   );

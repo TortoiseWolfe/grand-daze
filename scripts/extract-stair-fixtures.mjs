@@ -19,7 +19,7 @@
  * and railings included — they are part of whether you can get up), in metres, plus the
  * ascent direction derived from the geometry itself.
  *
- * Run: docker compose exec scripthammer node scripts/extract-stair-fixtures.mjs
+ * Run: docker compose exec grand-daze node scripts/extract-stair-fixtures.mjs
  */
 globalThis.self = globalThis; // the meshopt decoder module expects a worker/browser global
 

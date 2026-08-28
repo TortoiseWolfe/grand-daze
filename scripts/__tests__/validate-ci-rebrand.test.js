@@ -15,7 +15,7 @@
  *   1. Matching raw source hits the file's own prose. Three of these scripts
  *      EXPLAIN the hardcode in a comment; a naive grep flags them and gets
  *      "fixed" by loosening until it flags nothing at all.
- *   2. `grep 'exec.*scripthammer'` finds four of the five sites in
+ *   2. `grep 'exec.*grand-daze'` finds four of the five sites in
  *      e2e-live-acceptance.sh. The fifth is `docker compose exec -T \` with the
  *      service on the NEXT line, so a line-oriented match walks past it.
  *
@@ -48,7 +48,7 @@ function executableSource(rel) {
 }
 
 /** The literal is legitimate in exactly one place: the helper's own fallback. */
-const FALLBACK = /COMPOSE_SERVICE=scripthammer/;
+const FALLBACK = /COMPOSE_SERVICE=grand-daze/;
 
 for (const rel of EXEC_SCRIPTS) {
   test(`${rel} execs a derived service, not a literal`, () => {
@@ -56,7 +56,7 @@ for (const rel of EXEC_SCRIPTS) {
     const offenders = code
       .split('\n')
       .filter((l) => /docker compose exec\b/.test(l))
-      .filter((l) => /\bscripthammer\b/.test(l))
+      .filter((l) => /\bgrand-daze\b/.test(l))
       .filter((l) => !FALLBACK.test(l));
     assert.deepStrictEqual(
       offenders,
@@ -95,14 +95,14 @@ test('the derivation resolves to a service that exists in docker-compose.yml', (
 test('the matcher still catches a reintroduced literal — including a continued one', () => {
   // The mutation this guard exists for. Both shapes must be caught; the second
   // is the one that slipped past the obvious grep.
-  const inline = 'docker compose exec -T scripthammer pnpm test';
-  const continued = 'docker compose exec -T \\\n  scripthammer pnpm test';
+  const inline = 'docker compose exec -T grand-daze pnpm test';
+  const continued = 'docker compose exec -T \\\n  grand-daze pnpm test';
   const joined = continued.replace(/\\\n\s*/g, ' ');
   for (const [label, code] of [
     ['inline', inline],
     ['continued', joined],
   ]) {
-    const hit = /docker compose exec\b.*\bscripthammer\b/.test(code);
+    const hit = /docker compose exec\b.*\bgrand-daze\b/.test(code);
     assert.ok(hit, `matcher missed the ${label} form`);
   }
 });
@@ -113,7 +113,7 @@ test('a comment mentioning the old service name is NOT an offence', () => {
   const code = executableSource('scripts/test-suite.sh');
   assert.doesNotMatch(
     code,
-    /# .*docker compose exec scripthammer/,
+    /# .*docker compose exec grand-daze/,
     'comments should have been stripped before matching'
   );
 });

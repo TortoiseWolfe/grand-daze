@@ -14,8 +14,8 @@ const projectConfigPath = path.join(
   '../src/config/project-detected.json'
 );
 let projectConfig = {
-  projectName: 'ScriptHammer',
-  projectOwner: 'TortoiseWolfe',
+  projectName: 'Grand Daze',
+  projectOwner: 'tortoisewolfe',
   basePath: '',
 };
 

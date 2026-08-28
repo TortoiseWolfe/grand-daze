@@ -2,7 +2,7 @@
 
 Complete guide for configuring Supabase authentication with email/password and OAuth providers.
 
-> **Forking ScriptHammer for the first time?** Start at [`docs/FORK-CHECKLIST.md`](FORK-CHECKLIST.md) — it's the master walkthrough covering every external service this template integrates with (auth, payments, email, analytics). This document is the deep-dive for the auth portion.
+> **Forking Grand Daze for the first time?** Start at [`docs/FORK-CHECKLIST.md`](FORK-CHECKLIST.md) — it's the master walkthrough covering every external service this template integrates with (auth, payments, email, analytics). This document is the deep-dive for the auth portion.
 
 ## Prerequisites
 
@@ -103,7 +103,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 
 | Field                          | Value                                                        |
 | ------------------------------ | ------------------------------------------------------------ |
-| **Application name**           | `ScriptHammer` (or your preferred name)                      |
+| **Application name**           | `Grand Daze` (or your preferred name)                      |
 | **Homepage URL**               | `http://localhost:3000` (development) or your production URL |
 | **Application description**    | (Optional) "Next.js template with authentication"            |
 | **Authorization callback URL** | `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`    |
@@ -163,7 +163,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 3:** Configure OAuth consent screen (if needed)
 
 - **User Type:** External (for public apps)
-- **App name:** ScriptHammer
+- **App name:** Grand Daze
 - **User support email:** Your email
 - **Developer contact information:** Your email
 - Click **"Save and Continue"**
@@ -173,7 +173,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 4:** Create OAuth Client ID
 
 - **Application type:** Web application
-- **Name:** ScriptHammer
+- **Name:** Grand Daze
 - **Authorized redirect URIs:** Click **"+ ADD URI"**
   - Add: `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`
 - Click **"CREATE"**
@@ -215,13 +215,13 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 2:** Set Site URL
 
 - **Development:** `http://localhost:3000`
-- **Production:** Your deployed URL (e.g., `https://scripthammer.github.io/ScriptHammer`)
+- **Production:** Your deployed URL (e.g., `https://grand-daze.github.io/GrandDaze`)
 
 **Step 3:** Add Redirect URLs
 
 - Click **"Add redirect URL"** for each environment:
   - `http://localhost:3000/**` (development)
-  - `https://scripthammer.github.io/ScriptHammer/**` (production)
+  - `https://grand-daze.github.io/GrandDaze/**` (production)
 
 ### 5.2 Email Auth Settings
 
@@ -250,7 +250,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 1:** Start development server
 
 ```bash
-docker compose exec scripthammer pnpm run dev
+docker compose exec grand-daze pnpm run dev
 ```
 
 **Step 2:** Navigate to sign-up page
@@ -401,7 +401,7 @@ was not carelessness — it was that the change was verified by probing sign-**u
 the single path that happened to work.
 
 ```bash
-TURNSTILE_SECRET=0x... docker compose exec -T scripthammer \
+TURNSTILE_SECRET=0x... docker compose exec -T grand-daze \
   node scripts/check-captcha.mjs
 ```
 
@@ -545,7 +545,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 
 ```bash
 # Exit dev server (Ctrl+C)
-docker compose exec scripthammer pnpm run dev
+docker compose exec grand-daze pnpm run dev
 ```
 
 ## Troubleshooting

@@ -791,7 +791,7 @@
           Extension
         </a>
         <span class="link-separator">·</span>
-        <a id="portfolio-link" href="#" target="_blank" class="github-link" title="Built by TortoiseWolfe — portfolio">
+        <a id="portfolio-link" href="#" target="_blank" class="github-link" title="Built by tortoisewolfe — portfolio">
           Portfolio
         </a>
         <span class="link-separator">·</span>
@@ -927,7 +927,7 @@
       project_repo: "",
       extension_repo: "https://github.com/TortoiseWolfe/spec-kit-extension-wireframe",
       portfolio_url: "https://turtlewolfe.com",
-      sponsor_url: "https://github.com/sponsors/TortoiseWolfe"
+      sponsor_url: "https://github.com/sponsors/tortoisewolfe"
     };
 
     let PROJECT_NAME = DEFAULTS.project_name;
@@ -1012,7 +1012,7 @@
         const manifest = await r.json();
         wireframes = manifest.wireframes || [];
 
-        // Build categories — one entry per feature (simplified from ScriptHammer's
+        // Build categories — one entry per feature (simplified from Grand Daze's
         // hardcoded 9 categories). Each feature becomes its own category.
         let idx = 0;
         categories = (manifest.features || []).map(f => {
@@ -1352,7 +1352,7 @@
     // Status badges are baked into the manifest (see generate-manifest.py's
     // detect_status) and rendered by buildNavFromManifest, so fetchStatus() is a
     // no-op in this extension. We keep the function defined for API compat
-    // with the old ScriptHammer codebase.
+    // with the old Grand Daze codebase.
 
     // Parse feature number from path (e.g., "000-rls-implementation/..." → 0)
     function getFeatureNum(path) {

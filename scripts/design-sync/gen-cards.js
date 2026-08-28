@@ -14,7 +14,7 @@
  * Each card:
  *   - line 1 is <!-- @dsCard group="..." --> (compiled into _ds_manifest.json)
  *   - inlines theme.css in a <style> (fully self-contained)
- *   - renders the component twice, side by side: scripthammer-dark + scripthammer-light
+ *   - renders the component twice, side by side: grand-daze-dark + grand-daze-light
  */
 const fs = require('fs');
 const path = require('path');
@@ -92,7 +92,7 @@ function pageWrap(group, title, themeCss, innerDark, innerLight) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ScriptHammer — ${title}</title>
+<title>Grand Daze — ${title}</title>
 <style>
 ${themeCss}
 .ds-frame { display:flex; flex-wrap:wrap; gap:1.5rem; padding:1.5rem; }
@@ -102,15 +102,15 @@ ${themeCss}
 </head>
 <body>
 <div class="ds-frame">
-  <div class="ds-pane" data-theme="scripthammer-dark">
+  <div class="ds-pane" data-theme="grand-daze-dark">
     <div class="bg-base-100 text-base-content rounded-box p-6">
-      <div class="ds-label text-base-content">scripthammer-dark</div>
+      <div class="ds-label text-base-content">grand-daze-dark</div>
       ${innerDark}
     </div>
   </div>
-  <div class="ds-pane" data-theme="scripthammer-light">
+  <div class="ds-pane" data-theme="grand-daze-light">
     <div class="bg-base-100 text-base-content rounded-box p-6">
-      <div class="ds-label text-base-content">scripthammer-light</div>
+      <div class="ds-label text-base-content">grand-daze-light</div>
       ${innerLight}
     </div>
   </div>

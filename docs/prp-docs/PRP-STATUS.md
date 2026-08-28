@@ -17,11 +17,11 @@
 
 - **`docs/prp-docs/fediverse-community-platform-prd.md`** — 189 lines. Should the
   Chattanooga co-op's community need be met by **building** a forum + fediverse
-  engine on ScriptHammer, or by **adopting** mature software (Discourse /
+  engine on Grand Daze, or by **adopting** mature software (Discourse /
   Friendica) and spending the build budget on the one non-commodity asset, the
   place-anchored digital twin?
 - **Status: Draft v0.1, decision tool — NOT a mandate, and it argues against its
-  own subject.** The finding is that ScriptHammer's real data plane (group
+  own subject.** The finding is that Grand Daze's real data plane (group
   messaging, the dual-implemented RLS authorization contract, admin/audit shell,
   .NET backend, shipped 3D twin) shrinks the _first third_ of a forum build and
   does approximately nothing for the schedule-dominant two thirds — the
@@ -62,7 +62,7 @@
 
 ## 2026-07-18 — Model City / Chattanooga Digital Twin (feature 049) — PRD + PRP drafted
 
-Concept extracted from the Claude Design prototypes into ScriptHammer docs (no code yet):
+Concept extracted from the Claude Design prototypes into Grand Daze docs (no code yet):
 
 - **`model-city-prd.md`** (repo root) — the full vision: one project, three planes over the _existing_ `/chatt` twin (Tools / Play / Docs), equity-weighted, "explainable over accurate."
 - **`docs/prp-docs/model-city-prp.md`** — scoped PRP for the **first slice** (the Model City planning board; alternative slice = the Registry + Civic League civic loop).

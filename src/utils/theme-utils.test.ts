@@ -24,7 +24,7 @@ describe('isDarkTheme', () => {
   it('returns true for known dark themes', () => {
     expect(isDarkTheme('dark')).toBe(true);
     expect(isDarkTheme('dracula')).toBe(true);
-    expect(isDarkTheme('scripthammer-dark')).toBe(true);
+    expect(isDarkTheme('grand-daze-dark')).toBe(true);
   });
 
   it('returns false for light themes', () => {

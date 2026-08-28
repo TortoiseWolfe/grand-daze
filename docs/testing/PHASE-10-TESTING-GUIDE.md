@@ -242,12 +242,12 @@ This document provides comprehensive testing guidance for Phase 10 of the User M
 
 ```bash
 # Terminal 1: Start dev server
-docker compose exec scripthammer pnpm run dev
+docker compose exec grand-daze pnpm run dev
 
 # Terminal 2: Run Pa11y
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/messages --runner axe
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/messages/connections --runner axe
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/conversations --runner axe
+docker compose exec grand-daze pnpm exec pa11y http://localhost:3000/messages --runner axe
+docker compose exec grand-daze pnpm exec pa11y http://localhost:3000/messages/connections --runner axe
+docker compose exec grand-daze pnpm exec pa11y http://localhost:3000/conversations --runner axe
 ```
 
 **Expected Results**:
@@ -323,10 +323,10 @@ test('passes color contrast audit', async () => {
 docker compose run --rm builder pnpm run build
 
 # Terminal 2: Serve production build
-docker compose exec scripthammer pnpm exec serve out -p 3000
+docker compose exec grand-daze pnpm exec serve out -p 3000
 
 # Terminal 3: Run Lighthouse
-docker compose exec scripthammer pnpm exec lighthouse http://localhost:3000/messages \
+docker compose exec grand-daze pnpm exec lighthouse http://localhost:3000/messages \
   --only-categories=performance,accessibility,best-practices,seo \
   --output=json \
   --output-path=./lighthouse-report.json
@@ -353,7 +353,7 @@ docker compose run --rm builder pnpm run build
 
 # Analyze bundle
 docker compose run --rm builder pnpm exec next build --experimental-build-mode=compile
-docker compose exec scripthammer ls -lh .next/static/chunks
+docker compose exec grand-daze ls -lh .next/static/chunks
 ```
 
 **Target Metrics**:

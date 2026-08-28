@@ -1,5 +1,5 @@
 /**
- * Unit tests for cleanupStaleScripthammerUsers (#50).
+ * Unit tests for cleanupStaleGranddazeUsers (#50).
  *
  * Pins the FK-aware DELETE chain that runs before pnpm test:rls so that
  * a prior killed run's orphan rows can't wedge createTestUser.
@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { cleanupStaleScripthammerUsers } from '../rls/__setup__/cleanup-stale-impl';
+import { cleanupStaleGranddazeUsers } from '../rls/__setup__/cleanup-stale-impl';
 
 // Mock service client. Each table accessor returns a chain; the .delete()
 // path returns a Promise of { error } so the impl can await it. We
@@ -64,10 +64,10 @@ function makeMockClient(opts: {
         }),
       })),
     })),
-  } as unknown as Parameters<typeof cleanupStaleScripthammerUsers>[0];
+  } as unknown as Parameters<typeof cleanupStaleGranddazeUsers>[0];
 }
 
-describe('cleanupStaleScripthammerUsers (#50)', () => {
+describe('cleanupStaleGranddazeUsers (#50)', () => {
   beforeEach(() => {
     deleteCalls = [];
     deleteUserCalls = [];
@@ -76,12 +76,12 @@ describe('cleanupStaleScripthammerUsers (#50)', () => {
   it('deletes the FK chain in correct order per matching user', async () => {
     const client = makeMockClient({
       users: [
-        { id: 'user-a-id', email: 'test-user-a@scripthammer.test' },
-        { id: 'user-b-id', email: 'test-user-b@scripthammer.test' },
+        { id: 'user-a-id', email: 'test-user-a@grand-daze.test' },
+        { id: 'user-b-id', email: 'test-user-b@grand-daze.test' },
       ],
     });
 
-    const summary = await cleanupStaleScripthammerUsers(client);
+    const summary = await cleanupStaleGranddazeUsers(client);
 
     // For each user: payment_intents → webhook_events → subscriptions →
     // user_profiles, then auth deleteUser.
@@ -107,11 +107,11 @@ describe('cleanupStaleScripthammerUsers (#50)', () => {
 
   it('skips webhook_events when the user has no subscriptions', async () => {
     const client = makeMockClient({
-      users: [{ id: 'user-y', email: 'test-user-a@scripthammer.test' }],
+      users: [{ id: 'user-y', email: 'test-user-a@grand-daze.test' }],
       noSubs: true,
     });
 
-    await cleanupStaleScripthammerUsers(client);
+    await cleanupStaleGranddazeUsers(client);
 
     const tables = deleteCalls.map((c) => c.table);
     expect(tables).toEqual([
@@ -123,16 +123,16 @@ describe('cleanupStaleScripthammerUsers (#50)', () => {
     expect(deleteUserCalls).toEqual(['user-y']);
   });
 
-  it('ignores users whose email does not match @scripthammer.test', async () => {
+  it('ignores users whose email does not match @grand-daze.test', async () => {
     const client = makeMockClient({
       users: [
         { id: 'prod-id', email: 'real-user@example.com' },
-        { id: 'admin-id', email: 'admin@scripthammer.com' }, // .com, not .test
-        { id: 'sh-id', email: 'test-user-a@scripthammer.test' },
+        { id: 'admin-id', email: 'admin@grand-daze.com' }, // .com, not .test
+        { id: 'sh-id', email: 'test-user-a@grand-daze.test' },
       ],
     });
 
-    await cleanupStaleScripthammerUsers(client);
+    await cleanupStaleGranddazeUsers(client);
 
     // Only the .test user got cleaned.
     expect(deleteUserCalls).toEqual(['sh-id']);
@@ -142,11 +142,11 @@ describe('cleanupStaleScripthammerUsers (#50)', () => {
 
   it('continues to subsequent steps when a DELETE fails (best-effort)', async () => {
     const client = makeMockClient({
-      users: [{ id: 'user-x', email: 'test-user-a@scripthammer.test' }],
+      users: [{ id: 'user-x', email: 'test-user-a@grand-daze.test' }],
       failOn: { table: 'payment_intents' },
     });
 
-    const summary = await cleanupStaleScripthammerUsers(client);
+    const summary = await cleanupStaleGranddazeUsers(client);
 
     // payment_intents failed, but webhook_events + subscriptions + user_profiles
     // + auth deleteUser still ran for the same user.
@@ -164,12 +164,12 @@ describe('cleanupStaleScripthammerUsers (#50)', () => {
     expect(summary.errorsLogged).toBe(1);
   });
 
-  it('is a no-op when no @scripthammer.test users exist', async () => {
+  it('is a no-op when no @grand-daze.test users exist', async () => {
     const client = makeMockClient({
       users: [{ id: 'prod-id', email: 'real@example.com' }],
     });
 
-    const summary = await cleanupStaleScripthammerUsers(client);
+    const summary = await cleanupStaleGranddazeUsers(client);
 
     expect(deleteCalls).toHaveLength(0);
     expect(deleteUserCalls).toHaveLength(0);

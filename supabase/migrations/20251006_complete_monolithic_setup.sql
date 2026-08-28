@@ -457,7 +457,7 @@ VALUES
   ('prd-forge', 'product', 'Forge', 'The starter. Take it, ship it, keep it.',
    0, 'fixed', NULL, NULL, 'one_time', NULL,
    '["Next.js 15 + React 19 + TypeScript","680+ tests, PWA, 34 themes","Auth, payments, encrypted messaging","MIT licensed, community support"]'::jsonb,
-   '{"purchasable":false,"external_url":"https://github.com/TortoiseWolfe/ScriptHammer"}'::jsonb, 10, true),
+   '{"purchasable":false,"external_url":"https://github.com/tortoisewolfe/GrandDaze"}'::jsonb, 10, true),
 
   ('prd-anvil', 'product', 'Anvil', 'A vertical, productized.',
    14900, 'fixed', NULL, NULL, 'one_time', NULL,
@@ -3339,7 +3339,7 @@ COMMENT ON TABLE group_keys IS 'Encrypted symmetric group keys per member per ve
 --   ✅ Group chat policies: 8 policies (membership access, key distribution)
 --   ✅ Permissions: Authenticated users + service role (all tables)
 --   ✅ Test user: test@example.com (primary, email confirmed)
---   ✅ Admin user: scripthammer (Feature 002 - welcome messages, is_admin = TRUE)
+--   ✅ Admin user: grand-daze (Feature 002 - welcome messages, is_admin = TRUE)
 -- ============================================================================
 
 -- Admin profile for system welcome messages (Feature 002)
@@ -3360,7 +3360,7 @@ COMMENT ON TABLE group_keys IS 'Encrypted symmetric group keys per member per ve
 DO $seed_admin_profile$
 BEGIN
   INSERT INTO user_profiles (id, username, display_name, welcome_message_sent, is_admin)
-  VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer', TRUE, TRUE)
+  VALUES ('00000000-0000-0000-0000-000000000001', 'grand-daze', 'Grand Daze', TRUE, TRUE)
   ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;
 EXCEPTION
   WHEN foreign_key_violation THEN

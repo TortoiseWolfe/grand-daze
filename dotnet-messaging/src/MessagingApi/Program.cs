@@ -150,7 +150,7 @@ builder.Services
 builder.Services.AddAuthorization();
 
 // ── CORS: the browser calls this API from the Next.js origin. basePath
-// (/ScriptHammer) is a path, not part of the CORS origin, so allow the bare
+// (/GrandDaze) is a path, not part of the CORS origin, so allow the bare
 // scheme+host+port for the dev ports the app runs on.
 var corsOrigins =
     builder.Configuration["CORS_ORIGINS"]?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)

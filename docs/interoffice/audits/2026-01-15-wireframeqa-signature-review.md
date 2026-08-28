@@ -11,7 +11,7 @@
 | Check     | Requirement                                        |
 | --------- | -------------------------------------------------- |
 | Alignment | `x="40"` (LEFT-ALIGNED, no `text-anchor="middle"`) |
-| Format    | `NNN:NN \| Feature Name \| ScriptHammer`           |
+| Format    | `NNN:NN \| Feature Name \| Grand Daze`           |
 | Styling   | `font-size="18" font-weight="bold"`                |
 | Fill      | `#374151`                                          |
 
@@ -33,7 +33,7 @@
 ```xml
 <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif"
       font-size="18" font-weight="bold">
-  002:02 | Cookie Consent | ScriptHammer
+  002:02 | Cookie Consent | Grand Daze
 </text>
 ```
 
@@ -51,7 +51,7 @@
 ```xml
 <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif"
       font-size="18" font-weight="bold">
-  007:01 | E2E Testing Framework | ScriptHammer
+  007:01 | E2E Testing Framework | Grand Daze
 </text>
 ```
 
@@ -69,7 +69,7 @@
 ```xml
 <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif"
       font-size="18" font-weight="bold">
-  017:01 | Colorblind Mode | ScriptHammer
+  017:01 | Colorblind Mode | Grand Daze
 </text>
 ```
 
@@ -87,7 +87,7 @@
 ```xml
 <text x="960" y="1060" text-anchor="middle" font-family="system-ui, sans-serif"
       font-size="18" font-weight="bold" fill="#1f2937">
-  008:01 | User Avatar Upload | ScriptHammer
+  008:01 | User Avatar Upload | Grand Daze
 </text>
 ```
 
@@ -108,7 +108,7 @@
 ```xml
 <text x="40" y="1060" fill="#94a3b8" font-family="system-ui, sans-serif"
       font-size="18" font-weight="bold">
-  015:01 | OAuth Display Name | ScriptHammer
+  015:01 | OAuth Display Name | Grand Daze
 </text>
 ```
 
@@ -139,6 +139,6 @@ Based on full codebase scan (see conversation context):
 
 - **18 SVGs** have centered signatures (need alignment fix)
 - **2 SVGs** have wrong fill color (#94a3b8)
-- **6 SVGs** have wrong format (not NNN:NN | Feature | ScriptHammer)
+- **6 SVGs** have wrong format (not NNN:NN | Feature | Grand Daze)
 
 Consider adding signature validation to `validate-wireframe.py` to catch these automatically.

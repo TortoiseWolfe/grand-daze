@@ -100,9 +100,9 @@ async function livePages() {
 
     // DERIVE THE LIVE PREFIX; DO NOT ASSUME IT.
     //
-    // The deployed sitemap advertises `https://tortoisewolfe.github.io/ScriptHammer/…`
-    // while the site is served at `scripthammer.com` with NO basePath. So a loc
-    // pathname carries a `/ScriptHammer` prefix that does not exist on the host
+    // The deployed sitemap advertises `https://tortoisewolfe.github.io/GrandDaze/…`
+    // while the site is served at `grand-daze.com` with NO basePath. So a loc
+    // pathname carries a `/GrandDaze` prefix that does not exist on the host
     // being crawled — measured in production: 1 of 84 pages read, after the same
     // symptom had already been fixed once for a different reason.
     //
@@ -449,7 +449,7 @@ for (const { rel, dest, born, age } of candidates) {
   // HTML uses, and `rel` is prefix-free — so joining `rel` to BASE is the only
   // combination correct in both directions. Using the origin plus the live path
   // made all 33 references unreachable when the live sitemap advertised
-  // `/ScriptHammer/` and the crawl target served at root.
+  // `/GrandDaze/` and the crawl target served at root.
   const res = await get(`${BASE.replace(/\/$/, '')}/${rel}`);
   if (!res) {
     failed++;

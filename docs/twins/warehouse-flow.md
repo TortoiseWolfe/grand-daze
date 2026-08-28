@@ -26,7 +26,7 @@ served GLB. Everything else is shared config/data.
 ## The crank
 
 ```bash
-docker compose exec scripthammer pnpm run warehouse:sync        # all 3 stages
+docker compose exec grand-daze pnpm run warehouse:sync        # all 3 stages
 ```
 
 | Stage                     | Command                                                  | Input → Output                                                                                                                                                                                                                                                                                            |

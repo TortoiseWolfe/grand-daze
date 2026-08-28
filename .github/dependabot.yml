@@ -36,7 +36,7 @@ updates:
       #   versions: ["16.x"]
     # Add assignees to PRs
     assignees:
-      - 'TortoiseWolfe'
+      - 'tortoisewolfe'
     # Add labels to PRs
     labels:
       - 'dependencies'

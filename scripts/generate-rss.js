@@ -63,7 +63,7 @@ function readPublishedBlogPosts(blogDataPath) {
         title: post.title || post.slug,
         description: post.excerpt || '',
         url: `/blog/${encodeURIComponent(post.slug)}/`,
-        author: post.author?.name || 'ScriptHammer Team',
+        author: post.author?.name || 'Grand Daze Team',
         pubDate: publishedAt,
         categories: Array.isArray(post.metadata?.categories)
           ? post.metadata.categories
@@ -85,8 +85,8 @@ function renderRss({ blogPosts, siteUrl, buildDate }) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>ScriptHammer Blog</title>
-    <description>The engineering blog of ScriptHammer, a production Next.js and Supabase platform</description>
+    <title>Grand Daze Blog</title>
+    <description>The engineering blog of Grand Daze, a production Next.js and Supabase platform</description>
     <link>${siteUrl}/blog</link>
     <language>en-US</language>
     <lastBuildDate>${buildDate.toUTCString()}</lastBuildDate>
@@ -134,11 +134,11 @@ function generateRSSFeed({
   });
   const jsonFeed = {
     version: 'https://jsonfeed.org/version/1.1',
-    title: 'ScriptHammer Blog',
+    title: 'Grand Daze Blog',
     home_page_url: `${resolved.url}/blog`,
     feed_url: `${resolved.url}/feed.json`,
     description:
-      'The engineering blog of ScriptHammer, a production Next.js and Supabase platform',
+      'The engineering blog of Grand Daze, a production Next.js and Supabase platform',
     items: blogPosts.map((post) => ({
       id: `${resolved.url}${post.url}`,
       url: `${resolved.url}${post.url}`,

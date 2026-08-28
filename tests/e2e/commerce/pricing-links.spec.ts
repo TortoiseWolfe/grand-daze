@@ -42,7 +42,7 @@ test.describe('pricing → checkout links', () => {
 
     // Two attribute filters rather than one substring. The app sets
     // `trailingSlash`, so hrefs render as `/checkout/?sku=…`, and under the
-    // basePath build they are `/ScriptHammer/checkout/?sku=…`. A literal
+    // basePath build they are `/GrandDaze/checkout/?sku=…`. A literal
     // `a[href*="/checkout?sku="]` matches NEITHER — it found 0 links on the first
     // run, and only the coverage floor below turned that into a failure instead
     // of a green vacuous pass.

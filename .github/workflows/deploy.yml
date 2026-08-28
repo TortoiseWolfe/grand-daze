@@ -230,7 +230,7 @@ jobs:
         continue-on-error: true
         run: |
           node scripts/retain-previous-assets.mjs merged-output \
-            "${SITE_URL:-https://scripthammer.com}"
+            "${SITE_URL:-https://grand-daze.com}"
         env:
           SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
           # HOW LONG an asset is carried. Stated in days because the exposure is a

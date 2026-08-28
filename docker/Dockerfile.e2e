@@ -47,10 +47,10 @@ RUN mkdir -p test-results playwright-report
 ENV CI=true
 
 # A default only; docker-compose.e2e.yml sets the real value, pointing at the
-# sibling `scripthammer` service. The old default read `/CRUDkit` — the
+# sibling `grand-daze` service. The old default read `/CRUDkit` — the
 # pre-rename project name — and survived precisely because compose always
 # overrode it, so nothing ever exercised the wrong value.
-ENV BASE_URL=http://localhost:3000/ScriptHammer
+ENV BASE_URL=http://localhost:3000/GrandDaze
 
 # Expose ports
 EXPOSE 3000

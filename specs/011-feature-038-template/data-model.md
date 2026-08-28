@@ -40,7 +40,7 @@ interface ProjectConfig {
 
 ```javascript
 // Before (hardcoded)
-const CACHE_VERSION = 'scripthammer-v1.0.0';
+const CACHE_VERSION = 'grand-daze-v1.0.0';
 
 // After (dynamic)
 const CACHE_VERSION = `${PROJECT_NAME.toLowerCase()}-v${VERSION}`;
@@ -53,7 +53,7 @@ const CACHE_VERSION = `${PROJECT_NAME.toLowerCase()}-v${VERSION}`;
 | Category   | Pattern                                            | Action              |
 | ---------- | -------------------------------------------------- | ------------------- |
 | Content    | `*.ts`, `*.tsx`, `*.js`, `*.json`, `*.md`, `*.yml` | sed replacement     |
-| File Names | `*ScriptHammer*`                                   | mv rename           |
+| File Names | `*Grand Daze*`                                   | mv rename           |
 | Special    | `docker-compose.yml`                               | Service name update |
 | Special    | `public/CNAME`                                     | Delete              |
 | Special    | `.git/config`                                      | Update remote URL   |

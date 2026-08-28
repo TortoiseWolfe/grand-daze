@@ -189,5 +189,5 @@
       <text x="0" y="84" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Idempotent via edge_idempotency_keys, so a double submit yields exactly one order and one charge.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">050:02 | Checkout (/checkout) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">050:02 | Checkout (/checkout) | Grand Daze</text>
 </svg>

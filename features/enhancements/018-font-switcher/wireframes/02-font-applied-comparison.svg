@@ -42,7 +42,7 @@
         <text x="0" y="25" font-family="system-ui, sans-serif" font-size="22" font-weight="bold" fill="#1f2937">Documentation Overview</text>
         <text x="0" y="55" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#374151">Getting Started Guide</text>
 
-        <text x="0" y="90" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Welcome to ScriptHammer documentation. This guide will help</text>
+        <text x="0" y="90" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Welcome to Grand Daze documentation. This guide will help</text>
         <text x="0" y="108" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">you understand how to use our planning template effectively.</text>
         <text x="0" y="126" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">All 46 feature specifications follow the same structure.</text>
 
@@ -90,7 +90,7 @@
         <text x="0" y="25" font-family="Comic Sans MS, cursive" font-size="22" font-weight="bold" fill="#1f2937" letter-spacing="1">Documentation Overview</text>
         <text x="0" y="55" font-family="Comic Sans MS, cursive" font-size="16" font-weight="600" fill="#374151" letter-spacing="1">Getting Started Guide</text>
 
-        <text x="0" y="90" font-family="Comic Sans MS, cursive" font-size="14" fill="#4b5563" letter-spacing="0.5">Welcome to ScriptHammer documentation. This guide will help</text>
+        <text x="0" y="90" font-family="Comic Sans MS, cursive" font-size="14" fill="#4b5563" letter-spacing="0.5">Welcome to Grand Daze documentation. This guide will help</text>
         <text x="0" y="108" font-family="Comic Sans MS, cursive" font-size="14" fill="#4b5563" letter-spacing="0.5">you understand how to use our planning template effectively.</text>
         <text x="0" y="126" font-family="Comic Sans MS, cursive" font-size="14" fill="#4b5563" letter-spacing="0.5">All 46 feature specifications follow the same structure.</text>
 
@@ -157,7 +157,7 @@
     <rect x="20" y="180" width="320" height="280" fill="#f5f0e6" rx="6" stroke="#b8a080" stroke-width="1"/>
 
     <text x="30" y="210" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">Getting Started</text>
-    <text x="30" y="235" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Welcome to ScriptHammer</text>
+    <text x="30" y="235" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Welcome to Grand Daze</text>
     <text x="30" y="253" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">documentation. This guide</text>
     <text x="30" y="271" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">helps you get started.</text>
 
@@ -277,5 +277,5 @@
   <text x="140" y="940" font-family="system-ui, sans-serif" font-size="14" fill="#374151">before/after comparison | accessibility fonts | dyslexia-friendly | localStorage persistence | instant apply</text>
 
   <!-- Signature -->
-  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">018:02 | Font Switcher | ScriptHammer</text>
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">018:02 | Font Switcher | Grand Daze</text>
 </svg>

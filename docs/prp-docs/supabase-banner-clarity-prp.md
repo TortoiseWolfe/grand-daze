@@ -26,7 +26,7 @@ Three small gaps make the banner less useful than it could be:
    _"Supabase is not configured. Some features may be unavailable."_ —
    doesn't tell the user which two `NEXT_PUBLIC_*` vars to set.
 2. **`docsUrl` lands on a missing anchor.** Default points at
-   `https://github.com/TortoiseWolfe/ScriptHammer#supabase-setup`,
+   `https://github.com/tortoisewolfe/GrandDaze#supabase-setup`,
    but no such heading exists on the README. Closest match is
    `### 📝 Optional - Supabase Admin (for migrations)` (line 165),
    which slugifies to `optional---supabase-admin-for-migrations`.
@@ -95,7 +95,7 @@ hides when dismissed, sessionStorage round-trip) is unchanged.
 - **New components or wiring.** The component already exists. The
   layout-level mount already exists. This PRP is a string-and-docs
   change, nothing structural.
-- **Localizing the banner copy.** ScriptHammer doesn't have an i18n
+- **Localizing the banner copy.** Grand Daze doesn't have an i18n
   story today; adding one isn't this ticket's job.
 
 ## Files Touched
@@ -108,15 +108,15 @@ hides when dismissed, sessionStorage round-trip) is unchanged.
 
 ## Verification
 
-1. **Unit tests pass:** `docker compose exec scripthammer pnpm test SetupBanner`
-2. **A11y tests pass:** `docker compose exec scripthammer pnpm test SetupBanner.accessibility`
+1. **Unit tests pass:** `docker compose exec grand-daze pnpm test SetupBanner`
+2. **A11y tests pass:** `docker compose exec grand-daze pnpm test SetupBanner.accessibility`
 3. **Live verification with missing config:**
    - Comment out `NEXT_PUBLIC_SUPABASE_*` in `.env`
-   - `docker compose restart scripthammer`
+   - `docker compose restart grand-daze`
    - Load any page; banner appears with the new copy naming the env vars
    - Click "View setup guide" — lands on `docs/FORKING.md` Supabase Setup
    - Restore env vars; restart; banner disappears
-4. **Storybook:** `docker compose exec scripthammer pnpm run storybook` —
+4. **Storybook:** `docker compose exec grand-daze pnpm run storybook` —
    confirm `SetupBanner` stories still render correctly
 5. **Constitution gates:** 5-file structure intact, type-check passes,
    lint passes, no host installs, all work in Docker.

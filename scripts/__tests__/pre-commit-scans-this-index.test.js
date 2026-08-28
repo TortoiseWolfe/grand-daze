@@ -2,7 +2,7 @@
  * The pre-commit hook must scan the index it is committing (#747).
  *
  * WHAT WENT WRONG. The host branch ran
- * `docker compose exec -T scripthammer pnpm run gitleaks:staged`, which enters the
+ * `docker compose exec -T grand-daze pnpm run gitleaks:staged`, which enters the
  * ALREADY-RUNNING container whose `/app` is the primary checkout. A git worktree has
  * its own index, so committing from one scanned the wrong tree. Demonstrated:
  *

@@ -390,7 +390,7 @@ test('refuses to run with no base URL rather than measuring another site', () =>
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '');
   assert.ok(
-    !/scripthammer\.com/i.test(script),
+    !/grand-daze\.com/i.test(script),
     'no hardcoded upstream host may remain in the executable part of the script'
   );
 });

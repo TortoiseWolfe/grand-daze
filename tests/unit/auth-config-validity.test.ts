@@ -30,7 +30,7 @@ const { loadAuthConfig } = require_(
 );
 
 // Resolved against an EMPTY env, so this asserts the pinned DEFAULTS — what a fork
-// inherits before it configures anything, and what ScriptHammer's own drift gate
+// inherits before it configures anything, and what Grand Daze's own drift gate
 // compares prod against. Reading the ambient environment here would let a stray
 // AUTH_* var in a shell make these tests pass on values nobody committed.
 const config = loadAuthConfig(

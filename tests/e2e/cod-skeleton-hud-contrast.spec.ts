@@ -41,7 +41,7 @@ import { join } from 'node:path';
 
 const AAA = 7;
 // Derived, not listed (#915). This named two of the three house themes and missed
-// `scripthammer-forge`. This spec exists to pay the contrast debt for a route excluded from
+// `grand-daze-forge`. This spec exists to pay the contrast debt for a route excluded from
 // color-contrast.spec.ts, so a gap here is not covered anywhere else.
 const THEMES = HOUSE_THEMES;
 

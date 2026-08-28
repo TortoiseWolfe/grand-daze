@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   // This route claims its own URL (#668).
   alternates: { canonical: '/privacy/' },
   openGraph: { url: '/privacy/' },
-  title: 'Privacy Policy - ScriptHammer',
+  title: 'Privacy Policy - Grand Daze',
   description:
-    'Learn how ScriptHammer protects your privacy and handles your personal information.',
+    'Learn how Grand Daze protects your privacy and handles your personal information.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
         <section className="mb-8">
           <h2>1. Introduction</h2>
           <p>
-            Welcome to ScriptHammer. We are committed to protecting your privacy
+            Welcome to Grand Daze. We are committed to protecting your privacy
             and ensuring you have a positive experience on our website. This
             privacy policy explains how we collect, use, and protect your
             personal information in compliance with the General Data Protection

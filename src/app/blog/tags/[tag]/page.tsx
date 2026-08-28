@@ -35,7 +35,7 @@ export async function generateMetadata({
   const tagPath = `/blog/tags/${tag}/`;
 
   return {
-    title: `Posts tagged "${properTag}" | ScriptHammer Blog`,
+    title: `Posts tagged "${properTag}" | Grand Daze Blog`,
     description: `Browse all blog posts tagged with ${properTag}`,
     alternates: { canonical: tagPath },
     openGraph: {

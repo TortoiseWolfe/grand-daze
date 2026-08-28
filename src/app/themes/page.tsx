@@ -81,7 +81,7 @@ function ThemePlate({
       onClick={() => onApply(theme)}
       aria-pressed={active}
       // w-full: a `block` button still sizes to its content, so without this the
-      // plates were as wide as their labels — SCRIPTHAMMER-DARK far wider than
+      // plates were as wide as their labels — GRANDDAZE-DARK far wider than
       // LUXURY — and the grid read as ragged rather than a set.
       className="focus-visible:ring-primary block w-full overflow-hidden rounded-2xl text-left focus-visible:ring-2"
       style={{
@@ -140,13 +140,13 @@ export default function ThemesPage() {
             {CURATED_THEMES.length} themes we stand behind
           </h1>
           {/* The comp claims per-theme "AA ✓ / AAA ✓" badges. Deliberately not
-              reproduced: the contrast gate sweeps scripthammer-light and
-              scripthammer-dark only, so the grade of the other 32 is genuinely
+              reproduced: the contrast gate sweeps grand-daze-light and
+              grand-daze-dark only, so the grade of the other 32 is genuinely
               unmeasured here. A badge asserting it would be the #287 failure —
               a claim nobody checked. This says what is actually true. */}
           <p className="text-base-content mt-3 max-w-[60ch] leading-relaxed">
             These {CURATED_THEMES.length} are the ones we&rsquo;d hand a client.
-            The two ScriptHammer themes are gated at WCAG AAA on every push; the
+            The two Grand Daze themes are gated at WCAG AAA on every push; the
             rest are DaisyUI stock and still work.
           </p>
         </header>

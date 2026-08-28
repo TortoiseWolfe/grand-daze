@@ -1,7 +1,7 @@
 # 2a "Machine Shop" — imported design source
 
 The actual design for epic #376, pulled from the Claude Design project
-`9c45c862-cbec-4174-a794-a23e1d6bec7f` ("ScriptHammer visual refresh") on
+`9c45c862-cbec-4174-a794-a23e1d6bec7f` ("Grand Daze visual refresh") on
 2026-07-28.
 
 **Why this exists.** Every ticket in the epic (#377–#385) was written as a
@@ -12,16 +12,16 @@ spacing, copy or composition. This directory closes that gap.
 
 | file                              | covers                                                                                         |
 | --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ScriptHammer-Directions.dc.html` | the **home page** — three competing directions, of which **2a** was chosen                     |
-| `ScriptHammer-Site.dc.html`       | the **five inner pages** — docs, blog, themes, status, sign-in ("Turn 3 · 2a across the site") |
+| `GrandDaze-Directions.dc.html` | the **home page** — three competing directions, of which **2a** was chosen                     |
+| `GrandDaze-Site.dc.html`       | the **five inner pages** — docs, blog, themes, status, sign-in ("Turn 3 · 2a across the site") |
 
 ## Palette — theme-aware, built on DaisyUI tokens
 
 **Both documents are built on `var(--color-base-*)`, not on fixed colours:**
 
 ```
-ScriptHammer-Directions.dc.html   216 uses of var(--color-base-*)   78 hex literals
-ScriptHammer-Site.dc.html         255 uses of var(--color-base-*)   46 hex literals
+GrandDaze-Directions.dc.html   216 uses of var(--color-base-*)   78 hex literals
+GrandDaze-Site.dc.html         255 uses of var(--color-base-*)   46 hex literals
 ```
 
 The mockups render in whatever DaisyUI theme is active. Typical shadow recipe
@@ -77,8 +77,8 @@ The cause was the reading method, not the design. Pulling the copy out with a
 tag-stripping regex — `re.sub(r'<[^>]+>', ' ', html)` — silently discards:
 
 - every `<img>`, so the hero's **three layered SVGs** vanish
-  (`scripthammer-logo.svg` 308px over `script-tags.svg` 192px over
-  `printing-mallet.svg` 128px — exactly what `LayeredScriptHammerLogo`
+  (`grand-daze-logo.svg` 308px over `script-tags.svg` 192px over
+  `printing-mallet.svg` 128px — exactly what `LayeredGrandDazeLogo`
   renders)
 - every `style` attribute, so **every gradient** vanishes — including the
   headline's `linear-gradient(100deg, secondary → accent)` and the medallion's

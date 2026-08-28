@@ -7,7 +7,7 @@ metadata:
   source: wireframe:commands/screenshots.md
 ---
 
-> **ScriptHammer note:** wireframes live at `features/<category>/<NNN-name>/wireframes/`
+> **Grand Daze note:** wireframes live at `features/<category>/<NNN-name>/wireframes/`
 > (not `specs/<feature>/`). Screenshots output to
 > `features/<cat>/<NNN-name>/wireframes/screenshots/` per `wireframe-config.yml`.
 

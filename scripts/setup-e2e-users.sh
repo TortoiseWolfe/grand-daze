@@ -19,8 +19,8 @@ echo "=================================="
 echo ""
 
 # Check if docker compose is running
-if ! docker compose ps scripthammer | grep -q "Up"; then
-    echo "❌ Error: Docker container 'scripthammer' is not running"
+if ! docker compose ps grand-daze | grep -q "Up"; then
+    echo "❌ Error: Docker container 'grand-daze' is not running"
     echo "   Run: docker compose up -d"
     exit 1
 fi
@@ -38,12 +38,12 @@ FORWARD=()
 
 # Step 1: Create test users
 echo "📋 Step 1: Creating test users..."
-docker compose exec "${FORWARD[@]}" scripthammer pnpm exec tsx scripts/seed-test-users.ts
+docker compose exec "${FORWARD[@]}" grand-daze pnpm exec tsx scripts/seed-test-users.ts
 echo ""
 
 # Step 2: Create connections between users
 echo "📋 Step 2: Creating connections between users..."
-docker compose exec "${FORWARD[@]}" scripthammer pnpm exec tsx scripts/seed-connections.ts
+docker compose exec "${FORWARD[@]}" grand-daze pnpm exec tsx scripts/seed-connections.ts
 echo ""
 
 echo "=================================="
@@ -56,5 +56,5 @@ echo "  - Secondary: \$TEST_USER_SECONDARY_EMAIL"
 echo "  - Tertiary: \$TEST_USER_TERTIARY_EMAIL"
 echo ""
 echo "Run E2E tests:"
-echo "  docker compose exec scripthammer pnpm exec playwright test tests/e2e/messaging/"
+echo "  docker compose exec grand-daze pnpm exec playwright test tests/e2e/messaging/"
 echo ""

@@ -24,8 +24,8 @@
     <text x="700" y="31" text-anchor="middle" fill="#e8d4b8" font-family="system-ui, sans-serif" font-size="14" font-weight="600">Account</text>
 
     <!-- Centered page heading -->
-    <text x="640" y="120" text-anchor="middle" font-family="system-ui, sans-serif" font-size="32" font-weight="bold" fill="#1f2937">ScriptHammer Theme Playground</text>
-    <text x="640" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#4b5563">Explore 34 themes including custom ScriptHammer variants</text>
+    <text x="640" y="120" text-anchor="middle" font-family="system-ui, sans-serif" font-size="32" font-weight="bold" fill="#1f2937">Grand Daze Theme Playground</text>
+    <text x="640" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#4b5563">Explore 34 themes including custom Grand Daze variants</text>
 
     <!-- ThemeSwitcher (large component — 34 theme tiles grid) -->
     <rect x="140" y="180" width="1000" height="220" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
@@ -33,7 +33,7 @@
     <!-- Grid of theme swatches: 8 cols x 4 rows showing a sample -->
     <g transform="translate(160, 222)">
       <!-- Row 1 -->
-      <rect x="0"   y="0" width="112" height="40" rx="4" fill="#f5f0e6" stroke="#8b5cf6" stroke-width="2"/><text x="56" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1f2937">ScriptHammer</text>
+      <rect x="0"   y="0" width="112" height="40" rx="4" fill="#f5f0e6" stroke="#8b5cf6" stroke-width="2"/><text x="56" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1f2937">Grand Daze</text>
       <rect x="120" y="0" width="112" height="40" rx="4" fill="#1a1a2e"/><text x="176" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#e8d4b8">sh-dark</text>
       <rect x="240" y="0" width="112" height="40" rx="4" fill="#f3f4f6" stroke="#b8a080"/><text x="296" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">light</text>
       <rect x="360" y="0" width="112" height="40" rx="4" fill="#1e293b"/><text x="416" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#e5e7eb">dark</text>
@@ -99,7 +99,7 @@
 
     <!-- Vertical theme swatch list (scrollable in real app) -->
     <rect x="16" y="148" width="328" height="44" rx="4" fill="#f5f0e6" stroke="#8b5cf6" stroke-width="2"/>
-    <text x="28" y="176" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#1f2937">ScriptHammer (active)</text>
+    <text x="28" y="176" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#1f2937">Grand Daze (active)</text>
     <rect x="16" y="198" width="328" height="44" rx="4" fill="#1a1a2e"/>
     <text x="28" y="226" font-family="system-ui, sans-serif" font-size="15" fill="#e8d4b8">sh-dark</text>
     <rect x="16" y="248" width="328" height="44" rx="4" fill="#f3f4f6" stroke="#b8a080"/>
@@ -168,9 +168,9 @@
     <g transform="translate(20, 130)">
       <text x="0" y="19" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">WHAT SHIPS</text>
       <text x="0" y="44" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Source: src/app/themes/page.tsx — ThemeSwitcher component + Text showcase. No auth required.</text>
-      <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Theme persists via localStorage; applied via body[data-theme]; 34 DaisyUI themes + custom ScriptHammer variants.</text>
+      <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Theme persists via localStorage; applied via body[data-theme]; 34 DaisyUI themes + custom Grand Daze variants.</text>
     </g>
   </g>
 
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:03 | Themes (as-is /themes) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:03 | Themes (as-is /themes) | Grand Daze</text>
 </svg>

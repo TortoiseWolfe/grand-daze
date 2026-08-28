@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   // This route claims its own URL (#668).
   alternates: { canonical: '/terms/' },
   openGraph: { url: '/terms/' },
-  title: 'Terms of Service - ScriptHammer',
+  title: 'Terms of Service - Grand Daze',
   description:
-    'The terms that govern purchases of ScriptHammer services and products, including payment, refunds, cancellation and ownership of delivered work.',
+    'The terms that govern purchases of Grand Daze services and products, including payment, refunds, cancellation and ownership of delivered work.',
 };
 
 export default function TermsOfServicePage() {
@@ -45,7 +45,7 @@ export default function TermsOfServicePage() {
           <h2>1. Who these terms are between</h2>
           <p>
             These terms govern your purchase and use of services and digital
-            products from ScriptHammer (&ldquo;we&rdquo;, &ldquo;us&rdquo;). By
+            products from Grand Daze (&ldquo;we&rdquo;, &ldquo;us&rdquo;). By
             placing an order, or by accepting the payment consent prompt at
             checkout, you agree to them. If you are buying on behalf of a
             company, you confirm you are authorised to accept these terms for

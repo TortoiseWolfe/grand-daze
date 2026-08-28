@@ -93,7 +93,7 @@ export default async function BlogPage() {
   const rest = lead ? posts.filter((post) => post.id !== lead.id) : posts;
 
   // Root-relative image paths need the basePath prefix, or they 404 under
-  // /ScriptHammer. BlogPostCard.tsx:48-54 already does this; the lead post is
+  // /GrandDaze. BlogPostCard.tsx:48-54 already does this; the lead post is
   // a second renderer of the same field and needs the same treatment.
   const basePath = getProjectConfig().basePath || '';
   const rawLeadImage = lead?.metadata?.featuredImage;
@@ -108,7 +108,7 @@ export default async function BlogPage() {
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4 sm:mb-10 md:mb-12">
         <div>
           {/* Solid, not `text-accent`: the accent measured 6.44:1 on
-              scripthammer-light, under the 7:1 gate (#21/#411). */}
+              grand-daze-light, under the 7:1 gate (#21/#411). */}
           <p className="text-base-content mb-2 font-mono text-xs tracking-wider uppercase">
             Build log
           </p>

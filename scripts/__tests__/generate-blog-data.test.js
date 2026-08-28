@@ -8,7 +8,7 @@ const { generateBlogData, generateId } = require('../generate-blog-data');
 
 function makeCheckout(posts, writeOrder) {
   const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'scripthammer-blog-data-')
+    path.join(os.tmpdir(), 'grand-daze-blog-data-')
   );
   const blogDir = path.join(root, 'public', 'blog');
   const outputDir = path.join(root, 'src', 'lib', 'blog');

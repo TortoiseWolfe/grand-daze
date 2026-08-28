@@ -25,7 +25,7 @@
   <text x="1500" y="52" fill="#d946ef" font-family="system-ui, sans-serif" font-size="15" font-weight="bold">MOBILE</text>
 
   <defs>
-    <!-- Brand symbol: cog ring (geometry copied verbatim from public/scripthammer-logo.svg,
+    <!-- Brand symbol: cog ring (geometry copied verbatim from public/grand-daze-logo.svg,
          lines 109-248. Solid silver fill #c0c0c0 substitutes the metallic gradients
          which aren't perceptible at wireframe scale). 400x400 viewBox. -->
     <symbol id="brand-cog" viewBox="0 0 400 400">
@@ -135,10 +135,10 @@
     <!-- Canvas region (the WebGL surface) -->
     <rect x="32" y="136" width="1216" height="448" rx="8" fill="url(#sceneSky)" stroke="#b8a080"/>
 
-    <!-- ScriptHammer v1 brand-composition sculpt.
+    <!-- Grand Daze v1 brand-composition sculpt.
          Uses three <symbol> definitions in <defs> with geometry copied verbatim
          from the canonical brand SVGs (public/*.svg). The <use> placements below
-         match the exact layering rules from LayeredScriptHammerLogo.tsx:
+         match the exact layering rules from LayeredGrandDazeLogo.tsx:
            Layer 1 (BACK):  printing-mallet at top:58% left:42%, size 65% of cog
            Layer 2 (MIDDLE): cog ring at 100%, centered
            Layer 3 (FRONT):  script-tags brackets at 68%, centered
@@ -306,5 +306,5 @@
   </g>
 
   <!-- Signature -->
-  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4b5563">047:01 | Three.js Game - Main | ScriptHammer</text>
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4b5563">047:01 | Three.js Game - Main | Grand Daze</text>
 </svg>

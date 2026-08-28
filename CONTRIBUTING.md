@@ -1,6 +1,6 @@
-# Contributing to ScriptHammer
+# Contributing to Grand Daze
 
-Thank you for your interest in contributing to ScriptHammer. This guide will help you get started.
+Thank you for your interest in contributing to Grand Daze. This guide will help you get started.
 
 ## Table of Contents
 
@@ -48,11 +48,11 @@ this repo recommends, that is already true.
 # 1. Fork the repository on GitHub
 
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/ScriptHammer.git
-cd ScriptHammer
+git clone https://github.com/YOUR_USERNAME/GrandDaze.git
+cd Grand Daze
 
 # 3. Add upstream remote
-git remote add upstream https://github.com/TortoiseWolfe/ScriptHammer.git
+git remote add upstream https://github.com/tortoisewolfe/GrandDaze.git
 
 # 4. Create your .env — REQUIRED, the container will not start correctly without it
 cp .env.example .env
@@ -79,12 +79,12 @@ All commands run inside the Docker container:
 
 ```bash
 # Enter the container shell
-docker compose exec scripthammer sh
+docker compose exec grand-daze sh
 
 # Or run commands directly
-docker compose exec scripthammer pnpm run dev
-docker compose exec scripthammer pnpm run test
-docker compose exec scripthammer pnpm run lint
+docker compose exec grand-daze pnpm run dev
+docker compose exec grand-daze pnpm run test
+docker compose exec grand-daze pnpm run lint
 ```
 
 **Never run `npm install` or `pnpm install` on your host machine.** This violates the Docker-first principle and may cause inconsistencies.
@@ -93,17 +93,17 @@ docker compose exec scripthammer pnpm run lint
 
 | Command                                               | Description                      |
 | ----------------------------------------------------- | -------------------------------- |
-| `docker compose exec scripthammer pnpm dev`           | Start the Next.js dev server     |
+| `docker compose exec grand-daze pnpm dev`           | Start the Next.js dev server     |
 | `docker compose run --rm builder pnpm build`          | Production build — **see note**  |
-| `docker compose exec scripthammer pnpm test`          | Run the Vitest suite             |
-| `docker compose exec scripthammer pnpm test:coverage` | Generate a coverage report       |
-| `docker compose exec scripthammer pnpm lint`          | Run ESLint                       |
-| `docker compose exec scripthammer pnpm format`        | Format with Prettier             |
-| `docker compose exec scripthammer pnpm format:check`  | Check formatting, change nothing |
-| `docker compose exec scripthammer pnpm type-check`    | Run TypeScript type checking     |
-| `docker compose exec scripthammer pnpm storybook`     | Start Storybook                  |
+| `docker compose exec grand-daze pnpm test`          | Run the Vitest suite             |
+| `docker compose exec grand-daze pnpm test:coverage` | Generate a coverage report       |
+| `docker compose exec grand-daze pnpm lint`          | Run ESLint                       |
+| `docker compose exec grand-daze pnpm format`        | Format with Prettier             |
+| `docker compose exec grand-daze pnpm format:check`  | Check formatting, change nothing |
+| `docker compose exec grand-daze pnpm type-check`    | Run TypeScript type checking     |
+| `docker compose exec grand-daze pnpm storybook`     | Start Storybook                  |
 
-**The build row is `run --rm builder`, not `exec scripthammer`, and that is load-bearing
+**The build row is `run --rm builder`, not `exec grand-daze`, and that is load-bearing
 (#293).** `next dev` and `next build` both own `/app/.next`. Building inside the dev
 container wipes the directory the dev server is serving from, and every route 500s until
 it recompiles. The `builder` service is the same image with its own `.next` volume, which
@@ -124,7 +124,7 @@ docker compose up
 Validate wireframes with the shipped 40+ rule validator:
 
 ```bash
-docker compose exec scripthammer \
+docker compose exec grand-daze \
   python3 .specify/extensions/wireframe/scripts/validate.py --all --summary
 ```
 
@@ -133,7 +133,7 @@ docker compose exec scripthammer \
 ## Project Structure
 
 ```
-ScriptHammer/
+GrandDaze/
 ├── features/                    # Feature specifications (PRPs)
 │   ├── foundation/              # Core features (000-006)
 │   ├── core-features/           # Main features (007-012)
@@ -176,7 +176,7 @@ git checkout -b feature/your-feature-name
 
 ### Workflow for Features
 
-ScriptHammer uses the SpecKit workflow for feature development:
+Grand Daze uses the SpecKit workflow for feature development:
 
 ```bash
 # 1. Specification phase
@@ -229,7 +229,7 @@ src/components/Button/
 Use the component generator to ensure compliance:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component Button
+docker compose exec grand-daze pnpm run generate:component Button
 ```
 
 ### Component Structure
@@ -292,19 +292,19 @@ to the config.
 
 ```bash
 # All tests
-docker compose exec scripthammer pnpm run test
+docker compose exec grand-daze pnpm run test
 
 # Unit tests only
-docker compose exec scripthammer pnpm run test:unit
+docker compose exec grand-daze pnpm run test:unit
 
 # E2E tests
-docker compose exec scripthammer pnpm run test:e2e
+docker compose exec grand-daze pnpm run test:e2e
 
 # Accessibility tests
-docker compose exec scripthammer pnpm run test:a11y
+docker compose exec grand-daze pnpm run test:a11y
 
 # Watch mode for development
-docker compose exec scripthammer pnpm run test:watch
+docker compose exec grand-daze pnpm run test:watch
 ```
 
 ### Test File Examples
@@ -374,9 +374,9 @@ the output names the file and line — fix it and re-stage.
 ### Pre-Submission Checklist
 
 - [ ] Code follows [Style Guide](#style-guide)
-- [ ] All tests pass (`docker compose exec scripthammer pnpm run test`)
-- [ ] Type check passes (`docker compose exec scripthammer pnpm run type-check`)
-- [ ] Linting passes (`docker compose exec scripthammer pnpm run lint`)
+- [ ] All tests pass (`docker compose exec grand-daze pnpm run test`)
+- [ ] Type check passes (`docker compose exec grand-daze pnpm run type-check`)
+- [ ] Linting passes (`docker compose exec grand-daze pnpm run lint`)
 - [ ] Build succeeds (`docker compose run --rm builder pnpm build` — the builder, #293)
 - [ ] Components follow 5-file pattern
 - [ ] Storybook stories updated for UI changes (`.stories.tsx` is one of the five files)
@@ -554,7 +554,7 @@ href: 'https://github.com/TortoiseWolfe/ScriptHammer', // rebrand:keep
 
 - **Line-scoped, not file-scoped.** A marker at the top of a file protects nothing
   below it.
-- **The token is deliberately brand-neutral.** `scripthammer:keep` would contain the
+- **The token is deliberately brand-neutral.** `grand-daze:keep` would contain the
   very string the rebrand searches for.
 - Prettier keeps a trailing `// rebrand:keep` on its own line, so formatting will not
   separate the marker from what it protects.
@@ -574,8 +574,8 @@ See [docs/FORKING.md](./docs/FORKING.md) for the fork-side view.
 
 ## Getting Help
 
-- **Questions**: Open a [Discussion](https://github.com/TortoiseWolfe/ScriptHammer/discussions)
-- **Bugs**: Open an [Issue](https://github.com/TortoiseWolfe/ScriptHammer/issues)
+- **Questions**: Open a [Discussion](https://github.com/tortoisewolfe/GrandDaze/discussions)
+- **Bugs**: Open an [Issue](https://github.com/tortoisewolfe/GrandDaze/issues)
 - **Security**: See [SECURITY.md](./.github/SECURITY.md) for the reporting process — do not open a public issue
 
 ### Before opening an issue
@@ -598,4 +598,4 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 ---
 
-Thank you for contributing to ScriptHammer!
+Thank you for contributing to Grand Daze!

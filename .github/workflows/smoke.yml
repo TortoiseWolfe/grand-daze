@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      BASE_URL: https://scripthammer.com
+      BASE_URL: https://grand-daze.com
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
@@ -85,7 +85,7 @@ jobs:
       - name: Retained assets are still served (unstyled-production detector)
         env:
           SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
-        run: node scripts/ci/check-retained-assets.mjs "${SITE:-https://scripthammer.com}"
+        run: node scripts/ci/check-retained-assets.mjs "${SITE:-https://grand-daze.com}"
 
       # The step above guards the MITIGATION; this one guards the CURE (#635).
       #
@@ -107,7 +107,7 @@ jobs:
           # catch. check-cache-headers.test.js fails if this line disappears.
           REQUIRE_EDGE: 'true'
         # No `:-` fallback: a fork with NEXT_PUBLIC_DEPLOY_URL unset used to measure
-        # ScriptHammer's site and report green. The script now refuses an empty base.
+        # Grand Daze's site and report green. The script now refuses an empty base.
         run: node scripts/ci/check-cache-headers.mjs "$SITE"
 
       # The third dashboard-resident control, alongside the two above (#393).
@@ -124,7 +124,7 @@ jobs:
       - name: CSP is still delivered as a real header (Cloudflare rule still in place)
         env:
           SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
-        run: node scripts/ci/check-csp-header.mjs "${SITE:-https://scripthammer.com}"
+        run: node scripts/ci/check-csp-header.mjs "${SITE:-https://grand-daze.com}"
 
       # The FOURTH dashboard-resident control (#822), and the one whose failure is
       # silent in both directions.
@@ -140,7 +140,7 @@ jobs:
       # one-line reviewable change this check then enforces against live DNS.
       - name: Mail policy still matches the intent declared in the repo (#822)
         env:
-          MAIL_DOMAIN: scripthammer.com
+          MAIL_DOMAIN: grand-daze.com
         run: node scripts/ci/check-mail-policy.mjs "$MAIL_DOMAIN"
 
       # Runs BEFORE the browser suite: it is cheap, and if production is pointed at

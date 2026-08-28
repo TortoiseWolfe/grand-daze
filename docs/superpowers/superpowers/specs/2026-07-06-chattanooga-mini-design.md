@@ -17,21 +17,21 @@ calls.
 
 ### 1.1 Corrected premise (important)
 
-The original build prompt says _"port `Rig`/`Hud`/light-rig/material-kit from ScriptHammer
-Stage."_ Verified on disk: **ScriptHammer's actual R3F code is only a brand-logo spinner**
+The original build prompt says _"port `Rig`/`Hud`/light-rig/material-kit from Grand Daze
+Stage."_ Verified on disk: **Grand Daze's actual R3F code is only a brand-logo spinner**
 (`src/components/game/Scene/Scene.tsx`). It has no Rig, no Hud, no tilt-shift, no light-rig,
 no material kit. Those artifacts live in the **`cm/*.js` artifact game**, which is complete
 and high quality. Therefore:
 
 - **Port FROM:** the `cm/*.js` game (vanilla-three r128 → R3F/TSX). This is the real source
   of Stage, Rig, Hud, tilt-shift shaders, light rig, world, and agents.
-- **Adopt FROM ScriptHammer:** its _conventions only_ — Next 15 App Router, dynamic import
+- **Adopt FROM Grand Daze:** its _conventions only_ — Next 15 App Router, dynamic import
   `ssr:false`, DaisyUI theme-token reading, `getAssetUrl()`/basePath handling, Docker-first
   (no host installs), static export to GitHub Pages, 5-file component pattern.
 - **Back-port later:** the generic R3F layer (`StageCore`, `Rig`, `Hud`, tilt-shift,
-  light-rig, material-kit) becomes a new ScriptHammer ticket **after** it proves out here.
+  light-rig, material-kit) becomes a new Grand Daze ticket **after** it proves out here.
   This follows the house rule: _templates emerge from shipped apps, never template-first
-  speculation._ Chattanooga Mini is the driving app; the ScriptHammer R3F template is the
+  speculation._ Chattanooga Mini is the driving app; the Grand Daze R3F template is the
   extraction.
 
 ### 1.2 Source-of-truth map
@@ -129,7 +129,7 @@ src/
   packs/                      PURE DATA
     themes.ts  tours.ts  objectives.ts
   lib/
-    enu.ts  manifest.ts  assetUrl.ts   // assetUrl wraps basePath, adopted from ScriptHammer
+    enu.ts  manifest.ts  assetUrl.ts   // assetUrl wraps basePath, adopted from Grand Daze
 scripts/bake/
   fetch-osm.ts  fetch-terrain.ts  fetch-drape.ts  build-scene.ts
 public/chatt/
@@ -243,7 +243,7 @@ SRGBColorSpace` (or leave to R3F); all `THREE.<PostFX>` globals → explicit imp
 
 ### 3.5 Theming — two systems, explicit ownership (MEDIUM)
 
-ScriptHammer's `getDaisyUIColorAsThree` + `data-theme` `MutationObserver` is a runtime
+Grand Daze's `getDaisyUIColorAsThree` + `data-theme` `MutationObserver` is a runtime
 palette reader. If world materials adopt it, every DaisyUI theme switch (32 themes) yanks
 the scene palette — fighting the app's own true-to-life ⇄ toy toggle.
 
@@ -397,7 +397,7 @@ drops onto the footprint later. Everything else is honest OSM massing. Every slo
 
 ---
 
-## 5. Conventions & deployment (adopted from ScriptHammer)
+## 5. Conventions & deployment (adopted from Grand Daze)
 
 ### 5.1 Docker-first bake — separate service (HIGH)
 
@@ -416,7 +416,7 @@ dev is live** unless using the atomic-mv path.
 
 ### 5.2 GitHub Pages basePath — every asset URL wrapped (BLOCKER)
 
-ScriptHammer ships `output:'export'`, `trailingSlash:true`, and an auto-detected `basePath`
+Grand Daze ships `output:'export'`, `trailingSlash:true`, and an auto-detected `basePath`
 (e.g. `/chattanooga-mini`). In dev `basePath=''` so `fetch('/chatt/buildings.json')` works;
 in the deployed project-site the asset lives at `owner.github.io/chattanooga-mini/chatt/…`
 but a root-anchored `fetch('/chatt/…')` resolves against origin root and **404s** —
@@ -425,7 +425,7 @@ drape + `TextureLoader` paths fail together).
 
 → **Route EVERY runtime asset URL** (all `/chatt/*.json`, the drape image, any
 `TextureLoader`/`loader.load` path) through `src/lib/assetUrl.ts` `getAssetUrl(path)`
-(adopted from ScriptHammer's helper), which prefixes `config.basePath`. The bake emits
+(adopted from Grand Daze's helper), which prefixes `config.basePath`. The bake emits
 **relative keys** in `manifest.json`; the runtime resolves them with `getAssetUrl` at load —
 **never store absolute `/chatt/…` strings.** Add a Playwright basePath-project smoke
 (building with `NEXT_PUBLIC_BASE_PATH=/chattanooga-mini`) asserting the `buildings.json` +
@@ -475,9 +475,9 @@ trolley routing; per-material true-to-life recolor; BroadcastChannel multiplayer
 
 ---
 
-## 7. Back-port ticket (ScriptHammer)
+## 7. Back-port ticket (Grand Daze)
 
-After M1 proves out, open a ScriptHammer issue to extract the generic R3F layer as a reusable
+After M1 proves out, open a Grand Daze issue to extract the generic R3F layer as a reusable
 template: `StageCore` (renderer/composer/loop/resize + imperative handle), `Rig` (4-mode
 headless controller), `Hud` (generic-by-props glass HUD), `tiltShift` (raw-`postprocessing`
 composer), `lightRig`, `materialKit`. Ships as a "3D Stage" template alongside the existing

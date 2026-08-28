@@ -4,14 +4,14 @@ Generate wireframes-manifest.json for the viewer.
 
 Scans a feature tree for `wireframes/*.svg` and emits a JSON manifest the
 viewer can fetch. Supports both flat layouts (SpecKit default) and the
-ScriptHammer two-level layout (`features/<category>/<feature>/wireframes/`).
+Grand Daze two-level layout (`features/<category>/<feature>/wireframes/`).
 Also reads any *.issues.md files to surface review status in the manifest.
 
 Usage:
   # Flat SpecKit layout (specs/<feature>/wireframes/…)
   python3 scripts/generate-manifest.py
 
-  # ScriptHammer nested layout (features/<cat>/<feature>/wireframes/…)
+  # Grand Daze nested layout (features/<cat>/<feature>/wireframes/…)
   python3 scripts/generate-manifest.py \\
       --root features \\
       --output public/wireframes/wireframes-manifest.json \\

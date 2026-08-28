@@ -1,9 +1,9 @@
 /**
- * Pure cleanup function for stale `*@scripthammer.test` users (#50).
+ * Pure cleanup function for stale `*@grand-daze.test` users (#50).
  *
  * Walks the FK chain (payment_intents → webhook_events → subscriptions →
  * user_profiles → auth deleteUser) for every test-suite user that matches the
- * scripthammer.test domain. Best-effort: errors are logged via the
+ * grand-daze.test domain. Best-effort: errors are logged via the
  * provided logger and the cleanup continues. Returns a summary count.
  *
  * Used by tests/rls/__setup__/cleanup-stale.ts as a Vitest globalSetup.
@@ -13,7 +13,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const SCRIPTHAMMER_TEST_DOMAIN = '@scripthammer.test';
+const GRANDDAZE_TEST_DOMAIN = '@grand-daze.test';
 
 export interface CleanupSummary {
   /** Auth users hard-deleted via auth.admin.deleteUser. */
@@ -68,7 +68,7 @@ const noopLogger: Logger = {
   warn: () => {},
 };
 
-export async function cleanupStaleScripthammerUsers(
+export async function cleanupStaleGranddazeUsers(
   client: SupabaseClient,
   logger: Logger = noopLogger
 ): Promise<CleanupSummary> {
@@ -78,7 +78,7 @@ export async function cleanupStaleScripthammerUsers(
     errorsLogged: 0,
   };
 
-  // 1. List all auth users; filter to the scripthammer.test domain.
+  // 1. List all auth users; filter to the grand-daze.test domain.
   const { data: listData, error: listError } =
     await client.auth.admin.listUsers({ perPage: 1000 });
   if (listError) {
@@ -89,7 +89,7 @@ export async function cleanupStaleScripthammerUsers(
   }
   const users = (listData?.users ?? []).filter(
     (u: { id: string; email?: string }) =>
-      typeof u.email === 'string' && u.email.endsWith(SCRIPTHAMMER_TEST_DOMAIN)
+      typeof u.email === 'string' && u.email.endsWith(GRANDDAZE_TEST_DOMAIN)
   );
   if (users.length === 0) return summary;
 
@@ -105,9 +105,9 @@ export async function cleanupStaleScripthammerUsers(
 /**
  * Delete ONE auth user and everything that references it, in FK-safe order.
  *
- * Extracted so the two sweepers ({@link cleanupStaleScripthammerUsers} for the
- * Vitest `@scripthammer.test` fixtures, {@link sweepOrphanedE2EUsers} for the
- * Playwright `scripthammer.e2e+` isolates) share one implementation. A PARTIAL
+ * Extracted so the two sweepers ({@link cleanupStaleGranddazeUsers} for the
+ * Vitest `@grand-daze.test` fixtures, {@link sweepOrphanedE2EUsers} for the
+ * Playwright `grand-daze.e2e+` isolates) share one implementation. A PARTIAL
  * delete is what corrupts a shared user (#338 / #341 / #342) — the fix must not
  * reintroduce that failure mode in a second copy of the logic.
  *
@@ -223,7 +223,7 @@ async function deleteUserFkSafe(
 // ============================================================================
 
 /** Prefix every Playwright per-test isolated user is minted under. */
-const E2E_ISOLATE_PREFIX = 'scripthammer.e2e+';
+const E2E_ISOLATE_PREFIX = 'grand-daze.e2e+';
 
 /**
  * The three NAMED fixtures, which must never be swept. They share the isolate
@@ -281,8 +281,8 @@ export interface SweepSummary extends CleanupSummary {
  *
  * Three independent safety properties, because this hard-deletes real auth rows:
  *
- * 1. **Prefix scoping** — only `scripthammer.e2e+…`. Owner accounts, genuine
- *    sign-ups and the Vitest `@scripthammer.test` fixtures are unreachable.
+ * 1. **Prefix scoping** — only `grand-daze.e2e+…`. Owner accounts, genuine
+ *    sign-ups and the Vitest `@grand-daze.test` fixtures are unreachable.
  * 2. **Allowlist** — the three named fixtures are never swept, even though they
  *    match the prefix.
  * 3. **Age guard** — nothing younger than `olderThanMs` (default 2h), so a

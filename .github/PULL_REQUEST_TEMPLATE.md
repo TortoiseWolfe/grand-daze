@@ -29,7 +29,7 @@ Closes #
 
 ## Checklist
 
-- [ ] Ran in Docker, not on the host (`docker compose exec scripthammer …`) — never `npm install`, `pnpm install` or `npx` on the host machine
+- [ ] Ran in Docker, not on the host (`docker compose exec grand-daze …`) — never `npm install`, `pnpm install` or `npx` on the host machine
 - [ ] `pnpm run lint`, `pnpm test --run` and `pnpm run type-check` pass in the container
 - [ ] Commit hooks ran — **no `--no-verify`**
 - [ ] New/changed behaviour has a test that fails when the behaviour is removed

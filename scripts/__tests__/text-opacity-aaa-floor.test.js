@@ -10,7 +10,7 @@
  * removal that gets undone.
  *
  * THE MEASUREMENT, from #462 (canvas readback, because `getComputedStyle` returns
- * `oklch()` unparsed). Gate is 7:1, `scripthammer-light`:
+ * `oklch()` unparsed). Gate is 7:1, `grand-daze-light`:
  *
  *              /100    /85    /80    /70
  *   base-100  12.96   8.30   7.08   5.20   <- /70 fails
@@ -22,7 +22,7 @@
  *
  * `/80` AND `/85` ARE NOW BANNED TOO, and the reason the old note here gave for sparing
  * them turned out to be wrong. It said they were "surface-DEPENDENT" — `/80` passing on
- * `base-100` at 7.08 — but that table measures only `scripthammer-light`. Recomputed
+ * `base-100` at 7.08 — but that table measures only `grand-daze-light`. Recomputed
  * across ALL 35 enabled themes (composite in sRGB, then WCAG 2.x luminance, via
  * scripts/theme-contrast/compute.mjs):
  *

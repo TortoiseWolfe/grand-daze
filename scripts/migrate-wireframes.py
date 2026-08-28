@@ -19,7 +19,7 @@ destinations are left alone; only sources present under
 docs/design/wireframes are moved).
 
 Usage:
-    docker compose exec scripthammer python3 scripts/migrate-wireframes.py [--dry-run]
+    docker compose exec grand-daze python3 scripts/migrate-wireframes.py [--dry-run]
 """
 import argparse
 import shutil

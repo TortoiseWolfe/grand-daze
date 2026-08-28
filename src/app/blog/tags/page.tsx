@@ -7,7 +7,7 @@ import { getProjectConfig } from '@/config/project.config';
 export const metadata: Metadata = {
   // This route claims its own URL (#668).
   alternates: { canonical: '/blog/tags/' },
-  title: 'Blog Tags | ScriptHammer',
+  title: 'Blog Tags | Grand Daze',
   description: 'Browse all blog post tags and topics',
   openGraph: {
     url: '/blog/tags/',

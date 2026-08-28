@@ -1,5 +1,5 @@
 /**
- * manifest.js — the curated component manifest for the ScriptHammer design-sync bundle.
+ * manifest.js — the curated component manifest for the Grand Daze design-sync bundle.
  *
  * Each entry's class strings are copied verbatim from the component source so the
  * preview cards stay faithful to the real components:
@@ -372,7 +372,7 @@ function inputsCard() {
   out += '</div>';
   // states via FormField wrapper (DaisyUI v5: no form-control/label-text; .label + text utilities)
   out += `<div class="flex flex-col gap-1"><label class="text-sm font-medium text-base-content">Email address<span class="text-error ml-1">*</span></label>
-    <div class="relative w-full"><input class="input input-md min-h-11 input-success w-full" value="dev@scripthammer.com" /><div class="absolute top-1/2 right-3 -translate-y-1/2">${okIcon()}</div></div>
+    <div class="relative w-full"><input class="input input-md min-h-11 input-success w-full" value="dev@grand-daze.com" /><div class="absolute top-1/2 right-3 -translate-y-1/2">${okIcon()}</div></div>
     <div class="text-base-content/85 text-xs">Looks good.</div></div>`;
   out += `<div class="flex flex-col gap-1"><label class="text-sm font-medium text-base-content">Password<span class="text-error ml-1">*</span></label>
     <div class="relative w-full"><input class="input input-md min-h-11 input-error w-full" value="short" type="password" /><div class="absolute top-1/2 right-3 -translate-y-1/2">${errIcon()}</div></div>

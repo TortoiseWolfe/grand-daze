@@ -54,7 +54,7 @@ export function buildBookingUrl(params: {
   // ignored today.
   url.searchParams.set(
     'utm_source',
-    calendarConfig.utm?.source ?? 'scripthammer'
+    calendarConfig.utm?.source ?? 'grand-daze'
   );
   url.searchParams.set('utm_medium', 'checkout');
   url.searchParams.set(

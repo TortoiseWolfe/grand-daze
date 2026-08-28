@@ -12,7 +12,7 @@
  * Metadata only — no model binaries are downloaded here. ≤1 req/s with a
  * contact UA, mirroring the Nominatim etiquette in scripts/bake/geocode.ts.
  *
- * Run:  docker compose exec scripthammer node scripts/warehouse/inventory.mjs
+ * Run:  docker compose exec grand-daze node scripts/warehouse/inventory.mjs
  * Out:  sites/_warehouse/inventory.json (gitignored — model titles/descriptions
  *       can legitimately reference streets the #234 privacy gate denylists, so
  *       the raw data stays local; the committed deliverable is the MD report)
@@ -22,7 +22,7 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const API = 'https://3dwarehouse.sketchup.com/warehouse/v1.0';
-const USER_AGENT = 'scripthammer-twin-inventory/0.1 (jonpohlner@gmail.com)';
+const USER_AGENT = 'grand-daze-twin-inventory/0.1 (jonpohlner@gmail.com)';
 const CHATT_3D_CREATOR_ID = '1269677630914932972846048';
 const PAGE = 50;
 const DELAY_MS = 1100; // stay under 1 req/s

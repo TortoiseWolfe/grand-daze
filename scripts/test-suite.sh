@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Test Suite Runner for ScriptHammer
+# Test Suite Runner for Grand Daze
 # Runs all tests with clear feedback and actionable results
 
-# Rename-proof app service (#957) — a fork's is not `scripthammer`.
+# Rename-proof app service (#957) — a fork's is not `grand-daze`.
 # shellcheck source=scripts/lib/compose-service.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib/compose-service.sh"
 COMPOSE_SERVICE=$(compose_service)
-[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=scripthammer
+[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=grand-daze
 
 # Colors for output
 RED='\033[0;31m'
@@ -72,7 +72,7 @@ START_TIME=$(date +%s)
 # Main header
 echo ""
 echo -e "${BLUE}${BOLD}╔══════════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}${BOLD}║                  ScriptHammer Comprehensive Test Suite               ║${NC}"
+echo -e "${BLUE}${BOLD}║                  Grand Daze Comprehensive Test Suite               ║${NC}"
 echo -e "${BLUE}${BOLD}╚══════════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${CYAN}Running all tests to ensure code quality and functionality...${NC}"
@@ -164,7 +164,7 @@ fi
 # 7. Build Test
 print_header "7. Production Build"
 echo "Testing production build..."
-# In its OWN container (#293), not $CMD_PREFIX: `docker compose exec scripthammer
+# In its OWN container (#293), not $CMD_PREFIX: `docker compose exec grand-daze
 # pnpm build` wipes the .next the dev server is serving from, which is why this
 # step used to be followed by a container restart. See docker-compose.yml.
 # (The in-docker path can't drive docker; there it stays a plain build.)
@@ -184,7 +184,7 @@ fi
 # 8. Accessibility Tests (only if server is running)
 print_header "8. Accessibility Tests"
 
-# NOTE: step 7 used to be followed by a `docker compose restart scripthammer`
+# NOTE: step 7 used to be followed by a `docker compose restart grand-daze`
 # here, to "restore dev server after build" — the build ran in the dev container
 # and clobbered its .next. That was misfiled as a permissions problem; it was
 # #293. The build now runs in its own container, so there is nothing to restore.

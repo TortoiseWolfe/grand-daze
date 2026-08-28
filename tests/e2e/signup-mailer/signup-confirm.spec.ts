@@ -44,7 +44,7 @@ test.describe('Real-form signup with email confirmation (#288)', () => {
   test('a new user signs up via the form and confirms via the emailed link', async ({
     page,
   }) => {
-    email = `signup-e2e-${Date.now()}@scripthammer.test`;
+    email = `signup-e2e-${Date.now()}@grand-daze.test`;
 
     // 1. Sign up through the REAL form — not admin.createUser.
     await page.goto('/sign-up');

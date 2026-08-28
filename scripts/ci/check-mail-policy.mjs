@@ -26,7 +26,7 @@
  * undocumented dashboard edit nothing records. See #822 for why it is still `none`.
  *
  * USAGE
- *   node scripts/ci/check-mail-policy.mjs [domain]     # default scripthammer.com
+ *   node scripts/ci/check-mail-policy.mjs [domain]     # default grand-daze.com
  *   node scripts/ci/check-mail-policy.mjs --selftest
  */
 
@@ -45,11 +45,11 @@ const DOH = 'https://cloudflare-dns.com/dns-query';
  *      the maintainer's own replies.
  */
 export const INTENDED = {
-  domain: 'scripthammer.com',
+  domain: 'grand-daze.com',
   dmarcPolicy: 'none',
   // Aggregate reports must go somewhere that actually receives — see #881, where the
   // published security address had no mail route at all.
-  dmarcRua: 'admin@scripthammer.com',
+  dmarcRua: 'admin@grand-daze.com',
   spfInclude: '_spf.mx.cloudflare.net',
   dkimSelector: 'resend',
   mxSuffix: 'mx.cloudflare.net',
@@ -143,7 +143,7 @@ export function evaluate(observed, intended = INTENDED) {
 async function main(argv) {
   if (argv.includes('--selftest')) {
     const good = {
-      dmarc: ['v=DMARC1; p=none; rua=mailto:admin@scripthammer.com'],
+      dmarc: ['v=DMARC1; p=none; rua=mailto:admin@grand-daze.com'],
       spf: ['v=spf1 include:_spf.mx.cloudflare.net ~all'],
       dkim: ['v=DKIM1; k=rsa; p=MIIBIjAN'],
       mx: ['10 route1.mx.cloudflare.net.'],
@@ -151,7 +151,7 @@ async function main(argv) {
     const cases = [
       [good, 0, 'a correct zone passes'],
       [{ ...good, dmarc: [] }, 1, 'a missing DMARC record fails'],
-      [{ ...good, dmarc: ['v=DMARC1; p=reject; rua=mailto:admin@scripthammer.com'] }, 1, 'an undeclared policy change fails'],
+      [{ ...good, dmarc: ['v=DMARC1; p=reject; rua=mailto:admin@grand-daze.com'] }, 1, 'an undeclared policy change fails'],
       [{ ...good, dkim: [] }, 1, 'a missing DKIM key fails'],
       [{ ...good, mx: [] }, 1, 'a missing MX fails'],
       [{ ...good, spf: [] }, 1, 'a missing SPF fails'],

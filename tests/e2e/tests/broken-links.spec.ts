@@ -349,7 +349,7 @@ test.describe('Broken Links Detection', () => {
     // OG image is already live in production. A page merging in the same PR that adds
     // its OG image will 404 here during CI (image isn't deployed yet) and fail this test
     // on otherwise-correct code. Add new pages only after their image has shipped to prod.
-    const pagesToCheck = ['/', '/blog', '/blog/scripthammer-intro'];
+    const pagesToCheck = ['/', '/blog', '/blog/grand-daze-intro'];
     const brokenResources: BrokenLink[] = [];
 
     for (const pagePath of pagesToCheck) {
@@ -441,8 +441,8 @@ test.describe('Broken Links Detection', () => {
         // Handle production URLs (github.io)
         if (url.includes('github.io')) {
           const prodUrl = new URL(url);
-          // Remove base path (/ScriptHammer) from pathname
-          const path = prodUrl.pathname.replace(/^\/ScriptHammer/, '');
+          // Remove base path (/GrandDaze) from pathname
+          const path = prodUrl.pathname.replace(/^\/GrandDaze/, '');
           return `${baseUrl}${path}`;
         }
         // Already a localhost URL

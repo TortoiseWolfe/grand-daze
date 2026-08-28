@@ -25,7 +25,7 @@ NC='\033[0m' # No Color
 # shellcheck source=scripts/lib/compose-service.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib/compose-service.sh"
 COMPOSE_SERVICE=$(compose_service)
-[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=scripthammer
+[ -n "$COMPOSE_SERVICE" ] || COMPOSE_SERVICE=grand-daze
 
 # Track if we're in Docker or not
 if [ -f /.dockerenv ]; then
@@ -114,7 +114,7 @@ fi
 
 # 5. Production build — in its OWN container (#293).
 #
-# This must never be `docker compose exec scripthammer pnpm build`. That is the
+# This must never be `docker compose exec grand-daze pnpm build`. That is the
 # dev server's container; `next dev` and `next build` both own /app/.next, so the
 # build wipes what the dev server is serving and every route 500s until it
 # recompiles. That is what this script did on every push for months.

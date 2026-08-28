@@ -371,7 +371,7 @@ export const PaymentStatusDisplay: React.FC<PaymentStatusDisplayProps> = ({
                         this sits inside `.alert-warning`, which sets its own
                         foreground. Applying `text-base-content` here paints the
                         PAGE's text colour onto the alert's yellow and measured
-                        1.07:1 on scripthammer-dark. Inheriting is correct.
+                        1.07:1 on grand-daze-dark. Inheriting is correct.
                         Same reason the code chip carries no `bg-` — a
                         base-200 chip on warning yellow is a hole in the alert. */}
                     {paymentResult.transaction_id && (

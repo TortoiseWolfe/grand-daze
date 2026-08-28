@@ -35,7 +35,7 @@
  *
  * Usage:
  *   node scripts/ci/check-cache-headers.mjs [base-url]
- *   BASE=https://scripthammer.com node scripts/ci/check-cache-headers.mjs
+ *   BASE=https://grand-daze.com node scripts/ci/check-cache-headers.mjs
  *
  * Exits 1 if the contract is not being served.
  */
@@ -43,8 +43,8 @@
 /**
  * NO DEFAULT SITE, deliberately (#970).
  *
- * This used to fall back to `https://scripthammer.com`, and `smoke.yml` passed
- * `"${SITE:-https://scripthammer.com}"` on top of that. A fork whose
+ * This used to fall back to `https://grand-daze.com`, and `smoke.yml` passed
+ * `"${SITE:-https://grand-daze.com}"` on top of that. A fork whose
  * `NEXT_PUBLIC_DEPLOY_URL` variable was unset therefore ran a green post-deploy check
  * against THIS project's site — reporting, accurately, that somebody else's cache
  * headers were fine. A gate that measures the wrong host is worse than no gate: it

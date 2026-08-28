@@ -36,7 +36,7 @@ const API = process.env.EMAIL_HEALTH_API || 'https://api.resend.com';
 // fetch sends a sane one, but set it explicitly so this does not silently start
 // failing if that changes — a 403 here would otherwise look like an auth problem
 // and send someone hunting the wrong bug (it cost an hour when it happened).
-const UA = 'scripthammer-email-health/1.0';
+const UA = 'grand-daze-email-health/1.0';
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`);

@@ -192,5 +192,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">All mutations admin-gated; JSON export goes through service, not direct DB.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:37 | Admin Audit (as-is /admin/audit) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:37 | Admin Audit (as-is /admin/audit) | Grand Daze</text>
 </svg>

@@ -12,7 +12,7 @@
  *
  * THE PREFIX IS NOT THE basePath, and that distinction is the whole fix. The
  * canonical carries `new URL(projectConfig.deployUrl).pathname`. In THIS repo
- * basePath is "/ScriptHammer" while canonicals read "https://scripthammer.com/"
+ * basePath is "/GrandDaze" while canonicals read "https://grand-daze.com/"
  * — non-empty basePath, zero prefix. Subtracting basePath unconditionally would
  * break the repo the gate protects. Hence: derive the prefix from the export's
  * own root canonical, and subtract it only where it actually leads.
@@ -37,7 +37,7 @@ const FILLER = 24;
  * Build a throwaway export and run the real gate against it.
  *
  * `origin` + `prefix` model the deployment: a fork is
- * ('https://owner.github.io', '/widget'); this repo is ('https://scripthammer.com', '').
+ * ('https://owner.github.io', '/widget'); this repo is ('https://grand-daze.com', '').
  * `routes` maps a route to the path its canonical CLAIMS — omit a route's entry
  * and it self-canonicals, which is the common case.
  */
@@ -83,7 +83,7 @@ function run({ origin, prefix = '', claims = {}, noCanonical = [] }) {
 }
 
 const FORK = { origin: 'https://tortoisewolfe.github.io', prefix: '/widget' };
-const DOMAIN = { origin: 'https://scripthammer.com', prefix: '' };
+const DOMAIN = { origin: 'https://grand-daze.com', prefix: '' };
 
 test('PASSES for a fork served under /<repo>/ where every route claims itself', () => {
   const r = run(FORK);

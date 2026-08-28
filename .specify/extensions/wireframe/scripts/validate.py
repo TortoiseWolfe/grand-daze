@@ -2,7 +2,7 @@
 """
 SVG Wireframe Validator v5.4
 
-Programmatically checks wireframe SVGs against ScriptHammer standards.
+Programmatically checks wireframe SVGs against Grand Daze standards.
 All checks are errors - either it passes or it fails. No ambiguous warnings.
 
 NEW in v5.4: Added G-044 (footer/nav rounded corners) check.
@@ -896,13 +896,13 @@ class WireframeValidator:
         text_match = re.search(sig_text_pattern, self.svg_content)
         if text_match:
             sig_text = text_match.group(2).strip()
-            # Must match format: NNN:NN | Feature Name | ScriptHammer
-            valid_format = re.match(r'^\d{3}:\d{2}\s*\|\s*.+\s*\|\s*ScriptHammer$', sig_text)
+            # Must match format: NNN:NN | Feature Name | Grand Daze
+            valid_format = re.match(r'^\d{3}:\d{2}\s*\|\s*.+\s*\|\s*Grand Daze$', sig_text)
             if not valid_format:
                 self.issues.append(Issue(
                     severity="ERROR",
                     code="SIGNATURE-004",
-                    message=f"Signature format wrong: '{sig_text[:40]}...' - must be 'NNN:NN | Feature Name | ScriptHammer'"
+                    message=f"Signature format wrong: '{sig_text[:40]}...' - must be 'NNN:NN | Feature Name | Grand Daze'"
                 ))
 
     def _check_annotation_spacing(self):

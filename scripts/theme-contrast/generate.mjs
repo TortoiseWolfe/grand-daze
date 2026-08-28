@@ -21,7 +21,7 @@ const WRAPPER = `/**
  * Per-theme WCAG verdicts (#422). The DATA lives in \`theme-contrast.json\`; this file
  * only gives it a type. Do not edit either by hand — regenerate with:
  *
- *     docker compose exec scripthammer node scripts/theme-contrast/generate.mjs
+ *     docker compose exec grand-daze node scripts/theme-contrast/generate.mjs
  *
  * WHY THE JSON IS TRACKED. \`/themes\` renders a badge per theme from it, and a build
  * product cannot be imported (CLAUDE.md: generated artifacts are outputs, never inputs).

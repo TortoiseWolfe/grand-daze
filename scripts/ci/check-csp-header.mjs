@@ -37,7 +37,7 @@
  *     is collecting; a header can be perfectly delivered and still wrong.
  */
 
-const site = (process.argv[2] || 'https://scripthammer.com').replace(
+const site = (process.argv[2] || 'https://grand-daze.com').replace(
   /\/+$/,
   ''
 );

@@ -167,7 +167,7 @@ export default function StatusPage() {
     <main className="bg-base-200 min-h-full">
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         {/* Verdict pill beside the title, recessed — the composition and the
-            depth in the design source (`docs/design/2a/ScriptHammer-Site.dc.html`,
+            depth in the design source (`docs/design/2a/GrandDaze-Site.dc.html`,
             "3d STATUS"). It shipped as a raised plate; the design cuts it in,
             like every other reading on the page. See #383. */}
         <div className="mb-12 flex flex-wrap items-center gap-4">

@@ -13,8 +13,8 @@ import { defineConfig, devices } from '@playwright/test';
  * WebGL is still unavailable the spec `test.skip()`s rather than false-greening on
  * a blank canvas (same #288 limitation the twin-contrast specs document).
  *
- * Run against the running dev server (basePath /ScriptHammer):
- *   docker exec sh-cod-scripthammer-1 pnpm exec playwright test \
+ * Run against the running dev server (basePath /GrandDaze):
+ *   docker exec sh-cod-grand-daze-1 pnpm exec playwright test \
  *     --config playwright.visual.config.ts
  */
 export default defineConfig({
@@ -27,7 +27,7 @@ export default defineConfig({
   timeout: 90_000,
   use: {
     // Root origin; the spec prepends APP_BASE_PATH (the dev container serves the
-    // app under the /ScriptHammer basePath, CI's exported build serves at root).
+    // app under the /GrandDaze basePath, CI's exported build serves at root).
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     serviceWorkers: 'block',
     screenshot: 'only-on-failure',
@@ -48,7 +48,7 @@ export default defineConfig({
     ? undefined
     : {
         command: 'pnpm run dev',
-        url: 'http://localhost:3000/ScriptHammer',
+        url: 'http://localhost:3000/GrandDaze',
         reuseExistingServer: true,
         timeout: 120_000,
       },

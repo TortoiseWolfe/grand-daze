@@ -44,7 +44,7 @@
   <circle cx="72" cy="71" r="6" fill="#eab308" opacity="0.8"/>
   <circle cx="92" cy="71" r="6" fill="#22c55e" opacity="0.8"/>
   <rect x="120" y="63" width="400" height="16" rx="4" fill="#1e293b"/>
-  <text x="320" y="75" text-anchor="middle" class="text-muted">scripthammer.com</text>
+  <text x="320" y="75" text-anchor="middle" class="text-muted">grand-daze.com</text>
 
   <!-- Desktop Content -->
   <rect x="30" y="87" width="750" height="488" fill="#0f172a"/>
@@ -76,7 +76,7 @@
   </g>
 
   <!-- Brand text -->
-  <text x="405" y="430" text-anchor="middle" class="brand-text">ScriptHammer</text>
+  <text x="405" y="430" text-anchor="middle" class="brand-text">Grand Daze</text>
   <text x="405" y="455" text-anchor="middle" class="text-md">Forge Your Digital Future</text>
 
   <!-- Animation States -->
@@ -130,7 +130,7 @@
   </g>
 
   <!-- Mobile brand text -->
-  <text x="917" y="280" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">ScriptHammer</text>
+  <text x="917" y="280" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">Grand Daze</text>
   <text x="917" y="300" text-anchor="middle" class="text-sm">Forge Your Digital Future</text>
 
   <!-- Mobile Animation Controls -->

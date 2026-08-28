@@ -9,8 +9,8 @@ Execute these steps AUTOMATICALLY without asking the user for input. This is a f
 Docker is required because test-results files are root-owned:
 
 ```bash
-docker compose exec scripthammer rm -rf test-results/* playwright-report/*
-docker compose exec scripthammer mkdir -p test-results playwright-report
+docker compose exec grand-daze rm -rf test-results/* playwright-report/*
+docker compose exec grand-daze mkdir -p test-results playwright-report
 ```
 
 ## Step 2: Find Latest E2E Run (Success OR Failure)
@@ -18,7 +18,7 @@ docker compose exec scripthammer mkdir -p test-results playwright-report
 **IMPORTANT**: GitHub marks runs as "success" even when individual tests FAIL (the workflow completes). Always check the LATEST E2E run regardless of conclusion.
 
 ```bash
-docker compose exec scripthammer gh run list --repo TortoiseWolfe/ScriptHammer --limit 20 --json databaseId,conclusion,createdAt,name,event
+docker compose exec grand-daze gh run list --repo tortoisewolfe/GrandDaze --limit 20 --json databaseId,conclusion,createdAt,name,event
 ```
 
 Look for:
@@ -31,7 +31,7 @@ Look for:
 Download from the latest E2E run (or failed run):
 
 ```bash
-docker compose exec scripthammer gh run download <RUN_ID> --repo TortoiseWolfe/ScriptHammer --pattern "playwright-*" --dir test-results/
+docker compose exec grand-daze gh run download <RUN_ID> --repo tortoisewolfe/GrandDaze --pattern "playwright-*" --dir test-results/
 ```
 
 **NOTE**: `gh run download` automatically extracts the artifact. Files appear at:
@@ -42,8 +42,8 @@ NO unzip step is needed - gh extracts automatically.
 Verify download worked:
 
 ```bash
-docker compose exec scripthammer ls -la test-results/
-docker compose exec scripthammer ls test-results/playwright-results-chromium/ | head -20
+docker compose exec grand-daze ls -la test-results/
+docker compose exec grand-daze ls test-results/playwright-results-chromium/ | head -20
 ```
 
 If "no artifacts" message appears but you KNOW tests failed, try the next most recent E2E run.
@@ -51,16 +51,16 @@ If "no artifacts" message appears but you KNOW tests failed, try the next most r
 ## Step 4: Get Stats
 
 ```bash
-docker compose exec scripthammer bash -c "ls -1d test-results/playwright-results-chromium/*/ 2>/dev/null | wc -l"
-docker compose exec scripthammer bash -c "ls -1d test-results/playwright-results-chromium/*-retry*/ 2>/dev/null | wc -l"
-docker compose exec scripthammer bash -c "find test-results/playwright-results-chromium -name 'error-context.md' | wc -l"
-docker compose exec scripthammer bash -c "find test-results/playwright-results-chromium -name 'test-failed-*.png' | wc -l"
+docker compose exec grand-daze bash -c "ls -1d test-results/playwright-results-chromium/*/ 2>/dev/null | wc -l"
+docker compose exec grand-daze bash -c "ls -1d test-results/playwright-results-chromium/*-retry*/ 2>/dev/null | wc -l"
+docker compose exec grand-daze bash -c "find test-results/playwright-results-chromium -name 'error-context.md' | wc -l"
+docker compose exec grand-daze bash -c "find test-results/playwright-results-chromium -name 'test-failed-*.png' | wc -l"
 ```
 
 Group failures by test category:
 
 ```bash
-docker compose exec scripthammer bash -c "ls -1 test-results/playwright-results-chromium/ | sed 's/-chromium.*//' | sed 's/-retry[0-9]*//' | sort | uniq -c | sort -rn | head -20"
+docker compose exec grand-daze bash -c "ls -1 test-results/playwright-results-chromium/ | sed 's/-chromium.*//' | sed 's/-retry[0-9]*//' | sort | uniq -c | sort -rn | head -20"
 ```
 
 ## Step 5: DEEP ANALYSIS - Read error-context.md Files
@@ -70,7 +70,7 @@ For EACH failure category with 3+ failures:
 1. Find error-context.md files for that category:
 
    ```bash
-   docker compose exec scripthammer find test-results/playwright-results-chromium -path "*<category>*" -name "error-context.md" | head -3
+   docker compose exec grand-daze find test-results/playwright-results-chromium -path "*<category>*" -name "error-context.md" | head -3
    ```
 
 2. **READ each file using the Read tool** - do NOT grep. Use the full path returned.
@@ -91,7 +91,7 @@ For EACH failure category with 3+ failures:
 For tests WITHOUT error-context.md files, read the PNG screenshots:
 
 ```bash
-docker compose exec scripthammer find test-results/playwright-results-chromium -name "test-failed-*.png" | head -10
+docker compose exec grand-daze find test-results/playwright-results-chromium -name "test-failed-*.png" | head -10
 ```
 
 **READ each PNG using the Read tool** - Claude can analyze images directly.
@@ -153,7 +153,7 @@ Group by fix type:
 
 ## IMPORTANT RULES
 
-1. **ALL commands via Docker**: `docker compose exec scripthammer <cmd>`
+1. **ALL commands via Docker**: `docker compose exec grand-daze <cmd>`
 2. **Check BOTH failed AND success runs** - success runs may have test failure artifacts
 3. **READ the error-context.md files** - use the Read tool, don't just grep
 4. **READ the PNG screenshots** - Claude can analyze images, use the Read tool

@@ -1,10 +1,10 @@
-# Gitleaks configuration for ScriptHammer
+# Gitleaks configuration for Grand Daze
 # Scans for secrets and credentials before commits/pushes
 
 [extend]
 useDefault = true  # Use default secret patterns
 
-# Custom rules for ScriptHammer stack
+# Custom rules for Grand Daze stack
 [[rules]]
 id = "supabase-service-role-key"
 description = "Supabase Service Role Key"

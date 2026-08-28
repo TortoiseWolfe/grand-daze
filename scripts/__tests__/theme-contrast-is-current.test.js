@@ -68,13 +68,13 @@ describe('committed theme contrast verdicts are current (#422)', () => {
       fresh,
       'src/config/theme-contrast.ts is stale — a theme, a token or the enabled list ' +
         'changed and the badges on /themes would now assert numbers nobody recomputed. ' +
-        'Regenerate: docker compose exec scripthammer node scripts/theme-contrast/generate.mjs'
+        'Regenerate: docker compose exec grand-daze node scripts/theme-contrast/generate.mjs'
     );
   });
 
   it('no enabled theme is left without a verdict', async () => {
     // "unknown" must never reach a badge. It appeared for real during development:
-    // `scripthammer-forge` is authored in HEX rather than oklch, and an oklch-only
+    // `grand-daze-forge` is authored in HEX rather than oklch, and an oklch-only
     // parser skipped it silently — a theme a visitor can pick, with no verdict, and
     // nothing saying so.
     const { enabledThemes } = await import('../theme-contrast/compute.mjs');

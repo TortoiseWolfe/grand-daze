@@ -53,21 +53,21 @@
 
 ## Part A — Bake pipeline (offline, Docker). Produces `public/chatt/*`.
 
-### Task 1: Fork ScriptHammer + verify green + add diorama deps (REVISED — fork-based)
+### Task 1: Fork Grand Daze + verify green + add diorama deps (REVISED — fork-based)
 
-> **PIVOT (session 2026-07-06):** Chattanooga Mini is a **ScriptHammer fork**, not a
+> **PIVOT (session 2026-07-06):** Chattanooga Mini is a **Grand Daze fork**, not a
 > standalone repo. The fork gives us, working and tested: the real `pnpm-lock.yaml`,
 > `next.config.ts` (with auto-detected basePath), `docker/Dockerfile` (multi-stage
 > `node:22-slim`), `docker-compose.yml`, `src/config/project.config.ts` (the real
 > `getAssetUrl`), Vitest, Playwright, and CI. **We do NOT hand-write bootstrap config.**
 > The original hand-written Task 1 (with its phantom `typescript@5.7.0`) is obsolete.
 >
-> **Docker service name is `scripthammer`** (from the fork's compose). Every plan command
+> **Docker service name is `grand-daze`** (from the fork's compose). Every plan command
 > written as `docker compose run --rm app …` MUST be read as
-> `docker compose run --rm scripthammer …`. (A later cleanup pass may rename the service.)
+> `docker compose run --rm grand-daze …`. (A later cleanup pass may rename the service.)
 >
-> **Diorama mounts at `app/chatt/`** (a new route), NOT `app/page.tsx` — ScriptHammer's
-> existing app stays running. Prune ScriptHammer's auth/messaging/payments/blog in a
+> **Diorama mounts at `app/chatt/`** (a new route), NOT `app/page.tsx` — Grand Daze's
+> existing app stays running. Prune Grand Daze's auth/messaging/payments/blog in a
 > LATER dedicated pass, only after the diorama renders.
 >
 > **Runtime asset URLs use the fork's existing `getAssetUrl` from `@/config/project.config`**
@@ -75,14 +75,14 @@
 
 **Files:**
 
-- Fork base already in place (ScriptHammer source copied, git re-init'd on `feat/m1-vertical-slice`).
+- Fork base already in place (Grand Daze source copied, git re-init'd on `feat/m1-vertical-slice`).
 - Modify: `package.json` (add `postprocessing`; `three`/`@react-three/fiber`/`@react-three/drei`/`tsx` are ALREADY present), add a `bake` script.
 - Create: `scripts/bake/__tests__/smoke.test.ts`, `app/chatt/page.tsx` (route stub), `app/chatt/ChattCanvas.client.tsx` (filled in Task 20).
-- Add a `chatt-bake` service (or a `bake` npm script run via `docker compose run --rm scripthammer pnpm bake`).
+- Add a `chatt-bake` service (or a `bake` npm script run via `docker compose run --rm grand-daze pnpm bake`).
 
 **Interfaces:**
 
-- Produces: a GREEN forked base (`docker compose run --rm scripthammer pnpm test` passes the inherited suite), `postprocessing` installed, `pnpm bake` wired, an `app/chatt/` route stub reachable.
+- Produces: a GREEN forked base (`docker compose run --rm grand-daze pnpm test` passes the inherited suite), `postprocessing` installed, `pnpm bake` wired, an `app/chatt/` route stub reachable.
 
 - [ ] **Step 1: Write `package.json`**
 
@@ -3387,7 +3387,7 @@ Temporarily set `Buildings` to color by `b.rule` (height=green, levels=blue, ove
 
 ## Deferred to later milestones (not in this plan)
 
-Objective packs (landmark/photo mode, trolley-route run, time-trial, trivia); CBD Spine + Bluff & Rails tours; cars/peds/boats agents; street-graph-derived trolley routing (M1 uses a baked polyline); per-material true-to-life recolor beyond grade/FOV/blur; BroadcastChannel multiplayer; the ScriptHammer back-port ticket (open after M1 ships).
+Objective packs (landmark/photo mode, trolley-route run, time-trial, trivia); CBD Spine + Bluff & Rails tours; cars/peds/boats agents; street-graph-derived trolley routing (M1 uses a baked polyline); per-material true-to-life recolor beyond grade/FOV/blur; BroadcastChannel multiplayer; the Grand Daze back-port ticket (open after M1 ships).
 
 ## Self-Review
 

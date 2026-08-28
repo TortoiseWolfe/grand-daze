@@ -1,10 +1,10 @@
 # Positioning: a product first, a template second
 
-ScriptHammer is a real, deployed product that happens to also be forkable. Both halves are true, and this note says which leads and why — so the README, and anyone evaluating the repo, reads it accurately.
+Grand Daze is a real, deployed product that happens to also be forkable. Both halves are true, and this note says which leads and why — so the README, and anyone evaluating the repo, reads it accurately.
 
 ## It's a deployed product
 
-Running live at [scripthammer.com](https://www.scripthammer.com/), not just a repo:
+Running live at [grand-daze.com](https://www.grand-daze.com/), not just a repo:
 
 - **Auth** — email/password plus GitHub and Google OAuth via Supabase, protected routes, session management.
 - **Payments** — Stripe one-time and PayPal subscriptions through Supabase Edge Functions, GDPR consent flow, webhook handling with idempotency.

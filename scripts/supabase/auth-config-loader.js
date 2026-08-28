@@ -5,7 +5,7 @@
  * `auth-config-drift.yml` compares the live Supabase project against, daily and on
  * every push to main. It held eight values specific to this instance — site URL,
  * allow-list, SMTP host/user/sender, and both OAuth client ids — and nothing
- * rewrote them on fork. So a fork inherited ScriptHammer's identity as its
+ * rewrote them on fork. So a fork inherited Grand Daze's identity as its
  * *declared correct configuration*, and the gate then reported drift against values
  * that were never theirs. Their options were to edit the file or stop believing the
  * gate; both are bad, and the second is worse.
@@ -14,11 +14,11 @@
  * It compares LIVE prod against a value **pinned in the repo**. If the expected value
  * came from the runner's environment, both sides could drift together and the check
  * could never fire — and #287 is precisely "prod drifted while every test stayed
- * green". `${VAR:-default}` keeps a pinned default so ScriptHammer's own gate still
+ * green". `${VAR:-default}` keeps a pinned default so Grand Daze's own gate still
  * detects real drift, while letting a fork declare its own expectation in CI without
  * editing the file.
  *
- * WHAT A FORK THAT CONFIGURES NOTHING GETS: the ScriptHammer defaults, and a gate
+ * WHAT A FORK THAT CONFIGURES NOTHING GETS: the Grand Daze defaults, and a gate
  * that fails LOUDLY against their project. That is the correct outcome — it tells
  * them to configure rather than passing silently. Silence is the failure mode this
  * whole file exists to remove.

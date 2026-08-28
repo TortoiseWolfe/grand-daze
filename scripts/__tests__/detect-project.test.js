@@ -135,18 +135,18 @@ describe('detect-project.js', () => {
   describe('Configuration Generation', () => {
     test('should generate default config when git is not available', () => {
       const config = {
-        projectName: process.env.NEXT_PUBLIC_PROJECT_NAME || 'ScriptHammer',
-        projectOwner: process.env.NEXT_PUBLIC_PROJECT_OWNER || 'TortoiseWolfe',
+        projectName: process.env.NEXT_PUBLIC_PROJECT_NAME || 'Grand Daze',
+        projectOwner: process.env.NEXT_PUBLIC_PROJECT_OWNER || 'tortoisewolfe',
         projectHost: 'github.com',
-        projectUrl: 'https://github.com/TortoiseWolfe/ScriptHammer',
+        projectUrl: 'https://github.com/tortoisewolfe/GrandDaze',
         basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
         isGitHub: true,
         detectionSource: 'fallback',
         generatedAt: new Date().toISOString(),
       };
 
-      assert.strictEqual(config.projectName, 'ScriptHammer');
-      assert.strictEqual(config.projectOwner, 'TortoiseWolfe');
+      assert.strictEqual(config.projectName, 'Grand Daze');
+      assert.strictEqual(config.projectOwner, 'tortoisewolfe');
       assert.strictEqual(config.detectionSource, 'fallback');
     });
 
@@ -157,8 +157,8 @@ describe('detect-project.js', () => {
       process.env.NEXT_PUBLIC_BASE_PATH = '/test';
 
       const config = {
-        projectName: process.env.NEXT_PUBLIC_PROJECT_NAME || 'ScriptHammer',
-        projectOwner: process.env.NEXT_PUBLIC_PROJECT_OWNER || 'TortoiseWolfe',
+        projectName: process.env.NEXT_PUBLIC_PROJECT_NAME || 'Grand Daze',
+        projectOwner: process.env.NEXT_PUBLIC_PROJECT_OWNER || 'tortoisewolfe',
         basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
       };
 
@@ -277,12 +277,12 @@ export type DetectedConfig = typeof detectedConfig;
       process.env.NEXT_PUBLIC_PROJECT_OWNER = '';
 
       const config = {
-        projectName: process.env.NEXT_PUBLIC_PROJECT_NAME || 'ScriptHammer',
-        projectOwner: process.env.NEXT_PUBLIC_PROJECT_OWNER || 'TortoiseWolfe',
+        projectName: process.env.NEXT_PUBLIC_PROJECT_NAME || 'Grand Daze',
+        projectOwner: process.env.NEXT_PUBLIC_PROJECT_OWNER || 'tortoisewolfe',
       };
 
-      assert.strictEqual(config.projectName, 'ScriptHammer');
-      assert.strictEqual(config.projectOwner, 'TortoiseWolfe');
+      assert.strictEqual(config.projectName, 'Grand Daze');
+      assert.strictEqual(config.projectOwner, 'tortoisewolfe');
 
       // Restore environment
       process.env = originalEnv;
@@ -330,8 +330,8 @@ export type DetectedConfig = typeof detectedConfig;
       const envOwner = 'EnvOwner';
 
       const config = {
-        projectName: envName || gitInfo?.repo || 'ScriptHammer',
-        projectOwner: envOwner || gitInfo?.owner || 'TortoiseWolfe',
+        projectName: envName || gitInfo?.repo || 'Grand Daze',
+        projectOwner: envOwner || gitInfo?.owner || 'tortoisewolfe',
       };
 
       assert.strictEqual(config.projectName, 'EnvProject');
@@ -379,7 +379,7 @@ export type DetectedConfig = typeof detectedConfig;
           isGitHubActions: true,
           isGitHub: true,
           cnameExists: false,
-          projectName: 'ScriptHammer',
+          projectName: 'Grand Daze',
         }),
         ''
       );
@@ -388,11 +388,11 @@ export type DetectedConfig = typeof detectedConfig;
       assert.strictEqual(
         resolveBasePath({
           disableBasePath: true,
-          envBasePath: '/ScriptHammer',
+          envBasePath: '/GrandDaze',
           isGitHubActions: true,
           isGitHub: true,
           cnameExists: false,
-          projectName: 'ScriptHammer',
+          projectName: 'Grand Daze',
         }),
         ''
       );
@@ -407,7 +407,7 @@ export type DetectedConfig = typeof detectedConfig;
           isGitHubActions: true,
           isGitHub: true,
           cnameExists: true,
-          projectName: 'ScriptHammer',
+          projectName: 'Grand Daze',
         }),
         ''
       );
@@ -420,7 +420,7 @@ export type DetectedConfig = typeof detectedConfig;
           isGitHubActions: true,
           isGitHub: true,
           cnameExists: false,
-          projectName: 'ScriptHammer',
+          projectName: 'Grand Daze',
         }),
         '/custom'
       );
@@ -433,7 +433,7 @@ export type DetectedConfig = typeof detectedConfig;
           isGitHubActions: false,
           isGitHub: true,
           cnameExists: false,
-          projectName: 'ScriptHammer',
+          projectName: 'Grand Daze',
         }),
         ''
       );

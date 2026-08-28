@@ -24,7 +24,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const SCOPE = 'https://scripthammer.com/';
+const SCOPE = 'https://grand-daze.com/';
 
 type FetchHandler = (event: {
   request: Request;

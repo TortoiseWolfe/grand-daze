@@ -17,8 +17,8 @@
     <!-- Cover + title -->
     <rect x="200" y="80" width="880" height="100" rx="8" fill="#8b5cf6"/>
     <text x="640" y="116" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">[cover image]</text>
-    <text x="640" y="200" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#1f2937">Welcome to ScriptHammer</text>
-    <text x="640" y="224" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">By TortoiseWolfe · 2025-09-15 · 5 min read · intro</text>
+    <text x="640" y="200" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#1f2937">Welcome to Grand Daze</text>
+    <text x="640" y="224" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">By tortoisewolfe · 2025-09-15 · 5 min read · intro</text>
 
     <!-- 2-col: TOC + body -->
     <!-- TOC sidebar (left) -->
@@ -41,7 +41,7 @@
     <text x="360" y="286" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f2937">1. Why a template</text>
     <text x="360" y="312" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Starting a new web app is a solved problem —</text>
     <text x="360" y="332" font-family="system-ui, sans-serif" font-size="14" fill="#374151">yet every team ends up building the same scaffold</text>
-    <text x="360" y="352" font-family="system-ui, sans-serif" font-size="14" fill="#374151">again. ScriptHammer ships the parts no one</text>
+    <text x="360" y="352" font-family="system-ui, sans-serif" font-size="14" fill="#374151">again. Grand Daze ships the parts no one</text>
     <text x="360" y="372" font-family="system-ui, sans-serif" font-size="14" fill="#374151">enjoys writing twice: auth, GDPR, theming, PWA.</text>
 
     <text x="360" y="408" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f2937">2. What's included</text>
@@ -77,8 +77,8 @@
     <rect x="16" y="96" width="328" height="80" rx="8" fill="#8b5cf6"/>
     <text x="180" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">[cover]</text>
 
-    <text x="180" y="208" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f2937">Welcome to ScriptHammer</text>
-    <text x="180" y="234" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">TortoiseWolfe · 5 min</text>
+    <text x="180" y="208" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f2937">Welcome to Grand Daze</text>
+    <text x="180" y="234" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">tortoisewolfe · 5 min</text>
 
     <text x="20" y="274" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1f2937">1. Why a template</text>
     <text x="20" y="300" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Starting a new web app is a</text>
@@ -145,5 +145,5 @@
       <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Author info from detectedConfig; falls back to project owner when no match.</text>
     </g>
   </g>
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:21 | Blog Post (as-is /blog/[slug]) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:21 | Blog Post (as-is /blog/[slug]) | Grand Daze</text>
 </svg>

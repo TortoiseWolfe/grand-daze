@@ -10,7 +10,7 @@
  * JS builds paste-ready overrides JSON from the checked set for
  * scripts/warehouse/overrides-<site>.json.
  *
- * Run:  docker compose exec scripthammer pnpm run warehouse:qc
+ * Run:  docker compose exec grand-daze pnpm run warehouse:qc
  * Open: sites/_warehouse/qc.html in any browser (thumbnails hotlink the
  *       Warehouse's public CDN — local viewing only, nothing is published).
  */
@@ -92,7 +92,7 @@ const cards = modelsJson.models
         ${badge.html}
         <span class="links">
           <a href="${esc(m.url)}" target="_blank" rel="noreferrer">Warehouse ↗</a>
-          <a href="http://127.0.0.1:3002/ScriptHammer/${site}/?edit&amp;select=${esc(m.slug)}" target="_blank">Viewer ↗</a>
+          <a href="http://127.0.0.1:3002/GrandDaze/${site}/?edit&amp;select=${esc(m.slug)}" target="_blank">Viewer ↗</a>
         </span>
         <label><input type="checkbox" class="exclude" ${excluded ? 'checked' : ''}> Exclude</label>
       </div>

@@ -35,7 +35,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const SCOPE = 'https://scripthammer.com/';
+const SCOPE = 'https://grand-daze.com/';
 const IMAGE = `${SCOPE}blog-images/auto-config/featured.svg`;
 
 const SW_SOURCE = readFileSync(resolve(process.cwd(), 'public/sw.js'), 'utf-8');

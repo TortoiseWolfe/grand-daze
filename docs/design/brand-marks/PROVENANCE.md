@@ -2,7 +2,7 @@
 
 ## What is original, and what is ours
 
-**`*.svg` in this directory are the Claude Design exports, byte-identical to the zip.** Verified against `ScriptHammer visual refresh (2).zip` → `export/`, SHA-256 matched on all four plus `README.txt`. They are never edited. Keeping them intact is what lets anyone diff our composition against the designer's.
+**`*.svg` in this directory are the Claude Design exports, byte-identical to the zip.** Verified against `Grand Daze visual refresh (2).zip` → `export/`, SHA-256 matched on all four plus `README.txt`. They are never edited. Keeping them intact is what lets anyone diff our composition against the designer's.
 
 **`rebalanced/*.svg` are ours**, generated from the exports by `tools/rebalance.py`. That script is the diff, expressed as code — every substitution is asserted, so a silent no-match cannot ship a half-applied change.
 
@@ -19,9 +19,9 @@ The export is the designer's drawing; the composition is ours, and we changed it
 
 ### 1. Rebalanced — the name is Script + Hammer, not gear
 
-"ScriptHammer" is **Script** (the `< >` brackets) and **Hammer** (the mallet). The gear is in neither. The export gave the gear 95% of the canvas with a 30%-thick band and left the two things the name refers to at 41% and 27%.
+"Grand Daze" is **Script** (the `< >` brackets) and **Hammer** (the mallet). The gear is in neither. The export gave the gear 95% of the canvas with a 30%-thick band and left the two things the name refers to at 41% and 27%.
 
-This was not a new opinion. `docs/design/2a/ScriptHammer-Directions.dc.html:98-100` already specified the hero as gear 308px / brackets 192px / mallet 128px — **brackets 0.505 and mallet 0.368 of the gear** once corrected for each file's ink-to-box ratio. The component shipped 0.42 and 0.249. The brackets were ~20% undersized and the mallet ~48% undersized against the design of record. The Three.js scene had independently drifted the same way, rendering them at 0.65 and 0.70.
+This was not a new opinion. `docs/design/2a/GrandDaze-Directions.dc.html:98-100` already specified the hero as gear 308px / brackets 192px / mallet 128px — **brackets 0.505 and mallet 0.368 of the gear** once corrected for each file's ink-to-box ratio. The component shipped 0.42 and 0.249. The brackets were ~20% undersized and the mallet ~48% undersized against the design of record. The Three.js scene had independently drifted the same way, rendering them at 0.65 and 0.70.
 
 | | export | now |
 |---|---|---|
@@ -79,8 +79,8 @@ Order matters; two steps fail **silently**.
 
 1. `python3 tools/rebalance.py` → `rebalanced/*.svg` (asserts its own substitutions; `gear-path.py` asserts its regression first)
 2. Re-extract the glyph layout from the **new** lockup in Chromium with Oswald 700 loaded — *skip this and the wordmark bakes onto the old arc with no error*
-3. `python3 tools/outline-ring-text.py` → `public/scripthammer-wordmark.svg` (reads the diamonds from its source, so it can no longer re-emit stale ones)
-4. Re-derive `public/favicon.svg` and `public/scripthammer-logo.svg` — drop the `cut-word` mask, the ring guides, and the `mask=` on the steel gear. Validate the XML immediately; a malformed attribute here only surfaces when `sharp` rasterises it three steps later.
+3. `python3 tools/outline-ring-text.py` → `public/grand-daze-wordmark.svg` (reads the diamonds from its source, so it can no longer re-emit stale ones)
+4. Re-derive `public/favicon.svg` and `public/grand-daze-logo.svg` — drop the `cut-word` mask, the ring guides, and the `mask=` on the steel gear. Validate the XML immediately; a malformed attribute here only surfaces when `sharp` rasterises it three steps later.
 5. `pnpm run generate:icons` → 19 assets *(loud — `check:icons` fails CI)*
 6. Rebuild `opengraph-image.png` and `apple-icon.png` from the wordmark
 

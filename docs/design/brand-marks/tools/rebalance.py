@@ -7,10 +7,10 @@ the diff, expressed as code.
 
 WHAT CHANGES, AND WHY
 
-"ScriptHammer" is Script (the < > brackets) and Hammer (the mallet). The gear is
+"Grand Daze" is Script (the < > brackets) and Hammer (the mallet). The gear is
 in neither, yet the export gives it 95% of the canvas with a 30%-thick band,
 leaving the brackets at 41% and the mallet at 27%. The design comps already
-disagree with the export: docs/design/2a/ScriptHammer-Directions.dc.html:98-100
+disagree with the export: docs/design/2a/GrandDaze-Directions.dc.html:98-100
 sets the hero at brackets 0.505 and mallet 0.368 of the gear. This moves the
 composition to that intent and a little past it.
 
@@ -158,7 +158,7 @@ def main():
     assert gear_d.startswith("M") and "A167,167" in gear_d and "A122,122" in gear_d, "unexpected gear path"
 
     OUT.mkdir(exist_ok=True)
-    for name, is_lockup in (("scripthammer-gear.svg", False), ("scripthammer-lockup.svg", True)):
+    for name, is_lockup in (("grand-daze-gear.svg", False), ("grand-daze-lockup.svg", True)):
         original = (SRC / name).read_text(encoding="utf-8")
         result = apply(original, gear_d, is_lockup)
         assert result != original, f"{name}: nothing changed"

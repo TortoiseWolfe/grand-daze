@@ -1,6 +1,6 @@
 # Fork Setup Checklist
 
-**Audience**: someone who just forked ScriptHammer (or used "Use this template") and wants to get the app fully running with their own accounts on every integrated service.
+**Audience**: someone who just forked Grand Daze (or used "Use this template") and wants to get the app fully running with their own accounts on every integrated service.
 
 **Goal**: a single page that tells you which services this template integrates with, which are required vs. optional, what to set up first, and exactly where to go for each.
 
@@ -12,7 +12,7 @@ If you've never touched the repo before, start at the top and work down. Each st
 
 ### 1. Rebrand the repo (~15 min, of which 71s is the script)
 
-ScriptHammer ships with 932 files that reference its own name, theme, and Docker service. The included `scripts/rebrand.sh` rewrites them all for you.
+Grand Daze ships with 932 files that reference its own name, theme, and Docker service. The included `scripts/rebrand.sh` rewrites them all for you.
 
 - **Run**: `./scripts/rebrand.sh <YourProjectName> <YourGitHubUser> "<one-line description>" --icon path/to/mark.svg --preserve-ssh`
   - Example: `./scripts/rebrand.sh MyCoolApp myuser "My awesome app" --icon mark.svg --preserve-ssh`
@@ -41,7 +41,7 @@ ScriptHammer ships with 932 files that reference its own name, theme, and Docker
       lot; you rarely want that.
   - Run `./scripts/rebrand.sh --help` for the full flag list.
 - **Full guide**: [`docs/FORKING.md` — Quick Start](FORKING.md#quick-start-5-minutes)
-- **Why it matters**: skipping this leaves your fork branded as "ScriptHammer" everywhere.
+- **Why it matters**: skipping this leaves your fork branded as "Grand Daze" everywhere.
 
 ### 2. Create your Supabase project (~10 min)
 
@@ -61,7 +61,7 @@ The migration creates all the tables (auth, messaging, payments) the template ne
 
 ### 4. Configure your auth providers (~15-30 min)
 
-ScriptHammer supports email/password plus OAuth (GitHub, Google). Email/password is required for messaging features; OAuth is optional but recommended.
+Grand Daze supports email/password plus OAuth (GitHub, Google). Email/password is required for messaging features; OAuth is optional but recommended.
 
 | Provider           | Required?   | Where to set it up                                                                                                                                                           |
 | ------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -104,7 +104,7 @@ The contact form uses Web3Forms as primary with EmailJS as backup:
 ### 9. Final verification
 
 - Run the [verification checklist in `docs/FORKING.md`](FORKING.md#verification-checklist) (12 items)
-- All E2E tests pass: `docker compose exec scripthammer pnpm exec playwright test`
+- All E2E tests pass: `docker compose exec grand-daze pnpm exec playwright test`
 - Production build succeeds: `docker compose run --rm builder pnpm run build`
 
 ---
@@ -163,7 +163,7 @@ Skipping this means OAuth round-trips work locally but fail in production with r
 
 This template static-exports to GitHub Pages — there's no Next.js server runtime. Any env var without a `NEXT_PUBLIC_` prefix is unused by the client and must live in Supabase Vault if it's needed by Edge Functions (e.g., `STRIPE_SECRET_KEY`, `PAYPAL_CLIENT_SECRET`, `RESEND_API_KEY`).
 
-Set them via: `https://supabase.com/dashboard/project/<YOUR-PROJECT-REF>/settings/functions` → Edge Function Secrets, or via CLI: `docker compose exec scripthammer supabase secrets set KEY=value`.
+Set them via: `https://supabase.com/dashboard/project/<YOUR-PROJECT-REF>/settings/functions` → Edge Function Secrets, or via CLI: `docker compose exec grand-daze supabase secrets set KEY=value`.
 
 ### Editing a blog post does nothing until you regenerate the index
 
@@ -206,7 +206,7 @@ establishing whose window it is, which is why they go together.
 
 ### Don't run `pnpm install` on the host
 
-The container runs as your user (UID/GID from `.env`), and installing locally creates a `node_modules` directory the container can't manage. If you accidentally run it: `docker compose down && docker compose run --rm scripthammer rm -rf node_modules && docker compose up`. Full rules in [`CLAUDE.md`](../CLAUDE.md#docker-first-development-mandatory).
+The container runs as your user (UID/GID from `.env`), and installing locally creates a `node_modules` directory the container can't manage. If you accidentally run it: `docker compose down && docker compose run --rm grand-daze rm -rf node_modules && docker compose up`. Full rules in [`CLAUDE.md`](../CLAUDE.md#docker-first-development-mandatory).
 
 ---
 
@@ -216,7 +216,7 @@ The container runs as your user (UID/GID from `.env`), and installing locally cr
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | How does the rebrand script work?                    | [`docs/FORKING.md` — Rebrand](FORKING.md#what-the-rebrand-script-does)                             |
 | How do I deploy to GitHub Pages?                     | [`docs/FORKING.md` — GitHub Pages](FORKING.md#github-pages-deployment)                             |
-| How do I sync from upstream ScriptHammer?            | [`docs/FORKING.md` — Syncing with upstream](FORKING.md#syncing-with-upstream-scripthammer)         |
+| How do I sync from upstream Grand Daze?            | [`docs/FORKING.md` — Syncing with upstream](FORKING.md#syncing-with-upstream-grand-daze)         |
 | How do I configure GitHub Actions secrets for CI/CD? | [`README.md` — GitHub Actions Secrets](../README.md#-github-actions-secrets)                       |
 | Are my OAuth providers configured correctly?         | [`AUTH-SETUP.md` — Verification via Management API](AUTH-SETUP.md#verification-via-management-api) |
 | Which features are shipped vs. partial?              | [`STATUS.md`](../STATUS.md)                                                                        |

@@ -86,21 +86,21 @@ The batch patch addressed G-044 footer corners (most files pass), but major G-04
 
 ### 2. SIGNATURE-003: Wrong Signature Format (10 files)
 
-**Expected**: `NNN:NN | Feature Name | ScriptHammer`
+**Expected**: `NNN:NN | Feature Name | Grand Daze`
 **Found**: Various wrong formats
 
 | File                                                          | Actual Signature                                     |
 | ------------------------------------------------------------- | ---------------------------------------------------- |
-| 007-e2e-testing-framework/02-cicd-pipeline-flow.svg           | "ScriptHammer v0.1 - E2E Testing CI/CD Pipeline..."  |
-| 010-unified-blog-content/01-editor-and-preview.svg            | "ScriptHammer Wireframe v5 - 010-unified-blog-co..." |
-| 010-unified-blog-content/02-conflict-resolution.svg           | "ScriptHammer Wireframe v5 - 010-unified-blog-co..." |
-| 014-admin-welcome-email-gate/01-verification-gate.svg         | "ScriptHammer Wireframe v5 - 014-admin-welcome-e..." |
-| 014-admin-welcome-email-gate/02-admin-setup-process.svg       | "ScriptHammer Wireframe v5 - 014-admin-welcome-e..." |
-| 016-messaging-critical-fixes/01-message-input-visibility.svg  | "ScriptHammer v0.1 - Messaging UX Input Visibili..." |
-| 016-messaging-critical-fixes/02-oauth-setup-flow.svg          | "ScriptHammer v0.1 - OAuth Setup Flow - 016-mess..." |
-| 016-messaging-critical-fixes/03-conversation-error-states.svg | "ScriptHammer v0.1 - Conversation Error States -..." |
-| 021-geolocation-map/01-map-interface-permission.svg           | "ScriptHammer v0.1 - Map Interface Permission Fl..." |
-| 021-geolocation-map/02-markers-and-accessibility.svg          | "ScriptHammer v0.1 - Markers and Accessibility -..." |
+| 007-e2e-testing-framework/02-cicd-pipeline-flow.svg           | "Grand Daze v0.1 - E2E Testing CI/CD Pipeline..."  |
+| 010-unified-blog-content/01-editor-and-preview.svg            | "Grand Daze Wireframe v5 - 010-unified-blog-co..." |
+| 010-unified-blog-content/02-conflict-resolution.svg           | "Grand Daze Wireframe v5 - 010-unified-blog-co..." |
+| 014-admin-welcome-email-gate/01-verification-gate.svg         | "Grand Daze Wireframe v5 - 014-admin-welcome-e..." |
+| 014-admin-welcome-email-gate/02-admin-setup-process.svg       | "Grand Daze Wireframe v5 - 014-admin-welcome-e..." |
+| 016-messaging-critical-fixes/01-message-input-visibility.svg  | "Grand Daze v0.1 - Messaging UX Input Visibili..." |
+| 016-messaging-critical-fixes/02-oauth-setup-flow.svg          | "Grand Daze v0.1 - OAuth Setup Flow - 016-mess..." |
+| 016-messaging-critical-fixes/03-conversation-error-states.svg | "Grand Daze v0.1 - Conversation Error States -..." |
+| 021-geolocation-map/01-map-interface-permission.svg           | "Grand Daze v0.1 - Map Interface Permission Fl..." |
+| 021-geolocation-map/02-markers-and-accessibility.svg          | "Grand Daze v0.1 - Markers and Accessibility -..." |
 
 **Classification**: PATCH (text replacement)
 
@@ -191,7 +191,7 @@ Change `transform="translate(40, 730)"` to `transform="translate(40, 940)"` in K
 
 ### Batch 2: SIGNATURE-003 Fixes (10 files)
 
-Replace wrong signature text with `NNN:NN | Feature Name | ScriptHammer` format.
+Replace wrong signature text with `NNN:NN | Feature Name | Grand Daze` format.
 
 ### Batch 3: G-045 + G-046 Mobile Active State (13 files)
 

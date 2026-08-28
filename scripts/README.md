@@ -1,4 +1,4 @@
-# ScriptHammer Scripts
+# Grand Daze Scripts
 
 Automation scripts for the multi-terminal Claude Code workflow.
 

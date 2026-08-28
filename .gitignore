@@ -108,7 +108,7 @@ public/TASKS.md
 # SpecKit harness scripts and templates ship with the repo so every contributor
 # gets working /speckit.* commands without per-machine setup. The scripts under
 # .specify/scripts/bash/ are vendored from upstream github/spec-kit with two
-# ScriptHammer-specific adaptations:
+# Grand Daze-specific adaptations:
 #   - common.sh recurses through features/<category>/<NNN-name>/ instead of flat specs/
 #   - create-new-feature.sh lands new dirs under features/_uncategorized/
 # See .specify/scripts/bash/config.sh for the configurable bits.
@@ -119,7 +119,7 @@ storybook-static/
 # SpecKit installed extensions — payload is reinstalled via `./specify
 # extension add …`. We commit a small allow-list: the registry, the
 # project's wireframe-config.yml, and a hand-picked set of scripts that
-# ScriptHammer ships INTO the extension (not bundled by upstream). Any
+# Grand Daze ships INTO the extension (not bundled by upstream). Any
 # script shipped BY the extension stays gitignored so `specify extension
 # update wireframe` can overwrite it without producing a diff.
 .specify/extensions/**
@@ -129,18 +129,18 @@ storybook-static/
 !.specify/extensions/*/scripts/
 !.specify/extensions/*/scripts/validate.py
 !.specify/extensions/*/scripts/inspect-wireframes.py
-# ScriptHammer-local patches to extension-shipped scripts. Extension update
+# Grand Daze-local patches to extension-shipped scripts. Extension update
 # will overwrite these; re-apply the diff from git log afterwards (or better,
 # upstream the change so it becomes the shipped version).
 !.specify/extensions/*/scripts/generate-manifest.py
 # Project-local viewer customization. viewer-config.json is pure branding;
-# viewer.html carries ScriptHammer-local patches (kind grouping, status
+# viewer.html carries Grand Daze-local patches (kind grouping, status
 # detection wired to .issues.md format) that aren't upstream yet. An
 # extension update overwrites both; re-apply patches from git log after.
 !.specify/extensions/*/viewer/
 !.specify/extensions/*/viewer/viewer-config.json
 !.specify/extensions/*/viewer/viewer.html
-# Project-local authoring conventions doc (ScriptHammer-specific as-is
+# Project-local authoring conventions doc (Grand Daze-specific as-is
 # wireframe rules). Extension-shipped; re-apply on update if wiped.
 !.specify/extensions/*/AUTHORING-AS-IS.md
 # Accumulated cross-feature wireframe lessons, written by wireframe review and
@@ -150,7 +150,7 @@ storybook-static/
 !.specify/extensions/*/GENERAL_ISSUES.md
 # Registered wireframe-extension skills. The payload is installed by
 # `./specify extension add wireframe`, but we track the SKILL.md copies so
-# local ScriptHammer-specific preamble (path conventions) persists across
+# local Grand Daze-specific preamble (path conventions) persists across
 # forks. An extension update overwrites these — re-apply from git log.
 .claude/skills/speckit-wireframe-*/
 !.claude/skills/speckit-wireframe-*/

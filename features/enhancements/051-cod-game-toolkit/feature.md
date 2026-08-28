@@ -8,7 +8,7 @@
 
 ## Description
 
-A reusable, **asset-free** procedural game toolkit for the ScriptHammer R3F stack,
+A reusable, **asset-free** procedural game toolkit for the Grand Daze R3F stack,
 harvested from the MIT Claude-of-Duty engine and exposed as a clean public API at
 `@/lib/cod`: swept-capsule physics, a procedural PBR material forge, an atmospheric
 sky + IBL, procedural audio, a GPU particle system, camera-feel springs, a
@@ -45,7 +45,7 @@ violations on the DOM chrome.
 
 ## Verification
 
-- `docker compose exec -T scripthammer pnpm exec tsc --noEmit` → 0 errors (barrel +
+- `docker compose exec -T grand-daze pnpm exec tsc --noEmit` → 0 errors (barrel +
   `.d.ts` type-check; the app conforms).
 - `... pnpm exec vitest run src/lib/cod src/components/game/{CodSkeleton,ProceduralSky}`
   → all green, incl. real behavior tests for the EventBus + quality store.

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Broadcast audit questions to all terminals in the scripthammer session
+# Broadcast audit questions to all terminals in the grand-daze session
 # Usage: ./tmux-audit.sh
 
-SESSION="scripthammer"
+SESSION="grand-daze"
 AUDIT_FILE="docs/interoffice/audits/2026-01-14-organizational-review.md"
 
 # Check if session exists

@@ -6,7 +6,7 @@
  * FOREGROUND on the page background instead of a fill behind content. That is
  * fine for a colour picked as a foreground, and broken for one picked as a fill.
  *
- * `--color-neutral` on `scripthammer-dark` is `oklch(31.14% …)` against a
+ * `--color-neutral` on `grand-daze-dark` is `oklch(31.14% …)` against a
  * `--color-base-100` of `oklch(22.84% …)` — eight points of lightness apart.
  * Filled, it is fine: `btn-neutral` carries `--color-neutral-content` at 87%
  * lightness. Outlined, measured by canvas readback:
@@ -103,7 +103,7 @@ describe('btn-outline is not paired with a fill-only colour (#460)', () => {
       hits,
       `btn-outline makes the colour modifier the FOREGROUND. A fill-only colour\n` +
         `there is illegible on dark themes (btn-neutral btn-outline measured\n` +
-        `1.34:1 on scripthammer-dark). Drop the colour modifier — plain\n` +
+        `1.34:1 on grand-daze-dark). Drop the colour modifier — plain\n` +
         `btn-outline uses base-content and measures 13.84:1. See #460.\n\n` +
         hits.join('\n')
     ).toEqual([]);

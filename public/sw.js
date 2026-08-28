@@ -1,4 +1,4 @@
-// ScriptHammer Service Worker v1.0.0
+// Grand Daze Service Worker v1.0.0
 // Provides offline support, caching, and background sync
 // Note: Cache name includes project name - updated by rebrand script
 
@@ -28,11 +28,11 @@
 // happen to be rewritten in the same pass is incidental, not structural: one
 // `rebrand:keep`, one hand edit, and they part again silently. Deriving removes the
 // second copy instead of re-synchronising it.
-const CACHE_VERSION = 'scripthammer-v1.0.0';
+const CACHE_VERSION = 'grand-daze-v1.0.0';
 
-// The brand segment, e.g. `scripthammer-`. Strips the `-v<semver>` tail and anything
+// The brand segment, e.g. `grand-daze-`. Strips the `-v<semver>` tail and anything
 // the stamp script appends after it, so it holds for the authored
-// `scripthammer-v1.0.0` and a stamped `scripthammer-v0.0.1-<sha>` alike.
+// `grand-daze-v1.0.0` and a stamped `grand-daze-v0.0.1-<sha>` alike.
 const CACHE_PREFIX = CACHE_VERSION.replace(/-v[\d.].*$/, '') + '-';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
@@ -178,7 +178,7 @@ self.addEventListener('fetch', (event) => {
   // Never intercept Next's OWN router traffic.
   //
   // This is what made clicking "Blog" land the user on
-  // `https://scripthammer.com/blog/index.txt` — the raw RSC flight payload —
+  // `https://grand-daze.com/blog/index.txt` — the raw RSC flight payload —
   // instead of the blog.
   //
   // Under `output: 'export'` the App Router fetches a per-route `index.txt`
@@ -457,7 +457,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('ScriptHammer Notification', options)
+    self.registration.showNotification('Grand Daze Notification', options)
   );
 });
 

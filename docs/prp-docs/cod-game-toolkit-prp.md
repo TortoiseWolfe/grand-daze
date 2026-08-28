@@ -9,7 +9,7 @@ Phase 2b (the generator skill) designed here, not yet built.
 
 Harvest Matt Shumer's MIT [Claude-of-Duty](https://github.com/mshumer/Claude-of-Duty)
 procedural primitives into a **reusable, asset-free R3F game toolkit** for the
-ScriptHammer family, then build a **gauntlet-loop generator** that scaffolds a
+Grand Daze family, then build a **gauntlet-loop generator** that scaffolds a
 playable game demo from a short spec. The toolkit is the "variable function"; each
 game is a parameterization of it.
 
@@ -77,7 +77,7 @@ top-down survival-automation game on a dead-earth farm, darkly satirical."*
 **Repo constraints the generator MUST honor** (from `CLAUDE.md` + recon):
 - **Static export** — no `src/app/api/` / server routes; R3F components are
   `ssr:false` dynamic imports; browser env only `NEXT_PUBLIC_*`.
-- **Docker-first** — all commands as `docker compose exec scripthammer pnpm …`.
+- **Docker-first** — all commands as `docker compose exec grand-daze pnpm …`.
 - **5-file component CI gate** (`validate-structure.js`) — always via plop.
 - **Canvas a11y carve-out** — the `FallbackPanel` + WebGL-probe pattern, a Pa11y
   exclusion, and a documented manual-a11y rationale (axe can't audit canvas).

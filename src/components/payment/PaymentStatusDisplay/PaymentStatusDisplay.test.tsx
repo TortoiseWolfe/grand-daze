@@ -647,11 +647,11 @@ describe('PaymentStatusDisplay', () => {
     }
 
     it('prefixes the retry-success navigation with the base path', async () => {
-      process.env.NEXT_PUBLIC_BASE_PATH = '/ScriptHammer';
+      process.env.NEXT_PUBLIC_BASE_PATH = '/GrandDaze';
       setupRecoverable();
       const loc = stubLocation();
       await openSwitchPanelAndFire();
-      expect(loc.href).toBe('/ScriptHammer/payment-result?id=new-intent-999');
+      expect(loc.href).toBe('/GrandDaze/payment-result?id=new-intent-999');
     });
 
     it('navigates to the unprefixed path when no base path is set', async () => {

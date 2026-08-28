@@ -8,7 +8,7 @@
  *      `/repos/.../community/profile` returned no `security_policy` key at all, the repo had
  *      no Security tab entry and no "Report a vulnerability" affordance. Someone looking for
  *      how to report found nothing.
- *   2. The policy told people to email `security@scripthammer.com`. Cloudflare Email Routing
+ *   2. The policy told people to email `security@grand-daze.com`. Cloudflare Email Routing
  *      for the zone had exactly one rule — `admin@` → the maintainer — with the catch-all
  *      DISABLED, so mail to `security@` was rejected at the edge.
  *
@@ -18,7 +18,7 @@
  *
  * WHAT THIS CAN AND CANNOT CHECK. It cannot query Cloudflare — CI has no zone token, and a
  * test that silently skips when a credential is absent is its own #396 instance. What it CAN
- * do is force the question: any `@scripthammer.com` address published to outsiders must appear
+ * do is force the question: any `@grand-daze.com` address published to outsiders must appear
  * in ROUTED_ADDRESSES below, and adding one to that list means someone confirmed the route.
  * The command to confirm it is recorded here so the check is cheap to redo.
  */
@@ -39,7 +39,7 @@ const GITHUB_DETECTED = [
 ];
 
 /**
- * Addresses on scripthammer.com confirmed to have a Cloudflare Email Routing rule.
+ * Addresses on grand-daze.com confirmed to have a Cloudflare Email Routing rule.
  *
  * Confirm before adding one — an address with no rule is REJECTED, because the catch-all is
  * deliberately off:
@@ -49,7 +49,7 @@ const GITHUB_DETECTED = [
  *
  * As of 2026-08-21 the zone has exactly one enabled rule, for `admin@`.
  */
-const ROUTED_ADDRESSES = new Set(['admin@scripthammer.com']);
+const ROUTED_ADDRESSES = new Set(['admin@grand-daze.com']);
 
 /** Files an outsider is asked to act on. A wrong address here loses a real report. */
 const OUTWARD_FACING = [
@@ -93,7 +93,7 @@ describe('the security policy can actually be reached (#881)', () => {
     for (const file of OUTWARD_FACING) {
       if (!fs.existsSync(path.join(ROOT, file))) continue;
       const addresses =
-        read(file).match(/[a-zA-Z0-9._%+-]+@scripthammer\.com/g) ?? [];
+        read(file).match(/[a-zA-Z0-9._%+-]+@grand-daze\.com/g) ?? [];
       for (const a of new Set(addresses)) {
         if (!ROUTED_ADDRESSES.has(a)) offenders.push(`${file}: ${a}`);
       }
@@ -101,7 +101,7 @@ describe('the security policy can actually be reached (#881)', () => {
     assert.deepStrictEqual(
       offenders,
       [],
-      'These outward-facing files publish a scripthammer.com address that is not known to ' +
+      'These outward-facing files publish a grand-daze.com address that is not known to ' +
         'have a Cloudflare Email Routing rule. The catch-all is disabled, so mail to an ' +
         'unrouted address is REJECTED and the sender gets a bounce or silence:\n  ' +
         offenders.join('\n  ') +
@@ -117,7 +117,7 @@ describe('the security policy can actually be reached (#881)', () => {
     );
     const src = read(found);
     assert.match(src, /Reporting a Vulnerability/i, 'no reporting section');
-    assert.match(src, /@scripthammer\.com/, 'no contact address at all');
+    assert.match(src, /@grand-daze\.com/, 'no contact address at all');
     assert.ok(src.length > 500, 'the policy is suspiciously short');
   });
 

@@ -176,9 +176,9 @@ export function useOfflineQueue(): UseOfflineQueueReturn {
       return;
     }
     const win = window as unknown as Record<string, unknown>;
-    win.__scripthammer_syncQueue = () => syncQueue();
+    win.__granddaze_syncQueue = () => syncQueue();
     return () => {
-      delete win.__scripthammer_syncQueue;
+      delete win.__granddaze_syncQueue;
     };
   }, [syncQueue]);
 

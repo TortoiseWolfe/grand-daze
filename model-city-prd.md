@@ -2,7 +2,7 @@
 
 ### A Civic Digital Twin You Can Read, Complete, and Play
 
-**Author:** Jonathan "TurtleWolfe" Pohlner / ScriptHammer
+**Author:** Jonathan "TurtleWolfe" Pohlner / Grand Daze
 **Status:** Draft v0.1
 **Date:** July 2026
 **Source prototypes:** Claude Design projects `a201abcf-1166-49b7-af4f-56bbc9cac911` (Home, Nav, Chattanooga Twin, Building Registry, Civic League, Civic League HUD, City Ops HUD, Build Plan, What 100% Unlocks) and `4102a769-47b8-40c9-af38-8bb91d49aecc` (Model City board). Concept seed: `public/blog/playable-city-chattanooga.md`.
@@ -24,7 +24,7 @@ Two principles govern everything, taken directly from the prototypes:
 - **Equity weighted highest** — the Model City board scores Equity above every other dial; it is the plan's real scoreboard.
 - **Explainable over accurate** — the planning sim is a transparent teaching model, never a decision oracle. Every metric carries a **live / sim / local** provenance dot; no invented numbers are hidden.
 
-This is a **ScriptHammer showcase**: it stresses the template's static-export, PWA, a11y, and 5-file-component disciplines against a genuinely ambitious, data-heavy, map-driven app.
+This is a **Grand Daze showcase**: it stresses the template's static-export, PWA, a11y, and 5-file-component disciplines against a genuinely ambitious, data-heavy, map-driven app.
 
 ---
 
@@ -50,7 +50,7 @@ This is a **ScriptHammer showcase**: it stresses the template's static-export, P
 
 - **Primary — residents & civic-tech volunteers.** People who want to _do something_ about their city with an afternoon and a phone: tag a building, verify an address, capture a landmark, propose a plan.
 - **Secondary — students & educators.** The Model City board is a transparent, equity-first teaching tool for urban tradeoffs; the registry is a real open-data lesson.
-- **Tertiary — city staff / partners & the ScriptHammer audience.** A credible, forkable reference for "digital twin as civic engagement," and a flagship demo of what the template can carry.
+- **Tertiary — city staff / partners & the Grand Daze audience.** A credible, forkable reference for "digital twin as civic engagement," and a flagship demo of what the template can carry.
 
 ---
 
@@ -93,7 +93,7 @@ This is a **ScriptHammer showcase**: it stresses the template's static-export, P
 
 ## 5. Supporting Systems (MVP)
 
-- **Shared Nav shell** — one top bar on every screen (Home/Twin/Registry/League/Plan/Docs), the ScriptHammer DaisyUI dark/light theme.
+- **Shared Nav shell** — one top bar on every screen (Home/Twin/Registry/League/Plan/Docs), the Grand Daze DaisyUI dark/light theme.
 - **Provenance dots** — every metric is tagged live / sim / local so the UI never lies about what's real.
 - **Token model** — Cesium ion tokens are per-user (localStorage) now; a hosted deploy uses one app token scoped `assets:read`. True secrets never ship client-side.
 - **Home hub** — the Tools / Play / Docs index that frames the whole project as one thing.
@@ -102,7 +102,7 @@ This is a **ScriptHammer showcase**: it stresses the template's static-export, P
 
 ## 6. Technical Approach
 
-- **Static-export native.** Every screen is a client component with `localStorage` state and client-polled public endpoints (Overpass, Open-Meteo, OpenSky, CARTA GTFS, Hamilton Co. ArcGIS). No Next.js API routes; any keyed/CORS-blocked feed waits for a future Supabase Edge Function relay. This fits ScriptHammer's GitHub Pages constraint exactly.
+- **Static-export native.** Every screen is a client component with `localStorage` state and client-polled public endpoints (Overpass, Open-Meteo, OpenSky, CARTA GTFS, Hamilton Co. ArcGIS). No Next.js API routes; any keyed/CORS-blocked feed waits for a future Supabase Edge Function relay. This fits Grand Daze's GitHub Pages constraint exactly.
 - **Reuse the twin spine.** The registry/league read the same OSM/bake data the atlas uses (`public/twins/chatt/buildings.json`, `sites/chatt.json`); the game does not fork the twin.
 - **Sim as a pure lib.** The Model City `compute()`/`effects()`/projection logic (currently a `DCLogic` class in the prototype) extracts to a pure, unit-tested `src/lib/model-city/` engine; the view is a thin presentational component. Same for the registry's completeness/package math.
 - **Renderer split (from the Build Plan).** Cesium is the atlas (georeferenced twin); Three.js is only for bounded exhibits (Phase-4 splat walkthroughs). The data (3D Tiles / glTF / .ply) is the bridge, not the engine — do not re-render the twin in Three.
@@ -112,7 +112,7 @@ This is a **ScriptHammer showcase**: it stresses the template's static-export, P
 1. **Scope.** The concept is 20+ mechanics across 9 screens. Shipping all of it at once fails. Mitigation: pick ONE honest slice first (see §7); the PRD carries the rest as phases.
 2. **Overpass rate-limits.** The registry + twin hit the same shared public server; concurrent use throttles per-IP. Mitigation: 24 h localStorage cache, exponential retry with a clear message, second Overpass host fallback (both already in the prototype).
 3. **Sim honesty.** A pretty model that reads as authoritative can mislead real decisions or be weaponized. Mitigation: "explainable over accurate" banner, provenance dots, equity weighted highest, no persistence of "official" scores.
-4. **Static-export + live data + a11y + mobile.** Prototypes are desktop-1280, 3-column; ScriptHammer is mobile-first with a 44 px touch floor and Pa11y gates. Mitigation: responsive rework is explicit plan work, not an afterthought.
+4. **Static-export + live data + a11y + mobile.** Prototypes are desktop-1280, 3-column; Grand Daze is mobile-first with a 44 px touch floor and Pa11y gates. Mitigation: responsive rework is explicit plan work, not an afterthought.
 5. **Privacy (Civic League field missions).** Location/camera for canvassing + captures require explicit consent (Constitution Principle VI).
 
 ---
@@ -122,7 +122,7 @@ This is a **ScriptHammer showcase**: it stresses the template's static-export, P
 Maps onto the Build Plan prototype's 6 phases; Phase 0 is **done** (it is the shipping atlas).
 
 - **Phase 0 — Browser twin (DONE).** CesiumJS on open imagery, OSM-extruded buildings, live flights/weather/AQ, CARTA routes, zoning query, measure/sun-shadow/bookmarks. = `src/twin/` + `scripts/bake/` + `#229` accuracy work. _Exit: shipped._
-- **Phase 1 — First honest slice (this PRD's MVP).** One screen, ported cleanly into ScriptHammer (see the PRP for the chosen slice). _Exit: the slice is live at a route, tested, a11y-clean, mobile-usable; kill criterion: if it can't be made honest + mobile within the slice budget, cut it._
+- **Phase 1 — First honest slice (this PRD's MVP).** One screen, ported cleanly into Grand Daze (see the PRP for the chosen slice). _Exit: the slice is live at a route, tested, a11y-clean, mobile-usable; kill criterion: if it can't be made honest + mobile within the slice budget, cut it._
 - **Phase 2 — The civic loop.** Registry + Civic League together (completeness → missions → score), the value core. _Exit: a volunteer can improve completeness and see the city score move._
 - **Phase 3 — The planning sim.** Model City board as a tested `src/lib/model-city/` engine + responsive board. _Exit: propose→project→tradeoffs loop, equity-first._
 - **Phase 4 — Authoritative data + captures.** 3DEP lidar heights, GTFS-RT relay, landmark splats (feeds the league's capture score). _Exit: real heights + live buses + first published splat._

@@ -19,10 +19,10 @@ I turned the 3D city twin I've been building into something you can actually mov
 The whole thing runs on an open-source Three.js game engine (MIT licensed) — clone it, fork it, keep it. And you don't need money to get involved: playtest it, fork it, file a bug. Learning is free, contribution is the currency, and I build this stuff live on Twitch.
 
 Full story, plus how the free repo ramps up to real help:
-https://scripthammer.com/blog/ride-the-open-source-city
+https://grand-daze.com/blog/ride-the-open-source-city
 
 Or just ride it now:
-https://scripthammer.com/chatt/?diorama&walk
+https://grand-daze.com/chatt/?diorama&walk
 
 #opensource #threejs #gamedev #Chattanooga #webdev #reactjs
 
@@ -32,5 +32,5 @@ https://scripthammer.com/chatt/?diorama&walk
 
 🚲 Ride an open-source city. I made the 3D Chattanooga twin walkable — first person, hop on a bike, all in a browser tab. Beta, rough, and looking for players. Free and MIT.
 
-Story: https://scripthammer.com/blog/ride-the-open-source-city
-Play: https://scripthammer.com/chatt/?diorama&walk
+Story: https://grand-daze.com/blog/ride-the-open-source-city
+Play: https://grand-daze.com/chatt/?diorama&walk

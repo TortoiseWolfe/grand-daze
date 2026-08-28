@@ -86,7 +86,7 @@ const nextConfig: NextConfig = {
     // three upgrade renaming a class.
     //
     // WHERE IT LANDS, and why not in distDir. The gate runs via
-    // `docker compose exec scripthammer` (validate-ci.sh:54) — the DEV container —
+    // `docker compose exec grand-daze` (validate-ci.sh:54) — the DEV container —
     // while the build runs in `builder`, which has its OWN .next volume (#293).
     // A map written to distDir therefore never reaches the process that reads it;
     // the reader would see the dev server's .next instead, where three has never

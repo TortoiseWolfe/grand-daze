@@ -2,13 +2,13 @@
  * r180 -> r184 port smoke test for the vendored Claude-of-Duty physics core.
  *
  * Run from the repo root with the workspace's `three` on the resolution path:
- *   docker compose exec scripthammer node scripts/cod-physics-smoke.mjs
+ *   docker compose exec grand-daze node scripts/cod-physics-smoke.mjs
  *   # or, with three installed locally: node scripts/cod-physics-smoke.mjs
  *
  * No renderer, no R3F — just the framework-agnostic BVH + swept-capsule
  * character controller vendored under src/lib/cod/, driven by a minimal
  * gravity/WASD stepper. Proves the extraction ports to the Three r184 that
- * ScriptHammer pins. `scripts/` is excluded from tsconfig + vitest by design;
+ * Grand Daze pins. `scripts/` is excluded from tsconfig + vitest by design;
  * this is a standalone verification harness, not part of the app build.
  */
 import * as THREE from 'three';

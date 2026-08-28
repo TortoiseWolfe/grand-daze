@@ -92,5 +92,5 @@
 
   <!-- Bottom accent -->
   <rect x="300" y="360" width="200" height="1" fill="url(#ac-cyan)" opacity="0.2"/>
-  <text x="400" y="385" font-family="system-ui, -apple-system, sans-serif" font-size="10" text-anchor="middle" fill="#475569" letter-spacing="2">SCRIPTHAMMER</text>
+  <text x="400" y="385" font-family="system-ui, -apple-system, sans-serif" font-size="10" text-anchor="middle" fill="#475569" letter-spacing="2">GRANDDAZE</text>
 </svg>

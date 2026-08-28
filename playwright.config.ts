@@ -187,7 +187,7 @@ export default defineConfig({
     },
 
     // basePath project (#157): runs ONLY against a dedicated
-    // NEXT_PUBLIC_BASE_PATH=/ScriptHammer build served under a /ScriptHammer
+    // NEXT_PUBLIC_BASE_PATH=/GrandDaze build served under a /GrandDaze
     // prefix (see .github/workflows/e2e.yml). It inherits the prefixed
     // baseURL from BASE_URL (global `use.baseURL`), needs no auth/setup
     // (the smoke intercepts the signup POST), and is EXCLUDED from every

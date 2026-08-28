@@ -15,7 +15,7 @@ import sharp from 'sharp';
  * Chromium needs software GL (playwright.visual.config.ts forces SwiftShader). If
  * WebGL is still unavailable we SKIP rather than false-green on a blank canvas.
  *
- * Run: docker exec sh-cod-scripthammer-1 pnpm exec playwright test \
+ * Run: docker exec sh-cod-grand-daze-1 pnpm exec playwright test \
  *        --config playwright.visual.config.ts
  */
 
@@ -26,7 +26,7 @@ const MIN_MEAN_LUMINANCE = 0.1;
 const MIN_VARIANCE = 0.0015;
 
 /** The exported CI build serves at /chatt; the dev container serves under a basePath —
- *  set APP_BASE_PATH=/ScriptHammer when pointing at the dev server. */
+ *  set APP_BASE_PATH=/GrandDaze when pointing at the dev server. */
 async function openWalk(page: import('@playwright/test').Page) {
   const base = process.env.APP_BASE_PATH ?? '';
   await page.goto(`${base}/chatt/?diorama&walk`);

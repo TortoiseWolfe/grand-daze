@@ -119,7 +119,7 @@
  * Form labels must be readable, not decorative (#411)
  *
  * DaisyUI's `.label` mutes its own text — measured `#9094a1` on base-200 in
- * scripthammer-dark, which is **5.86:1**, under the 7:1 this repo gates at.
+ * grand-daze-dark, which is **5.86:1**, under the 7:1 this repo gates at.
  * That is not one page: it is every form in the product — sign-in, sign-up,
  * reset-password, profile, payment, payment-demo, payment-result, contact and
  * admin/messaging all reported it.
@@ -192,9 +192,9 @@
 
 @plugin "daisyui" {
   themes:
-    scripthammer-dark --default,
-    scripthammer-light,
-    scripthammer-forge,
+    grand-daze-dark --default,
+    grand-daze-light,
+    grand-daze-forge,
     light,
     dark,
     cupcake,
@@ -229,9 +229,9 @@
     sunset;
 }
 
-/* ScriptHammer Dark Theme — VS Code dark meets metallic craftsmanship */
+/* Grand Daze Dark Theme — VS Code dark meets metallic craftsmanship */
 @plugin "daisyui/theme" {
-  name: 'scripthammer-dark';
+  name: 'grand-daze-dark';
   default: true;
   color-scheme: dark;
 
@@ -271,7 +271,7 @@
   --noise: 1;
 }
 
-/* ScriptHammer Light Theme — warm parchment with adjusted brand colors
+/* Grand Daze Light Theme — warm parchment with adjusted brand colors
  *
  * Every colour below was AAA-verified against base-100 ONLY (#21), and the old
  * annotations said so — "AAA 8.03:1" was true on #f5f0eb. Text is routinely
@@ -289,7 +289,7 @@
  * Solved by canvas readback, NOT getComputedStyle, which returns oklch()
  * unparsed (see lesson_oklch_contrast_canvas_playwright). */
 @plugin "daisyui/theme" {
-  name: 'scripthammer-light';
+  name: 'grand-daze-light';
   default: false;
   prefersdark: false;
   color-scheme: light;
@@ -332,7 +332,7 @@
   --noise: 1;
 }
 
-/* ScriptHammer Forge — the commerce design import, made AAA-safe
+/* Grand Daze Forge — the commerce design import, made AAA-safe
  *
  * Palette measured off `docs/design/commerce/pricing-demo.html` by RENDERING it
  * and reading pixels back through a canvas, not by parsing the CSS as text.
@@ -363,7 +363,7 @@
  * the fill. Copper stays in the palette as `secondary` (lifted), so the family
  * survives while the button that carries text is the one that can. */
 @plugin "daisyui/theme" {
-  name: 'scripthammer-forge';
+  name: 'grand-daze-forge';
   default: false;
   color-scheme: dark;
 
@@ -537,7 +537,7 @@
   --color-base-300: #fbd9ec;
 }
 
-/* ScriptHammer visual polish — scoped to custom themes only.
+/* Grand Daze visual polish — scoped to custom themes only.
  * Stock DaisyUI themes keep their original look untouched.
  *
  * The `:not()` chain is load-bearing (#379). This selector is `[attr] .class`
@@ -581,81 +581,81 @@
  * here can erase it. Verified rather than assumed. */
 
 /* Raised — content sitting on top of the page. */
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .card:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .card:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .card:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .alert:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .alert:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .alert:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .modal-box:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .modal-box:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .modal-box:not(.sh-plate):not(.sh-well):not(.sh-groove) {
   box-shadow: var(--sh-plate);
 }
 
 /* Cut — data sitting down inside the page. */
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .stats:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .stats:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .stats:not(.sh-plate):not(.sh-well):not(.sh-groove) {
   box-shadow: var(--sh-well);
 }
 
 /* Machined channel — inputs and thin strips. A control you type into is cut
  * into the surface; that is the whole grammar of the system. */
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .input:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .input:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .input:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .select:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .select:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .select:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .textarea:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .textarea:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .textarea:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .file-input:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .file-input:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .file-input:not(.sh-plate):not(.sh-well):not(.sh-groove),
-[data-theme='scripthammer-dark'] .table thead th,
-[data-theme='scripthammer-light'] .table thead th,
-[data-theme='scripthammer-forge'] .table thead th {
+[data-theme='grand-daze-dark'] .table thead th,
+[data-theme='grand-daze-light'] .table thead th,
+[data-theme='grand-daze-forge'] .table thead th {
   box-shadow: var(--sh-groove);
 }
 
 /* Buttons are raised, and they press. `.btn-ghost` and `.btn-link` are flat by
  * definition — shadowing them would make "quiet action" read as a raised one,
  * which is the opposite of what the variant means. */
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ),
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ),
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ) {
@@ -681,30 +681,30 @@
  * must out-specify resting, and doing it by counting rather than by source
  * order means re-ordering this file cannot swap them back.
  * Gated by tests/e2e/tests/depth-tokens.spec.ts. */
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ):hover,
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ):hover,
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ):hover {
   box-shadow: var(--sh-plate-lift);
 }
 
-[data-theme='scripthammer-dark']
+[data-theme='grand-daze-dark']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ):not(.btn-disabled):active,
-[data-theme='scripthammer-light']
+[data-theme='grand-daze-light']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ):not(.btn-disabled):active,
-[data-theme='scripthammer-forge']
+[data-theme='grand-daze-forge']
   .btn:not(.btn-ghost):not(.btn-link):not(.sh-plate):not(.sh-well):not(
     .sh-groove
   ):not(.btn-disabled):active {
@@ -729,12 +729,12 @@
  * `.label`, the 404 copy and the conversation timestamp. A stat's caption is
  * the label for its number; there is no reading in which it should be dimmer
  * than the text around it. */
-[data-theme='scripthammer-dark'] .stat-title,
-[data-theme='scripthammer-dark'] .stat-desc,
-[data-theme='scripthammer-light'] .stat-title,
-[data-theme='scripthammer-forge'] .stat-title,
-[data-theme='scripthammer-light'] .stat-desc,
-[data-theme='scripthammer-forge'] .stat-desc {
+[data-theme='grand-daze-dark'] .stat-title,
+[data-theme='grand-daze-dark'] .stat-desc,
+[data-theme='grand-daze-light'] .stat-title,
+[data-theme='grand-daze-forge'] .stat-title,
+[data-theme='grand-daze-light'] .stat-desc,
+[data-theme='grand-daze-forge'] .stat-desc {
   color: var(--color-base-content);
 }
 
@@ -1174,7 +1174,7 @@ p:not([class*='text-']) {
 }
 
 /* ---------------------------------------------------------------------------
-   Brand mark motion — ported verbatim from the Claude Design "ScriptHammer
+   Brand mark motion — ported verbatim from the Claude Design "Grand Daze
    Logo v3" export, panel 8e ("Motion — gear turns, mallet strikes the
    brackets"). Timings and keyframe stops are the designer's; do not retune
    them here without going back to docs/design/brand-marks/.
@@ -1365,8 +1365,8 @@ p:not([class*='text-']) {
 }
 
 /* Dark background for map container before tiles load */
-[data-theme='scripthammer-dark'] .leaflet-container,
-[data-theme='scripthammer-forge'] .leaflet-container,
+[data-theme='grand-daze-dark'] .leaflet-container,
+[data-theme='grand-daze-forge'] .leaflet-container,
 [data-theme='dark'] .leaflet-container,
 [data-theme='dracula'] .leaflet-container,
 [data-theme='synthwave'] .leaflet-container,
@@ -1383,8 +1383,8 @@ p:not([class*='text-']) {
 }
 
 /* Invert OSM tiles for dark mode — preserves color/detail unlike CartoDB dark_all */
-[data-theme='scripthammer-dark'] .leaflet-tile-pane,
-[data-theme='scripthammer-forge'] .leaflet-tile-pane,
+[data-theme='grand-daze-dark'] .leaflet-tile-pane,
+[data-theme='grand-daze-forge'] .leaflet-tile-pane,
 [data-theme='dark'] .leaflet-tile-pane,
 [data-theme='dracula'] .leaflet-tile-pane,
 [data-theme='synthwave'] .leaflet-tile-pane,
@@ -1440,8 +1440,8 @@ p:not([class*='text-']) {
 }
 
 /* Fix Leaflet controls for dark mode */
-[data-theme='scripthammer-dark'] .leaflet-control,
-[data-theme='scripthammer-forge'] .leaflet-control,
+[data-theme='grand-daze-dark'] .leaflet-control,
+[data-theme='grand-daze-forge'] .leaflet-control,
 [data-theme='dark'] .leaflet-control,
 [data-theme='dracula'] .leaflet-control,
 [data-theme='synthwave'] .leaflet-control,
@@ -1462,8 +1462,8 @@ p:not([class*='text-']) {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='scripthammer-dark'] .leaflet-control a,
-[data-theme='scripthammer-forge'] .leaflet-control a,
+[data-theme='grand-daze-dark'] .leaflet-control a,
+[data-theme='grand-daze-forge'] .leaflet-control a,
 [data-theme='dark'] .leaflet-control a,
 [data-theme='dracula'] .leaflet-control a,
 [data-theme='synthwave'] .leaflet-control a,
@@ -1678,7 +1678,7 @@ h6 {
  * one — every one of them computing `overflow-wrap: normal`.
  *
  * What overflows is never prose. It is a URL
- * (`https://www.scripthammer.com/...`), an environment variable
+ * (`https://www.grand-daze.com/...`), an environment variable
  * (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`), or a repo path
  * (`docs/CREATING_COMPONENTS.md`) — single tokens with no break opportunity,
  * which is exactly and only the case `break-word` acts on.
@@ -1842,7 +1842,7 @@ body.twin-diorama [aria-label='Cookie consent banner'] {
    /90 rather than the HUD's /85: measured in GAMMA space (a naive
    linear-luminance estimate wrongly condemns /85 at ~4.1:1), /90 holds both
    shipped themes above 10:1 against the worst possible backdrop --
-   scripthammer-dark 10.33:1, scripthammer-light 10.37:1 -- where /85 leaves
+   grand-daze-dark 10.33:1, grand-daze-light 10.37:1 -- where /85 leaves
    dark at 8.71:1, a 1.24x margin over AAA that one theme tweak erases. The nav
    is the only escape hatch from a full-screen scene; it should be the most
    legible chrome on the page, not the least. The blur does the glass's

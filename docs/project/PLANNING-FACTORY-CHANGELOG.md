@@ -4,7 +4,7 @@ History of the **planning-factory / wireframe pipeline** — SpecKit workflow, t
 tmux roles, RFCs, and the SVG validator rules. That pipeline has since been retired and folded
 into the `/speckit.wireframe.*` skills, so this file is an archive and is not maintained.
 
-**This is not the product changelog.** ScriptHammer's released versions live in
+**This is not the product changelog.** Grand Daze's released versions live in
 [`CHANGELOG.md`](./CHANGELOG.md) beside this file, and that is the one a release updates.
 
 It used to sit at the repo root under the name `CHANGELOG.md`, which made it indistinguishable

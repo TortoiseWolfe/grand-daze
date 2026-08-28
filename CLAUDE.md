@@ -28,8 +28,8 @@ yarn install
 npx <anything>
 
 # ✅ CORRECT - Always use Docker
-docker compose exec scripthammer pnpm install
-docker compose exec scripthammer pnpm add <package>
+docker compose exec grand-daze pnpm install
+docker compose exec grand-daze pnpm add <package>
 ```
 
 **Why this is critical:**
@@ -43,7 +43,7 @@ docker compose exec scripthammer pnpm add <package>
 
 ```bash
 docker compose down
-docker compose run --rm scripthammer rm -rf node_modules
+docker compose run --rm grand-daze rm -rf node_modules
 docker compose up
 ```
 
@@ -57,7 +57,7 @@ sudo chown -R $USER:$USER .next
 sudo rm -rf node_modules
 
 # ✅ CORRECT - Use Docker
-docker compose exec scripthammer rm -rf node_modules
+docker compose exec grand-daze rm -rf node_modules
 docker compose down && docker compose up
 ```
 
@@ -69,13 +69,13 @@ recommended here, which is how the habit spread into the hooks and CI scripts. T
 clear the dev cache, restart the container (the entrypoint does it for you):
 
 ```bash
-docker compose restart scripthammer
+docker compose restart grand-daze
 ```
 
 **Permission errors? Always try:**
 
 1. `docker compose down && docker compose up` (restarts container, cleans .next)
-2. `docker compose exec scripthammer pnpm run docker:clean`
+2. `docker compose exec grand-daze pnpm run docker:clean`
 
 ### Essential Commands
 
@@ -84,30 +84,30 @@ docker compose restart scripthammer
 docker compose up
 
 # Development server
-docker compose exec scripthammer pnpm run dev
+docker compose exec grand-daze pnpm run dev
 
 # Run tests
-docker compose exec scripthammer pnpm test
-docker compose exec scripthammer pnpm run test:suite    # Full suite
+docker compose exec grand-daze pnpm test
+docker compose exec grand-daze pnpm run test:suite    # Full suite
 
-# Production build — its OWN container, never `exec scripthammer` (#293).
+# Production build — its OWN container, never `exec grand-daze` (#293).
 # `next dev` and `next build` both own /app/.next; building in the dev
 # container wipes what it is serving and 500s every route. The `builder`
 # service is the same image with its own .next volume.
 docker compose run --rm builder pnpm build
 
 # Storybook
-docker compose exec scripthammer pnpm run storybook
+docker compose exec grand-daze pnpm run storybook
 
 # E2E tests
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec grand-daze pnpm exec playwright test
 
 # Type checking & linting
-docker compose exec scripthammer pnpm run type-check
-docker compose exec scripthammer pnpm run lint
+docker compose exec grand-daze pnpm run type-check
+docker compose exec grand-daze pnpm run lint
 
 # Clean start if issues
-docker compose exec scripthammer pnpm run docker:clean
+docker compose exec grand-daze pnpm run docker:clean
 ```
 
 ### Git Commits from Docker
@@ -120,8 +120,8 @@ GIT_AUTHOR_NAME=Your Name
 GIT_AUTHOR_EMAIL=your@email.com
 
 # Commit from container (hooks run correctly)
-docker compose exec scripthammer git add -A
-docker compose exec scripthammer git commit -m "Your commit message"
+docker compose exec grand-daze git add -A
+docker compose exec grand-daze git commit -m "Your commit message"
 
 # Push from host (uses your SSH keys)
 git push
@@ -132,7 +132,7 @@ git push
 Supabase Cloud free tier auto-pauses after 7 days. If paused:
 
 ```bash
-docker compose exec scripthammer pnpm run prime
+docker compose exec grand-daze pnpm run prime
 ```
 
 ## Component Structure (MANDATORY)
@@ -151,7 +151,7 @@ ComponentName/
 **Always use the generator:**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec grand-daze pnpm run generate:component
 ```
 
 See `docs/CREATING_COMPONENTS.md` for details.
@@ -251,7 +251,7 @@ docker compose down && docker compose up
 Instance paused after inactivity:
 
 ```bash
-docker compose exec scripthammer pnpm run prime
+docker compose exec grand-daze pnpm run prime
 ```
 
 ### Tailwind CSS Not Loading
@@ -265,10 +265,10 @@ docker compose exec scripthammer pnpm run prime
 `SH_PORT` in `.env` pins the host port so the dev URL survives container
 restarts and self-heal events (issue #230). On this machine the convention is
 `SH_PORT=3002` (3000 is held by the RescueDogs container):
-`http://127.0.0.1:3002/ScriptHammer/`
+`http://127.0.0.1:3002/GrandDaze/`
 
 If `SH_PORT` is unset, Docker assigns an ephemeral port per restart — find it
-with `docker compose port scripthammer 3000`. "Port in use" means another
+with `docker compose port grand-daze 3000`. "Port in use" means another
 instance pinned the same port — change `SH_PORT` in `.env`; don't kill host
 processes.
 
@@ -279,7 +279,7 @@ Signature: `Cannot read properties of undefined (reading '/_app')` / ENOENT
 The entrypoint supervisor self-heals (issue #230): after ~60s of sustained
 HTTP 5xx it recycles `.next` and relaunches `next dev` in-place — port
 unchanged, back to 200 within ~2 minutes (watch for `[self-heal]` in
-`docker compose logs`). Manual fallback: `docker compose restart scripthammer`.
+`docker compose logs`). Manual fallback: `docker compose restart grand-daze`.
 
 ## Test Users
 
@@ -318,7 +318,7 @@ NEXT_PUBLIC_DEPLOY_URL=https://your-domain.com
 ```
 
 The two URLs matter even before a custom domain: unset, `sitemap.xml`/`robots.txt` advertise a
-`github.io` origin, and `retain-previous-assets.mjs` falls back to crawling **scripthammer.com**
+`github.io` origin, and `retain-previous-assets.mjs` falls back to crawling **grand-daze.com**
 rather than your own site — printing "retained N asset(s)" as though it worked.
 
 ### Optional but Recommended
@@ -704,7 +704,7 @@ Requiring `Build` or the raw `Validate Component Structure` job would still make
 
 **`scripts/__tests__/required-checks-documented.test.js` fails when this list and branch protection disagree** (#782). This passage said "two" for two days after the third was added, which made a legitimate merge refusal — "the base branch policy prohibits the merge", while both documented checks were green — read as a broken protection rule.
 
-To lift it: `gh api -X DELETE repos/TortoiseWolfe/ScriptHammer/branches/main/protection`.
+To lift it: `gh api -X DELETE repos/tortoisewolfe/GrandDaze/branches/main/protection`.
 
 ## Important Notes
 
@@ -718,7 +718,7 @@ To lift it: `gh api -X DELETE repos/TortoiseWolfe/ScriptHammer/branches/main/pro
 
 ## Planning Factory (Multi-Terminal Workflow)
 
-This repo also contains the planning factory tooling from the ScriptHammer planning template. The sections below govern the multi-terminal spec-driven workflow.
+This repo also contains the planning factory tooling from the Grand Daze planning template. The sections below govern the multi-terminal spec-driven workflow.
 
 ### Multi-Terminal Assembly Line
 
@@ -777,7 +777,7 @@ checks and follows **Concurrent checkout safety** above.
 
 ### Fork Guide
 
-After forking ScriptHammer:
+After forking Grand Daze:
 
 1. Run `/refresh-inventories` — Regenerates context files for your specs
 2. Update `.claude/inventories/` — Reflects your project's features

@@ -9,7 +9,7 @@
 The Chattanooga atlas went live today (PR #296) and is better than the diorama it hides behind. Three things follow from that:
 
 1. **Nobody finds the tour.** It is a `btn btn-xs min-h-0` chip, fifth in a row of near-identical chips. The best thing on the page is the hardest control to see. `min-h-0` also contradicts CLAUDE.md's 44px touch-target rule — an accessibility defect, not only a design one.
-2. **Sharing the atlas advertises the homepage.** `/chatt/` serves the root layout's OG block verbatim — homepage title, homepage description, homepage image, and `og:url = https://scripthammer.com/`. Post the 3D map, get a card pointing home.
+2. **Sharing the atlas advertises the homepage.** `/chatt/` serves the root layout's OG block verbatim — homepage title, homepage description, homepage image, and `og:url = https://grand-daze.com/`. Post the 3D map, get a card pointing home.
 3. **The atlas is opt-in.** It lives behind `?atlas`, so it is unindexed, invisible to analytics (GA strips query params), and not what a visitor lands on.
 
 The decision: **make the atlas the default.** This is the roadmap's own stated endgame ("flip `?atlas` to default → retire the R3F atlas path"), pulled forward because the owner prefers the atlas today.
@@ -65,7 +65,7 @@ Per `lesson_bake_byte_comparability_prettier`: verify the rebake **semantically*
 
 ### 3. Retarget E2E — the flip breaks it
 
-**Verified against the live atlas, not assumed** — `https://scripthammer.com/chatt/?atlas`:
+**Verified against the live atlas, not assumed** — `https://grand-daze.com/chatt/?atlas`:
 
 ```
 atlas_has_ChattanoogaMini : false      <- the suite's core assertion
@@ -136,9 +136,9 @@ export const metadata: Metadata = {
 
 After the flip the card is honest: it advertises the atlas, and the atlas is what you land on.
 
-**Copy.** Open-source framing pointing at **https://chattanooga.digital** or **https://github.com/TortoiseWolfe/ScriptHammer** — both verified live (200) on 2026-07-16; do not ship a dead link. The draft above ships as written and is explicitly cheap to change later; it must never block implementation.
+**Copy.** Open-source framing pointing at **https://chattanooga.digital** or **https://github.com/tortoisewolfe/GrandDaze** — both verified live (200) on 2026-07-16; do not ship a dead link. The draft above ships as written and is explicitly cheap to change later; it must never block implementation.
 
-**Length budgets are measured, not estimated.** The helper renders `"<title> | ScriptHammer"`, so the title costs 14 chars more than it looks:
+**Length budgets are measured, not estimated.** The helper renders `"<title> | Grand Daze"`, so the title costs 14 chars more than it looks:
 
 |                     | chars | budget | headroom |
 | ------------------- | ----- | ------ | -------- |

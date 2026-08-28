@@ -35,7 +35,7 @@ export function corsHeaders(req: Request): HeadersInit {
   const siteUrl = Deno.env.get('NEXT_PUBLIC_SITE_URL') ?? '';
 
   // NEXT_PUBLIC_SITE_URL may carry a basePath (GitHub Pages project site,
-  // e.g. https://user.github.io/ScriptHammer) because the checkout functions
+  // e.g. https://user.github.io/GrandDaze) because the checkout functions
   // build success_url from it — but a browser Origin header is always
   // scheme://host[:port], so compare against the URL's origin only.
   let siteOrigin = '';
@@ -45,7 +45,7 @@ export function corsHeaders(req: Request): HeadersInit {
     siteOrigin = '';
   }
 
-  // Allow the configured site, plus localhost dev (3000/3001) for ScriptHammer.
+  // Allow the configured site, plus localhost dev (3000/3001) for Grand Daze.
   const allowed = [
     siteOrigin,
     'http://localhost:3000',

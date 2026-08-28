@@ -1,6 +1,6 @@
-# Forking ScriptHammer
+# Forking Grand Daze
 
-Complete guide to creating your own project from the ScriptHammer template.
+Complete guide to creating your own project from the Grand Daze template.
 
 ## Quick Start (about 11 minutes)
 
@@ -12,7 +12,7 @@ test suite. Going live on your own domain is longer and mostly third-party — s
 
 ```bash
 # 1. Fork and clone
-gh repo fork TortoiseWolfe/ScriptHammer --clone
+gh repo fork tortoisewolfe/GrandDaze --clone
 cd YourProjectName
 
 # 2. Run the rebrand script. It refuses without an icon decision -- see "Your brand
@@ -46,14 +46,14 @@ The `scripts/rebrand.sh` script automates updating 932 files:
 
 | Category  | Changes                                                                                                          |
 | --------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Code**  | Replaces every ASCII case style of "ScriptHammer" across tracked text, while keeping prose and identifiers valid |
+| **Code**  | Replaces every ASCII case style of "Grand Daze" across tracked text, while keeping prose and identifiers valid |
 | **Paths** | Renames brand-bearing files and directories from one collision-checked plan; binary bytes are never rewritten    |
 
 ### Your brand mark is not covered by any of that
 
 A rebrand substitutes strings, and **a logo is not a string**. Nothing in the
 table above looks at an image, so without a mark of your own every browser tab
-and every home-screen install shows ScriptHammer's icon.
+and every home-screen install shows Grand Daze's icon.
 
 This is not a hypothetical: it has reached production twice, on two different
 live sites, the second time straight past a warning added to prevent the first.
@@ -94,13 +94,13 @@ frames and `icon.svg` — while the main mark keeps 48px and up. It is copied to
 `public/favicon-small.*`, so `pnpm check:icons` and later `generate:icons` runs pick it
 up on their own.
 
-If you take `--no-icon`, the icons stay ScriptHammer's until you run
+If you take `--no-icon`, the icons stay Grand Daze's until you run
 `pnpm run generate:icons` with your own mark. `pnpm run check:icons` tells you
 whether the committed set still matches it.
 | **Docker** | Updates service name in `docker-compose.yml` |
 | **Git** | Updates remote origin URL to your repository |
 | **Config** | Updates `package.json` name, description, and repository fields |
-| **Themes** | Renames `scripthammer-dark`/`scripthammer-light` theme blocks to your project name |
+| **Themes** | Renames `grand-daze-dark`/`grand-daze-light` theme blocks to your project name |
 | **Env** | Updates `COMPOSE_PROJECT_NAME` and example commands in `.env.example` |
 | **CNAME** | **Deletes** `public/CNAME` — a fork has no custom domain yet, and the file's presence drops the Pages basePath (unless a real custom domain is already set, or `--keep-cname`) |
 | **Blog** | **Removes the template's posts**, keeping only the `hello-world` exemplar, and filters `src/lib/blog/blog-data.json` to match (unless `--keep-blog`) — see below |
@@ -118,7 +118,7 @@ whether the committed set still matches it.
 ./scripts/rebrand.sh MyProject myuser "Description" --icon mark.svg --force
 
 # Keep public/CNAME exactly as it is. NOTE: on a fresh fork that file contains
-# ScriptHammer's own domain, so this is only right if you have already replaced it.
+# Grand Daze's own domain, so this is only right if you have already replaced it.
 ./scripts/rebrand.sh MyProject myuser "Description" --icon mark.svg --keep-cname
 
 # Preserve SSH format for git remote (if your origin is SSH)
@@ -144,7 +144,7 @@ any other file, so the template's posts come out with your name on them — publ
 your `sitemap.xml` and your RSS feed. That includes this project's personal essays and
 `bad-seo-example.md`, a deliberate bad-SEO **test fixture** that would ship as a real post.
 A real fork measured before this changed was republishing 15 of the template's 16 posts, and
-its own introduction slug served a post titled "ScriptHammer — Opinionated Next.js PWA
+its own introduction slug served a post titled "Grand Daze — Opinionated Next.js PWA
 Template".
 
 So the rebrand removes them, keeping one `hello-world` post that documents the frontmatter
@@ -176,7 +176,7 @@ Three things worth knowing:
 
 - **It is line-scoped, not file-scoped.** A marker at the top of a file protects
   nothing below it.
-- **The token is deliberately brand-neutral.** `scripthammer:keep` would contain
+- **The token is deliberately brand-neutral.** `grand-daze:keep` would contain
   the very string the second replacement pass searches for — a self-referential
   trap.
 - **The attribution link uses this**, which is why `--preserve-attribution` is
@@ -193,12 +193,12 @@ same-line `rebrand:keep` marker is an error, and the script does not print
 `REBRAND COMPLETE`. Dry runs report proposed changes but do not apply that
 postcondition to the intentionally unchanged tree.
 
-Case style is intentional: `ScriptHammer` uses the display name,
-`scripthammer` uses the technical slug, `Scripthammer` uses title case, and
-`SCRIPTHAMMER` uses an uppercase identifier-safe component name. Thus a fork
+Case style is intentional: `Grand Daze` uses the display name,
+`grand-daze` uses the technical slug, `Grand daze` uses title case, and
+`GRANDDAZE` uses an uppercase identifier-safe component name. Thus a fork
 named `GeoLarp` gets `GeoLarp`, `geolarp`, `Geolarp`, and `GEOLARP`; an env-style
-`SCRIPTHAMMER_TEST_DOMAIN` becomes `GEOLARP_TEST_DOMAIN`. Arbitrary mixed forms
-such as `ScriptHAMMER` are matched too.
+`GRANDDAZE_TEST_DOMAIN` becomes `GEOLARP_TEST_DOMAIN`. Arbitrary mixed forms
+such as `Grand Daze` are matched too.
 
 The shell workflow and its case-mapping helper remain stable template tooling;
 only the four recorded identity fields in `scripts/rebrand.sh` change after the
@@ -223,7 +223,7 @@ accident.
 
 ## Customizing Your Theme
 
-The rebrand script renames the ScriptHammer theme blocks to your project name but keeps the same colors. To customize:
+The rebrand script renames the Grand Daze theme blocks to your project name but keeps the same colors. To customize:
 
 1. Edit `src/app/globals.css` — change the oklch color values in the `@plugin "daisyui/theme"` blocks
 2. Run Storybook to preview: `docker compose exec <project> pnpm run storybook`
@@ -361,9 +361,9 @@ After forking, verify everything works:
 - [ ] `docker compose up` starts without errors
 - [ ] `docker compose exec <project> pnpm test` — all tests pass
 - [ ] `docker compose run --rm builder pnpm run build` — build succeeds
-- [ ] No "ScriptHammer" references in `package.json`
+- [ ] No "Grand Daze" references in `package.json`
 - [ ] `git remote -v` shows your repository URL
-- [ ] `.env` has `COMPOSE_PROJECT_NAME=<yourproject>` (not `scripthammer`)
+- [ ] `.env` has `COMPOSE_PROJECT_NAME=<yourproject>` (not `grand-daze`)
 - [ ] `.env` is owner-only (`chmod 600 .env`) before it contains credentials
 - [ ] `public/CNAME` contains your domain — or is **absent**, which is correct until you own one. Its presence drops the Pages basePath, so a CNAME naming a domain you do not control 404s every asset.
 - [ ] `docker compose ps` shows your project name in container names
@@ -430,20 +430,20 @@ sudo rm -rf node_modules
 docker compose exec <project> rm -rf node_modules
 ```
 
-## Syncing with Upstream (ScriptHammer)
+## Syncing with Upstream (Grand Daze)
 
-Keep your fork updated with improvements from ScriptHammer:
+Keep your fork updated with improvements from Grand Daze:
 
 ### One-Time Setup
 
 ```bash
-# Add ScriptHammer as upstream remote
-git remote add upstream https://github.com/TortoiseWolfe/ScriptHammer.git
+# Add Grand Daze as upstream remote
+git remote add upstream https://github.com/tortoisewolfe/GrandDaze.git
 
 # Verify remotes
 git remote -v
 # origin    https://github.com/YOU/YOUR-PROJECT.git (fetch)
-# upstream  https://github.com/TortoiseWolfe/ScriptHammer.git (fetch)
+# upstream  https://github.com/tortoisewolfe/GrandDaze.git (fetch)
 ```
 
 ### Pulling Updates
@@ -481,11 +481,11 @@ git cherry-pick <commit-hash>
 ### If Merge Conflicts Are Too Complex
 
 Open an issue with the conflicting paths on
-[ScriptHammer Issues](https://github.com/TortoiseWolfe/ScriptHammer/issues). Upstream
+[Grand Daze Issues](https://github.com/tortoisewolfe/GrandDaze/issues). Upstream
 changes that conflict badly for one fork usually conflict for others, so they are worth
 reporting rather than working around alone.
 
 ## Getting Help
 
-- **GitHub Issues**: [ScriptHammer Issues](https://github.com/TortoiseWolfe/ScriptHammer/issues)
+- **GitHub Issues**: [Grand Daze Issues](https://github.com/tortoisewolfe/GrandDaze/issues)
 - **Documentation**: [CLAUDE.md](../CLAUDE.md) for comprehensive development guide

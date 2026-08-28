@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Dedicated Playwright config for the post-deploy production @smoke suite (#288).
  *
- * Runs against the LIVE deployed origin — `BASE_URL` (e.g. https://scripthammer.com)
+ * Runs against the LIVE deployed origin — `BASE_URL` (e.g. https://grand-daze.com)
  * and `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` (the prod project).
  * It has **no `globalSetup`** (the main config's globalSetup hard-requires a
  * service-role key + shared test users and would abort — and we never want that
@@ -24,7 +24,7 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/smoke-results.json' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'https://scripthammer.com',
+    baseURL: process.env.BASE_URL || 'https://grand-daze.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     serviceWorkers: 'block',

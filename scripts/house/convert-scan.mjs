@@ -7,7 +7,7 @@
 // uses exactly the loader semantics the runtime ecosystem expects and needs
 // no extra native dependencies.
 //
-//   docker compose exec scripthammer node scripts/house/convert-scan.mjs \
+//   docker compose exec grand-daze node scripts/house/convert-scan.mjs \
 //     --dae public/twins/<slug>/house/_src/scan.dae \
 //     [--dae public/twins/<slug>/house/_src/scan_2.dae ...] \
 //     --out public/twins/<slug>/house/model.glb

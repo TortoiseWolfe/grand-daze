@@ -20,7 +20,7 @@
  * `.next` volume and no dev server inside it, so there is nothing to race.
  *
  *     docker compose run --rm builder pnpm build     # correct
- *     docker compose exec scripthammer pnpm build    # the defect
+ *     docker compose exec grand-daze pnpm build    # the defect
  *
  * ## Why a test and not a comment
  *
@@ -41,7 +41,7 @@
  * One was **serving in production** (`public/blog/auto-configuration-system.md`,
  * `featured: true`), so a visitor following our own onboarding post broke their dev
  * server. `docs/FORKING.md` had it twice using the FORKER's service name
- * (`exec myproject`), which is why greps for `exec scripthammer` never found it.
+ * (`exec myproject`), which is why greps for `exec grand-daze` never found it.
  *
  * So documents are scanned with the SAME regexes and two extra exclusions: a line
  * that negates the command is a description, and archived spec directories are

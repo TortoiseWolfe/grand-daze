@@ -25,7 +25,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ScriptHammer — Pricing Storefront Demo</title>
+<title>Grand Daze — Pricing Storefront Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -242,7 +242,7 @@ footer code{color:var(--brass);font-size:.75rem}
  <div class="wrap hdr">
   <div class="brand">
    <svg class="cog" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 6.2A2.2 2.2 0 1112 9.8a2.2 2.2 0 010 4.4z"/><path d="M20.3 13.1l-1.6-.9a6.9 6.9 0 000-2.4l1.6-.9a.7.7 0 00.3-.9l-1.5-2.6a.7.7 0 00-.9-.3l-1.6.9a7 7 0 00-2-1.2V3a.7.7 0 00-.7-.7h-3a.7.7 0 00-.7.7v1.8a7 7 0 00-2 1.2l-1.6-.9a.7.7 0 00-.9.3L3.2 8a.7.7 0 00.3.9l1.6.9a6.9 6.9 0 000 2.4l-1.6.9a.7.7 0 00-.3.9l1.5 2.6a.7.7 0 00.9.3l1.6-.9a7 7 0 002 1.2V21a.7.7 0 00.7.7h3a.7.7 0 00.7-.7v-1.8a7 7 0 002-1.2l1.6.9a.7.7 0 00.9-.3l1.5-2.6a.7.7 0 00-.3-.9z" opacity=".55"/></svg>
-   <div><b>SCRIPTHAMMER</b><span>The Forge</span></div>
+   <div><b>GRANDDAZE</b><span>The Forge</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
    <span class="hdr-note">PRD 016 · Demo</span>
@@ -556,7 +556,7 @@ function stepStripe(due,disc){
    <div class="stripe-mock">
      <div class="stripe-bar"><span>checkout.stripe.com</span><span>TEST MODE</span></div>
      <div class="stripe-body">
-       <div class="lbl">ScriptHammer · ${sel.name}</div>
+       <div class="lbl">Grand Daze · ${sel.name}</div>
        <div class="amt">${money(due)}${sel.interval?' <span style="font-size:.9rem;font-weight:400;color:#6b7280">/ '+sel.interval+'</span>':''}</div>
        <div class="ln">Card · 4242 4242 4242 4242 · 12/34 · 123</div>
      </div>
@@ -579,10 +579,10 @@ function stepDone(due){
    <div class="notice ok"><b>Paid — ${money(due)}.</b> Order <code>o_7fd2…</code> is now <code>paid</code>. Receipt sent; the intake summary is in the operator's inbox and the job is in <code>/admin/orders</code>.</div>
 
    <div class="cal">
-     <div class="cal-bar"><span>calendly.com/scripthammer/kickoff</span><span>PREFILLED</span></div>
+     <div class="cal-bar"><span>calendly.com/grand-daze/kickoff</span><span>PREFILLED</span></div>
      <div class="cal-body">
        <h4>Kickoff call · 30 min</h4>
-       <div class="who">Jonathan Pohlner · ScriptHammer</div>
+       <div class="who">Jonathan Pohlner · Grand Daze</div>
        <div class="slots">
          <div class="slot">Fri 10:00</div><div class="slot">Fri 2:30</div><div class="slot">Mon 9:00</div>
          <div class="slot">Mon 11:30</div><div class="slot">Tue 1:00</div><div class="slot">Tue 3:30</div>
@@ -597,7 +597,7 @@ function stepDone(due){
    <div class="notice"><b>Scope is locked by the SKU.</b> ${sel.feats.length} deliverables and the revision count came from the <code>products</code> row. Excluded: photography, logo design, long-form copywriting, SEO campaigns.</div>
    <button class="btn alt" id="done">Close</button>`;
   $('#book').addEventListener('click',()=>{
-    trace('CalendarEmbed mode="popup"',`{\n  <span class="s">"url"</span>: <span class="s">"https://calendly.com/scripthammer/kickoff"</span>,\n  <span class="s">"prefill"</span>: { <span class="s">"name"</span>: <span class="s">"Warrior Roofing Inc"</span>, <span class="s">"email"</span>: <span class="s">"rigo@warriorroofing.example"</span> },\n  <span class="s">"utm"</span>: { <span class="s">"source"</span>: <span class="s">"scripthammer"</span>, <span class="s">"content"</span>: <span class="s">"o_7fd2…"</span> }\n}\n<span class="c">// popup, not inline — an inline embed would fire a SECOND consent</span>\n<span class="c">// card (consent.functional) seconds after the payment consent.</span>`);
+    trace('CalendarEmbed mode="popup"',`{\n  <span class="s">"url"</span>: <span class="s">"https://calendly.com/grand-daze/kickoff"</span>,\n  <span class="s">"prefill"</span>: { <span class="s">"name"</span>: <span class="s">"Warrior Roofing Inc"</span>, <span class="s">"email"</span>: <span class="s">"rigo@warriorroofing.example"</span> },\n  <span class="s">"utm"</span>: { <span class="s">"source"</span>: <span class="s">"grand-daze"</span>, <span class="s">"content"</span>: <span class="s">"o_7fd2…"</span> }\n}\n<span class="c">// popup, not inline — an inline embed would fire a SECOND consent</span>\n<span class="c">// card (consent.functional) seconds after the payment consent.</span>`);
     $('#book').textContent='Opening Calendly…'; $('#book').disabled=true;
   });
   $('#done').addEventListener('click',closeCheckout);
@@ -618,10 +618,10 @@ $('#talkBtn').addEventListener('click',()=>{
     trace('ConsentContext.update()','{ <span class="s">"functional"</span>: <span class="n">true</span> }  <span class="c">// now CalendlyProvider mounts</span>');
     $('#dbody').innerHTML = `
      <div class="cal">
-       <div class="cal-bar"><span>calendly.com/scripthammer/intro</span><span>INLINE EMBED</span></div>
+       <div class="cal-bar"><span>calendly.com/grand-daze/intro</span><span>INLINE EMBED</span></div>
        <div class="cal-body">
          <h4>Intro call · 15 min</h4>
-         <div class="who">Jonathan Pohlner · ScriptHammer</div>
+         <div class="who">Jonathan Pohlner · Grand Daze</div>
          <div class="slots">
            <div class="slot">Fri 10:00</div><div class="slot">Fri 2:30</div><div class="slot">Mon 9:00</div>
            <div class="slot">Mon 11:30</div><div class="slot">Tue 1:00</div><div class="slot">Tue 3:30</div>
@@ -638,7 +638,7 @@ $('#talkBtn').addEventListener('click',()=>{
 /* free tier */
 function stepFree(){
   $('#dbody').innerHTML = `<div class="notice ok"><b>Forge is free and MIT licensed.</b> No checkout, no email wall.</div>
-   <pre style="background:var(--surface-2);border:1px solid var(--line);padding:14px;border-radius:4px;color:var(--text)">git clone https://github.com/\n  TortoiseWolfe/ScriptHammer.git\n\npnpm install\ndocker compose up</pre>
+   <pre style="background:var(--surface-2);border:1px solid var(--line);padding:14px;border-radius:4px;color:var(--text)">git clone https://github.com/\n  tortoisewolfe/GrandDaze.git\n\npnpm install\ndocker compose up</pre>
    <div class="notice">Give back: file bugs, report what your users do with it, and come on the stream to talk about what you built.</div>
    <button class="btn alt" id="done2">Close</button>`;
   $('#done2').addEventListener('click',closeCheckout);

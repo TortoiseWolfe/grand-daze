@@ -324,7 +324,7 @@
 /* THE DARK STOP IS BOUND BY AAA, NOT BY TASTE (#778/#459).
  *
  * This was `... 78%, black` and measured 4.21:1 against --on-copper on
- * scripthammer-dark — below the 7:1 this 11.84px/600 label requires. It passed
+ * grand-daze-dark — below the 7:1 this 11.84px/600 label requires. It passed
  * every gate for months because axe cannot compute contrast against a gradient:
  * it returns `contrastRatio: null` and files the node under `passes`.
  *

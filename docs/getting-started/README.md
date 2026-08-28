@@ -1,4 +1,4 @@
-# Getting Started with ScriptHammer
+# Getting Started with Grand Daze
 
 Get your development environment running in under 10 minutes.
 
@@ -21,8 +21,8 @@ Get your development environment running in under 10 minutes.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_ORG/ScriptHammer.git
-cd ScriptHammer
+git clone https://github.com/YOUR_ORG/GrandDaze.git
+cd Grand Daze
 ```
 
 ### 2. Start Docker Environment
@@ -39,15 +39,15 @@ Expected output:
 
 ```
 NAME                    STATUS
-scripthammer-app        running
-scripthammer-db         running (if applicable)
+grand-daze-app        running
+grand-daze-db         running (if applicable)
 ```
 
 ### 3. Verify Installation
 
 ```bash
 # Enter the container
-docker compose exec scripthammer sh
+docker compose exec grand-daze sh
 
 # Check Node version
 node --version
@@ -75,7 +75,7 @@ Open http://localhost:3000 to browse feature wireframes.
 
 ## Project Overview
 
-ScriptHammer is a **planning template** for AI-assisted development. It contains:
+Grand Daze is a **planning template** for AI-assisted development. It contains:
 
 - **46 feature specifications** - Detailed requirements for each feature
 - **SVG wireframes** - Visual designs for desktop and mobile
@@ -89,7 +89,7 @@ ScriptHammer is a **planning template** for AI-assisted development. It contains
 ## Project Structure
 
 ```
-ScriptHammer/
+GrandDaze/
 │
 ├── features/                    # Feature specifications
 │   ├── IMPLEMENTATION_ORDER.md  # Build sequence (read this first!)
@@ -198,7 +198,7 @@ docker compose up -d
 docker compose down
 
 # View logs
-docker compose logs -f scripthammer
+docker compose logs -f grand-daze
 
 # Rebuild after Dockerfile changes
 docker compose build --no-cache
@@ -208,7 +208,7 @@ docker compose build --no-cache
 
 ```bash
 # Enter container shell
-docker compose exec scripthammer sh
+docker compose exec grand-daze sh
 
 # Run development server
 pnpm run dev
@@ -256,7 +256,7 @@ src/components/Button/
 Use the generator:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component Button
+docker compose exec grand-daze pnpm run generate:component Button
 ```
 
 ---
@@ -311,7 +311,7 @@ See `.specify/memory/constitution.md` for full details.
 
 ```bash
 # Check logs
-docker compose logs scripthammer
+docker compose logs grand-daze
 
 # Rebuild from scratch
 docker compose down -v
@@ -380,7 +380,7 @@ npm run dev
 ```
 # Start development
 docker compose up -d
-docker compose exec scripthammer sh
+docker compose exec grand-daze sh
 
 # Feature workflow
 /speckit.specify → /speckit.clarify → /wireframe →

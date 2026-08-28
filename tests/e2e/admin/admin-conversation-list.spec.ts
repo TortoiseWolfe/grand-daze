@@ -13,7 +13,7 @@
  * this insert the stale assertion would be dead weight.
  *
  * Run from inside the Docker container:
- *   docker compose exec -T -e SKIP_WEBSERVER=1 -e CI= scripthammer \
+ *   docker compose exec -T -e SKIP_WEBSERVER=1 -e CI= grand-daze \
  *     pnpm exec playwright test tests/e2e/admin/admin-conversation-list.spec.ts --project=chromium
  */
 
@@ -126,7 +126,7 @@ test.describe('Admin Conversation List E2E', () => {
   //
   // This used to sign in as `test@example.com`, a constant named ADMIN_EMAIL that is not an
   // admin: `is_admin()` reads the user_profiles.is_admin COLUMN (#240, migration:1218) and
-  // seed-test-users.ts sets it only for admin@scripthammer.com. AdminGate therefore
+  // seed-test-users.ts sets it only for admin@grand-daze.com. AdminGate therefore
   // redirected to `/` and every assertion here measured the home page.
   //
   // Promoting the shared user would be the cheap fix and is wrong twice over: its session is

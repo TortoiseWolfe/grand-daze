@@ -4,7 +4,7 @@
  *
  * THE FAILURE THIS ENDS. `alternates.canonical` set on the root layout is inherited
  * by every route that does not override it. The root correctly claimed `/`, so **83
- * of 100 routes shipped `<link rel="canonical" href="https://scripthammer.com/">`** —
+ * of 100 routes shipped `<link rel="canonical" href="https://grand-daze.com/">`** —
  * each one asking Google to drop it in favour of the front page. `/pricing`, `/docs`,
  * `/blog` and 80 others were requesting their own removal, and `og:url` came with it,
  * so sharing `/pricing` unfurled as the homepage.
@@ -66,8 +66,8 @@ const routeOf = (file) => {
  * Measured on a real one: 85 then 102 "cross-canonicals", none of them real.
  *
  * WHY NOT JUST READ basePath. Because they are different quantities, and this repo is
- * the counter-example: basePath is `/ScriptHammer` while its canonicals read
- * `https://scripthammer.com/` — non-empty basePath, zero prefix. Subtracting basePath
+ * the counter-example: basePath is `/GrandDaze` while its canonicals read
+ * `https://grand-daze.com/` — non-empty basePath, zero prefix. Subtracting basePath
  * would break the deployment this gate exists to protect.
  *
  * So derive the prefix from the export's own root canonical, which IS that quantity by

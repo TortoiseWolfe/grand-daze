@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LayeredScriptHammerLogo } from '@/components/atomic/SpinningLogo';
+import { LayeredGrandDazeLogo } from '@/components/atomic/SpinningLogo';
 import Icon from '@/components/atomic/Icon';
 import { type TemplateDemo } from '@/components/molecular/TemplateStats';
 import { detectedConfig } from '@/config/project-detected';
@@ -35,7 +35,7 @@ const WIREFRAME_COUNT = countWireframes();
 const NEXT_MINOR = pkg.dependencies.next.replace(/^\^?(\d+\.\d+).*$/, '$1');
 
 // The install block, verbatim from README.md — NOT the design's
-// `npx create-scripthammer my-app`, which names a package that exists nowhere
+// `npx create-grand-daze my-app`, which names a package that exists nowhere
 // in this repo and which `CLAUDE.md` forbids outright ("npx <anything>" is on
 // the ABSOLUTELY FORBIDDEN list). Owner's ruling on #380: "Docker Only, the
 // design was a mockup, technical specs are still first priority over an
@@ -135,7 +135,7 @@ const SURFACES = [
   },
 ] as const;
 
-const STORYBOOK_URL = 'https://tortoisewolfe.github.io/ScriptHammer/storybook/';
+const STORYBOOK_URL = 'https://tortoisewolfe.github.io/GrandDaze/storybook/';
 
 // The design's four modules. `01–04` is legitimate numbering here: these are a
 // declared set of four, not a decorative sequence — the design labels them
@@ -214,14 +214,14 @@ export default function Home() {
           }}
         >
           <div className="h-[88%] w-[88%]">
-            <LayeredScriptHammerLogo wordmark pauseOnHover />
+            <LayeredGrandDazeLogo wordmark pauseOnHover />
           </div>
         </div>
 
         <div className="flex flex-col gap-6">
           {/* Eyebrow as a groove pill with a pulsing dot, per the design.
               The dot carries the accent — the LABEL does not. `text-accent`
-              measures 6.44:1 on scripthammer-light, under the 7:1 AAA gate
+              measures 6.44:1 on grand-daze-light, under the 7:1 AAA gate
               (#21), which is the violation that failed CI on this page. The
               dot is decorative and aria-hidden, so it keeps the colour without
               carrying meaning that contrast has to preserve. */}
@@ -301,7 +301,7 @@ export default function Home() {
         >
           {/* SCREEN — a FIXED near-black, deliberately not a theme token. The
               comp hard-codes oklch(18% 0.03 282), darker than even
-              scripthammer-dark's base-100 (oklch(22.84%)), because a terminal
+              grand-daze-dark's base-100 (oklch(22.84%)), because a terminal
               screen is a physical object that does not repaint with the theme.
               Keeping it fixed is also what lets the muted opacities below clear
               7:1 — they are light-on-near-black in every theme. */}

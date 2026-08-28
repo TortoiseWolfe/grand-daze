@@ -52,7 +52,7 @@ const PUBLIC = path.join(ROOT, 'public');
 /**
  * The default mark. `favicon.svg` is the printing mallet over angle brackets —
  * a symbol, not a wordmark, which is the only kind that survives 72px.
- * `scripthammer-logo.svg` is deliberately NOT used: it wraps "ScriptHammer.com"
+ * `grand-daze-logo.svg` is deliberately NOT used: it wraps "GrandDaze.com"
  * around a saw blade, and that text is illegible below about 256px.
  */
 const DEFAULT_SOURCE = 'public/favicon.svg';

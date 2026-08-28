@@ -16,16 +16,16 @@
 #   scripts/serve-basepath.sh all [PORT]    # build then serve (fg)
 #
 # Env:
-#   BASE_PATH   the prefix, default /ScriptHammer
+#   BASE_PATH   the prefix, default /GrandDaze
 #   OUT_DIR     export dir, default out-basepath
 #   PORT        serve port, default 3000 (arg overrides)
 
 set -euo pipefail
 
-BASE_PATH="${BASE_PATH:-/ScriptHammer}"
+BASE_PATH="${BASE_PATH:-/GrandDaze}"
 OUT_DIR="${OUT_DIR:-out-basepath}"
 SERVE_ROOT="${SERVE_ROOT:-serve-root}"
-# BASE_PATH is /ScriptHammer → the symlink name is ScriptHammer.
+# BASE_PATH is /GrandDaze → the symlink name is Grand Daze.
 PREFIX_NAME="${BASE_PATH#/}"
 
 cmd="${1:-all}"

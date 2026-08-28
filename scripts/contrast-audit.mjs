@@ -27,7 +27,7 @@ import { writeFile } from 'node:fs/promises';
 
 const STORYBOOK_BASE = 'http://localhost:6006';
 const INDEX_URL = `${STORYBOOK_BASE}/index.json`;
-const THEMES = ['scripthammer-dark', 'scripthammer-light', 'aqua', 'cyberpunk'];
+const THEMES = ['grand-daze-dark', 'grand-daze-light', 'aqua', 'cyberpunk'];
 const REPORT_PATH = '/tmp/contrast-audit-report.json';
 const RENDER_WAIT_MS = 1000;
 

@@ -8,7 +8,7 @@
 
 This document is the cross-issue work-order. STATUS.md describes _what_ the gaps are; this describes _which order_ to close them in and _why_. New issues land here first, then graduate into PRs.
 
-For raw issue lists: `gh issue list --label gap-audit --repo TortoiseWolfe/ScriptHammer`
+For raw issue lists: `gh issue list --label gap-audit --repo tortoisewolfe/GrandDaze`
 
 ---
 
@@ -82,7 +82,7 @@ Defensive only. Each item maps to a STATUS.md "Tier 7" feature.
 
 | Order | Issue                                                          | Severity | What                                                                                                                                                        |
 | ----- | -------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1    | [#50](https://github.com/TortoiseWolfe/ScriptHammer/issues/50) | P2       | RLS test fixture `globalSetup` to scrub stale `*@scripthammer.test` users + orphan FKs. ~1-2 hours.                                                         |
+| D1    | [#50](https://github.com/TortoiseWolfe/ScriptHammer/issues/50) | P2       | RLS test fixture `globalSetup` to scrub stale `*@grand-daze.test` users + orphan FKs. ~1-2 hours.                                                         |
 | D2    | [#49](https://github.com/TortoiseWolfe/ScriptHammer/issues/49) | P2       | Add `sign_up` audit log emission to the existing `on_auth_user_created` trigger so `get_security_metrics()` reports a real `signups_this_month`. ~half-day. |
 
 **Why D1 before D2:** D1 fixes a wedge (RLS suite can't run on cloud after a killed prior run). D2 fixes a metric (admin dashboard underreports). Wedges before metrics.

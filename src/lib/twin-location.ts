@@ -89,7 +89,7 @@ export interface MarkerInput {
   z: number;
   near?: string | null;
   note?: string;
-  /** Path prefix of the running app, e.g. `/ScriptHammer`. */
+  /** Path prefix of the running app, e.g. `/GrandDaze`. */
   basePath?: string;
   /** Site slug, e.g. `chatt`. */
   slug: string;

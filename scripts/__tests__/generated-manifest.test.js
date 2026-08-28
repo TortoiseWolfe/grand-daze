@@ -10,16 +10,16 @@
  * WHAT ACTUALLY GOES WRONG. `DISABLE_BASE_PATH=true` is the documented recipe for a
  * local CI-matching E2E run, and running it rewrites this file:
  *
- *     -  "start_url": "/ScriptHammer/",      +  "start_url": "/",
- *     -  "scope":     "/ScriptHammer/",      +  "scope":     "/",
- *     -  "src": "/ScriptHammer/icon-72.svg"  +  "src": "/icon-72.svg"
+ *     -  "start_url": "/GrandDaze/",      +  "start_url": "/",
+ *     -  "scope":     "/GrandDaze/",      +  "scope":     "/",
+ *     -  "src": "/GrandDaze/icon-72.svg"  +  "src": "/icon-72.svg"
  *
  * `git add -A` is the natural way to lose that, and the diff reads as harmless
- * config churn. On GitHub Pages under `/ScriptHammer/` it breaks PWA install and
+ * config churn. On GitHub Pages under `/GrandDaze/` it breaks PWA install and
  * offline. This test is what turns that into a failing check.
  *
  * WHAT THIS DOES **NOT** CLAIM. The committed copy is not what production serves.
- * scripthammer.com runs at the apex with no base path, and its deploy regenerates
+ * grand-daze.com runs at the apex with no base path, and its deploy regenerates
  * the file — live values are `/`, while the committed copy is the default GitHub
  * Pages variant. So this pins the tracked artifact to the repo's DEFAULT
  * configuration, which is the thing a reviewer sees; production correctness is the
@@ -57,9 +57,9 @@ const PROJECT_CONFIG_PATH = path.join(
  *     isGitHubActions && info.isGitHub && !cnameExists ? `/${projectName}` : ''
  *
  * A repo with `public/CNAME` deploys at the apex, so its base path is '' and its
- * manifest start_url is '/'. This test demanded `/ScriptHammer/` -- a value the
+ * manifest start_url is '/'. This test demanded `/GrandDaze/` -- a value the
  * deploy has not produced since the custom domain was added, and which
- * scripthammer.com does not serve. The committed manifest was a fossil, and the
+ * grand-daze.com does not serve. The committed manifest was a fossil, and the
  * consequences compounded: every local build rewrote the file, so the working tree
  * was permanently dirty, and committing the CORRECT regenerated value failed this
  * test. Both symptoms, one stale expectation.
@@ -172,7 +172,7 @@ test('the generator applies the base path it is given, to every field', () => {
   // The companion to the pin above: the committed copy could be correct while the
   // generator that produces it is not, and a reviewer would never see it.
   const fixture = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'scripthammer-manifest-')
+    path.join(os.tmpdir(), 'grand-daze-manifest-')
   );
   fs.mkdirSync(path.join(fixture, 'public'), { recursive: true });
 

@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   // This route claims its own URL (#668).
   alternates: { canonical: '/cookies/' },
   openGraph: { url: '/cookies/' },
-  title: 'Cookie Policy - ScriptHammer',
+  title: 'Cookie Policy - Grand Daze',
   description:
-    'Learn how ScriptHammer uses cookies and how you can manage your cookie preferences.',
+    'Learn how Grand Daze uses cookies and how you can manage your cookie preferences.',
 };
 
 export default function CookiePolicyPage() {

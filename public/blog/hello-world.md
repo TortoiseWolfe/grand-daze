@@ -1,6 +1,6 @@
 ---
 title: Hello, world
-author: TortoiseWolfe
+author: tortoisewolfe
 date: 2026-08-27
 slug: hello-world
 tags:
@@ -48,7 +48,7 @@ generating it is deliberately not part of the build.
 So after adding, editing, **or deleting** a post:
 
 ```bash
-docker compose exec scripthammer pnpm generate:blog
+docker compose exec grand-daze pnpm generate:blog
 ```
 
 and commit the resulting `blog-data.json` diff. Skip it and nothing happens: your edit
@@ -64,7 +64,7 @@ Copy this file, change the frontmatter, replace the body, regenerate the index:
 ```bash
 cp public/blog/hello-world.md public/blog/my-first-post.md
 # edit it, then:
-docker compose exec scripthammer pnpm generate:blog
+docker compose exec grand-daze pnpm generate:blog
 ```
 
 Then delete this one.

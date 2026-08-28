@@ -86,7 +86,7 @@ test.describe('Cross-Page Navigation', () => {
 
       // Check key navigation links are present
       const homeLink = page
-        .locator('a:has-text("Home"), a:has-text("ScriptHammer")')
+        .locator('a:has-text("Home"), a:has-text("Grand Daze")')
         .first();
       await expect(homeLink).toBeVisible();
 
@@ -137,7 +137,7 @@ test.describe('Cross-Page Navigation', () => {
     // Check for 404 content or redirect to home
     const has404Content =
       (await page.locator('text=/404|not found/i').count()) > 0;
-    const isHomePage = await page.url().includes('/ScriptHammer');
+    const isHomePage = await page.url().includes('/GrandDaze');
 
     expect(has404Content || isHomePage).toBe(true);
   });
@@ -178,7 +178,7 @@ test.describe('Cross-Page Navigation', () => {
     await dismissCookieBanner(page);
 
     const external = await page
-      .locator('a[href^="http"]:not([href*="scripthammer.com"])')
+      .locator('a[href^="http"]:not([href*="grand-daze.com"])')
       .all();
 
     const offenders: string[] = [];
@@ -232,8 +232,8 @@ test.describe('Cross-Page Navigation', () => {
     await dismissCookieBanner(page);
 
     // Pick a random theme from every registered theme. This used to read
-    // from a local 32-entry copy that omitted scripthammer-dark and
-    // scripthammer-light — so the site's own default theme was never
+    // from a local 32-entry copy that omitted grand-daze-dark and
+    // grand-daze-light — so the site's own default theme was never
     // covered here. /themes renders a button for all 34 (#408).
     const randomTheme = THEMES[Math.floor(Math.random() * THEMES.length)];
 

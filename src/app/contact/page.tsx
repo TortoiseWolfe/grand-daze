@@ -5,14 +5,14 @@ import { projectConfig } from '@/config/project.config';
 export const metadata: Metadata = {
   // This route claims its own URL (#668).
   alternates: { canonical: '/contact/' },
-  title: 'Contact Us | ScriptHammer',
+  title: 'Contact Us | Grand Daze',
   description:
-    "Get in touch with the ScriptHammer team. We'd love to hear from you!",
-  keywords: ['contact', 'support', 'help', 'feedback', 'ScriptHammer'],
+    "Get in touch with the Grand Daze team. We'd love to hear from you!",
+  keywords: ['contact', 'support', 'help', 'feedback', 'Grand Daze'],
   openGraph: {
     url: '/contact/',
-    title: 'Contact Us | ScriptHammer',
-    description: 'Get in touch with the ScriptHammer team',
+    title: 'Contact Us | Grand Daze',
+    description: 'Get in touch with the Grand Daze team',
     type: 'website',
   },
 };
@@ -140,7 +140,7 @@ export default function ContactPage() {
                   </a>
                 )}
                 <a
-                  href="https://github.com/TortoiseWolfe/ScriptHammer/issues"
+                  href="https://github.com/tortoisewolfe/GrandDaze/issues"
                   className="link link-primary flex items-center"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -155,7 +155,7 @@ export default function ContactPage() {
                   GitHub Issues
                 </a>
                 <a
-                  href="https://github.com/TortoiseWolfe/ScriptHammer/discussions"
+                  href="https://github.com/tortoisewolfe/GrandDaze/discussions"
                   className="link link-primary flex items-center"
                   target="_blank"
                   rel="noopener noreferrer"

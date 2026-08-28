@@ -1,6 +1,6 @@
 {
-  "site_url": "${AUTH_SITE_URL:-https://scripthammer.com}",
-  "uri_allow_list": "${AUTH_URI_ALLOW_LIST:-https://scripthammer.com,https://scripthammer.com/**,https://www.scripthammer.com,https://www.scripthammer.com/**,http://localhost:3000,http://localhost:3000/**,http://127.0.0.1:3002,http://127.0.0.1:3002/**}",
+  "site_url": "${AUTH_SITE_URL:-https://grand-daze.com}",
+  "uri_allow_list": "${AUTH_URI_ALLOW_LIST:-https://grand-daze.com,https://grand-daze.com/**,https://www.grand-daze.com,https://www.grand-daze.com/**,http://localhost:3000,http://localhost:3000/**,http://127.0.0.1:3002,http://127.0.0.1:3002/**}",
   "jwt_exp": 7200,
   "rate_limit_verify": 100,
   "rate_limit_email_sent": 30,
@@ -11,8 +11,8 @@
   "smtp_host": "${AUTH_SMTP_HOST:-smtp.resend.com}",
   "smtp_port": "587",
   "smtp_user": "${AUTH_SMTP_USER:-resend}",
-  "smtp_admin_email": "${AUTH_SMTP_ADMIN_EMAIL:-noreply@scripthammer.com}",
-  "smtp_sender_name": "${AUTH_SMTP_SENDER_NAME:-ScriptHammer}",
+  "smtp_admin_email": "${AUTH_SMTP_ADMIN_EMAIL:-noreply@grand-daze.com}",
+  "smtp_sender_name": "${AUTH_SMTP_SENDER_NAME:-Grand Daze}",
   "hook_custom_access_token_enabled": true,
   "hook_custom_access_token_uri": "pg-functions://postgres/public/custom_access_token_hook",
 

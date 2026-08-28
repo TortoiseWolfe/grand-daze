@@ -1,4 +1,4 @@
-# ScriptHammer Architecture
+# Grand Daze Architecture
 
 System design reference for developers and architects.
 
@@ -21,9 +21,9 @@ System design reference for developers and architects.
 
 ## Architecture Overview
 
-ScriptHammer is a **static-first web application** designed for deployment on GitHub Pages with Supabase as the backend-as-a-service.
+Grand Daze is a **static-first web application** designed for deployment on GitHub Pages with Supabase as the backend-as-a-service.
 
-![ScriptHammer architecture overview: a Next.js static export on GitHub Pages, a managed Supabase backend for Postgres with Row-Level Security, auth, realtime and storage, and twelve Deno Edge Functions for anything requiring a secret.](./architecture-simple.png)
+![Grand Daze architecture overview: a Next.js static export on GitHub Pages, a managed Supabase backend for Postgres with Row-Level Security, auth, realtime and storage, and twelve Deno Edge Functions for anything requiring a secret.](./architecture-simple.png)
 
 <sub>The [detailed reference diagram](./architecture-detailed.png) expands this to every table, Edge Function and route. Both are rendered from the committed SVG sources beside them — edit the SVG, not the PNG.</sub>
 
@@ -111,7 +111,7 @@ The ASCII rendering below says the same thing in plain text, for terminals and d
 
 ### The Constraint
 
-ScriptHammer deploys to **GitHub Pages**, which only serves static files. This means:
+Grand Daze deploys to **GitHub Pages**, which only serves static files. This means:
 
 ```
 ❌ NO server-side rendering (SSR)

@@ -202,7 +202,7 @@ describe('parseTasksFile', () => {
       await parseTasksFile();
       const url = (fetch as unknown as ReturnType<typeof vi.fn>).mock
         .calls[0][0] as string;
-      expect(url.startsWith('/ScriptHammer/')).toBe(true);
+      expect(url.startsWith('/GrandDaze/')).toBe(true);
     } finally {
       Object.defineProperty(window, 'location', {
         value: { ...window.location, hostname: original },

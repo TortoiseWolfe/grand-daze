@@ -189,7 +189,7 @@ jobs:
           # The E2E suite serves this build from the ROOT (`serve out -l 3000`).
           # DISABLE_BASE_PATH forces a basePath-less build so /_next/*.js assets
           # resolve at /. If the build baked in the GitHub Pages basePath
-          # (/ScriptHammer), every /ScriptHammer/_next/*.js would 404 under
+          # (/GrandDaze), every /GrandDaze/_next/*.js would 404 under
           # serve-at-root, React would never hydrate, and the whole suite fails.
           # A step-level `GITHUB_ACTIONS: false` is NOT reliable here — the
           # runner re-injects GITHUB_ACTIONS=true into the child processes
@@ -353,7 +353,7 @@ jobs:
   # A GitHub Pages project-site fork needs a /RepoName basePath; the class of
   # bug where auth redirects / hand-built URLs escape that prefix is invisible
   # to the root-anchored suite. This job builds a DEDICATED basePath-prefixed
-  # export and serves it under /ScriptHammer, then runs the `basepath` project
+  # export and serves it under /GrandDaze, then runs the `basepath` project
   # (tests/e2e/basepath/**) against it. Self-contained: builds its own artifact
   # (the shared build-output is root-path), chromium-only, one fast spec.
   # ============================================
@@ -389,7 +389,7 @@ jobs:
       - name: Build basePath-prefixed export
         run: bash scripts/serve-basepath.sh build
         env:
-          BASE_PATH: /ScriptHammer
+          BASE_PATH: /GrandDaze
           # The prefixed build must NOT be zeroed by the CNAME/DISABLE_BASE_PATH
           # path — NEXT_PUBLIC_BASE_PATH (set by the script) wins in next.config.
           NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
@@ -404,10 +404,10 @@ jobs:
           # beforeEach, so no request leaves the runner either way.
           NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: e2e_dummy_web3forms_key
 
-      - name: Start server (symlink under /ScriptHammer)
+      - name: Start server (symlink under /GrandDaze)
         run: |
           set -euo pipefail
-          BASE_PATH=/ScriptHammer bash scripts/serve-basepath.sh serve 3000 > serve.log 2>&1 &
+          BASE_PATH=/GrandDaze bash scripts/serve-basepath.sh serve 3000 > serve.log 2>&1 &
           SERVE_PID=$!
           echo "serve started, PID=$SERVE_PID"
           sleep 2
@@ -416,13 +416,13 @@ jobs:
             cat serve.log || true
             exit 1
           fi
-          if ! npx wait-on http://localhost:3000/ScriptHammer/sign-up/ --timeout 60000 --verbose; then
+          if ! npx wait-on http://localhost:3000/GrandDaze/sign-up/ --timeout 60000 --verbose; then
             echo "::error::wait-on timed out — prefixed serve never bound within 60s"
             cat serve.log || true
             ss -tlnp 2>/dev/null || true
             exit 1
           fi
-          echo "serve is responding on http://localhost:3000/ScriptHammer/"
+          echo "serve is responding on http://localhost:3000/GrandDaze/"
 
       - name: Run basePath project
         run: |
@@ -434,7 +434,7 @@ jobs:
         env:
           CI: true
           SKIP_WEBSERVER: true
-          BASE_URL: http://localhost:3000/ScriptHammer
+          BASE_URL: http://localhost:3000/GrandDaze
           # The smoke spec intercepts the signup POST (no real user/email), but
           # the shared globalSetup hard-requires these to validate prerequisites
           # before ANY project runs — so supply the same set the smoke job uses.

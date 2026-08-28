@@ -7,7 +7,7 @@
  * capped resolution, meshopt geometry compression. Geometry is NOT simplified
  * (scan fidelity is the product).
  *
- * Run:  docker compose exec scripthammer node scripts/house/optimize-scan.mjs \
+ * Run:  docker compose exec grand-daze node scripts/house/optimize-scan.mjs \
  *         --in public/twins/<slug>/house/model.glb [--max 2048] [--quality 80]
  *       Writes <in>.optimized.glb beside the input; swap manually after
  *       eyeballing the property page.

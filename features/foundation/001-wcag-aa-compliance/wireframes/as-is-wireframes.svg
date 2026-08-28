@@ -22,7 +22,7 @@
     <!-- This page is a thin iframe wrapper. Content is viewer.html itself. -->
     <!-- Sketch: the whole viewport is the iframe showing the viewer sidebar + canvas -->
     <rect x="0" y="60" width="260" height="600" fill="#1f2937"/>
-    <text x="130" y="94" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#f3f4f6">ScriptHammer</text>
+    <text x="130" y="94" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#f3f4f6">Grand Daze</text>
 
     <!-- Sidebar nav (kind + category grouping) -->
     <g font-family="system-ui, sans-serif" font-size="14">
@@ -162,5 +162,5 @@
     </g>
   </g>
 
-  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:05 | Wireframes viewer (as-is /wireframes) | ScriptHammer</text>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">999:05 | Wireframes viewer (as-is /wireframes) | Grand Daze</text>
 </svg>

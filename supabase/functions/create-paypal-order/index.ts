@@ -169,7 +169,7 @@ serve(async (req) => {
               currency_code: intent.currency.toUpperCase(),
               value: (intent.amount / 100).toFixed(2),
             },
-            description: intent.description ?? 'ScriptHammer payment',
+            description: intent.description ?? 'Grand Daze payment',
             custom_id: intent.id,
           },
         ],
