@@ -13,9 +13,19 @@
 const defaultConfig = {
   projectName: 'Grand Daze',
   projectOwner: 'tortoisewolfe',
-  projectDescription:
-    'Grand Daze',
+  projectDescription: 'Grand Daze',
   basePath: '',
+  /**
+   * Which mark the hero renders.
+   *
+   * 'lockup' is the UPSTREAM TEMPLATE's identity — a gear ring, a printing mallet and
+   * its domain twice around the rim. This project inherited that artwork and published
+   * it, and no rebrand could have prevented it: the rim lettering is outlined glyph
+   * paths in ringWordmark.ts, with no brand string in them to substitute.
+   *
+   * Left at 'placeholder' until this project has a mark of its own. See issue #1.
+   */
+  brandMark: 'placeholder' as 'placeholder' | 'lockup',
 };
 
 /**
@@ -34,6 +44,7 @@ export function getProjectConfig() {
       process.env.NEXT_PUBLIC_PROJECT_OWNER || defaultConfig.projectOwner,
     projectDescription: defaultConfig.projectDescription,
     basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? defaultConfig.basePath,
+    brandMark: defaultConfig.brandMark,
     // A monitored address a visitor can write to when the contact FORM cannot
     // deliver. The form depends on a third-party key, and production shipped an
     // EMPTY one, so `/contact/` offered no working channel at all while Stripe

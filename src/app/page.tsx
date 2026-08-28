@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LayeredGrandDazeLogo } from '@/components/atomic/SpinningLogo';
+import { PlaceholderMark } from '@/components/atomic/PlaceholderMark';
+import { getProjectConfig } from '@/config/project.config';
 import Icon from '@/components/atomic/Icon';
 import { type TemplateDemo } from '@/components/molecular/TemplateStats';
 import { detectedConfig } from '@/config/project-detected';
@@ -168,6 +170,9 @@ const MODULES = [
 ] as const;
 
 export default function Home() {
+  // The inherited lockup is the upstream template's artwork, not ours (issue #1).
+  const { brandMark } = getProjectConfig();
+
   return (
     // The ambient glow from the top of the comp. It is what sets the mood of
     // the whole page, and it was the single biggest thing missing — the built
@@ -214,7 +219,11 @@ export default function Home() {
           }}
         >
           <div className="h-[88%] w-[88%]">
-            <LayeredGrandDazeLogo wordmark pauseOnHover />
+            {brandMark === 'lockup' ? (
+              <LayeredGrandDazeLogo wordmark pauseOnHover />
+            ) : (
+              <PlaceholderMark />
+            )}
           </div>
         </div>
 
