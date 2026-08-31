@@ -46,6 +46,21 @@
     'JetBrains Mono', 'JetBrains Mono Fallback', 'SF Mono', Monaco,
     'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
 }
+// raitch additions for Grand Daze fonts
+@font-face {
+  font-family: 'Alcemo';
+  src: url('/fonts/Alcemo.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'GrandHarbor';
+  src: url('/fonts/GrandHarbor.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* /pricing only. next/font generated a `.className` per family and the page applies them to
  * 19 elements; these replace them one-for-one so no call site changes. Scoped as classes,
@@ -233,6 +248,7 @@
 @plugin "daisyui/theme" {
   name: 'grand-daze-dark';
   default: true;
+  prefersdark: true;
   color-scheme: dark;
 
   --color-base-100: oklch(22.84% 0.038 282.93); /* #1a1a2e charcoal */
@@ -779,10 +795,15 @@
  * block removed in #388. Inside `base`, utilities still win.
  * ========================================================================= */
 @layer base {
-  body {
+  /*   body {
     font-family: var(--sh-font-body, var(--font-sans));
+  } */
+  body {
+    font-family:
+      'Alcemo',
+      -apple-system,
+      sans-serif;
   }
-
   /* The display face is a separate channel so a user font choice can replace
    * it. #377: someone who picks OpenDyslexic must not still get Archivo Black
    * on every heading. Both controls set both variables together. */
@@ -792,8 +813,14 @@
   h4,
   h5,
   h6 {
-    font-family: var(--sh-font-display, var(--font-display));
+    font-family:
+      'Alcemo',
+      -apple-system,
+      sans-serif;
   }
+  /* {
+    font-family: var(--sh-font-display, var(--font-display));
+  } */
 }
 
 /* Accessibility Font Scaling System + Mobile-First Fluid Typography (PRP-017) */

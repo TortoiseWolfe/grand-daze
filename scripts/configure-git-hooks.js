@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+// Guard clause: skip in container environments
+if (process.env.DOCKER_ENV === 'true' || process.env.CI === 'true') {
+  console.log('Skipping git hooks setup in container environment');
+  process.exit(0);
+}
+
 /**
  * Configure versioned hooks for this checkout and every linked worktree.
  *

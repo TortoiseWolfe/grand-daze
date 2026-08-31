@@ -88,6 +88,9 @@ services:
       - GIT_AUTHOR_EMAIL
       - GIT_COMMITTER_NAME=${GIT_AUTHOR_NAME}
       - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL}
+      - SKIP_GIT_HOOKS=1
+      - npm_config_prepend=0
+      - DOCKER_ENV=true
     healthcheck:
       # basePath-aware; reads NEXT_PUBLIC_BASE_PATH at exec time. See #230.
       test: ['CMD', '/usr/local/bin/healthcheck.sh']
