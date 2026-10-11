@@ -37,11 +37,17 @@ jobs:
   smoke:
     name: Production @smoke (live origin)
     # Post-deploy runs proceed only if the deploy succeeded; other triggers always run.
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    #
+    # AND a production URL must be configured (#1054). This used to probe a flat
+    # `https://grand-daze.com` literal, which does not resolve (ENOTFOUND), so the job
+    # failed on every run for a site that is not at that address yet. The URL now comes
+    # from the repository VARIABLE the other jobs already read, and unset means skip. `vars`
+    # is testable in a job-level `if:`, unlike secrets. A skipped job blocks no merge.
+    if: ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && vars.NEXT_PUBLIC_DEPLOY_URL != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      BASE_URL: https://grand-daze.com
+      BASE_URL: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 

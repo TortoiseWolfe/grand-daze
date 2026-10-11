@@ -57,7 +57,11 @@ function pingScript() {
 }
 
 /** Run the workflow body locally with curl forced to a successful HTTP 200. */
-function runKeepalive(refs, script = pingScript()) {
+function runKeepalive(
+  refs,
+  script = pingScript(),
+  tokens = { TOKEN_A: 'test-token', TOKEN_B: '' }
+) {
   const work = fs.mkdtempSync(
     path.join(os.tmpdir(), 'grand-daze-keepalive-')
   );
@@ -75,8 +79,8 @@ function runKeepalive(refs, script = pingScript()) {
       env: {
         PATH: `${bin}:/usr/local/bin:/usr/bin:/bin`,
         REFS: refs,
-        TOKEN_A: 'test-token',
-        TOKEN_B: '',
+        TOKEN_A: tokens.TOKEN_A,
+        TOKEN_B: tokens.TOKEN_B,
         GITHUB_STEP_SUMMARY: summary,
       },
     });
@@ -116,6 +120,28 @@ describe('Supabase Keep-Alive workflow', () => {
     assert.match(result.stdout, /OK    beta/);
     assert.match(result.summary, /`alpha` \| ✅ pinged/);
     assert.match(result.summary, /`beta` \| ✅ pinged/);
+  });
+
+  // An unprovisioned project has no refs and no tokens: nothing exists that could pause,
+  // so the run skips with a notice instead of going red every five days (#985).
+  it('skips with a notice when nothing at all is configured', () => {
+    const result = runKeepalive('', pingScript(), { TOKEN_A: '', TOKEN_B: '' });
+
+    assert.strictEqual(result.status, 0, result.stderr);
+    assert.match(result.stdout, /::notice::No Supabase project configured/);
+  });
+
+  it('still fails on an empty ref list when a token is present', () => {
+    // An emptied variable on a configured repository is a keepalive that stops keeping
+    // anything alive while looking healthy. Only the fully-absent case may skip.
+    for (const tokens of [
+      { TOKEN_A: 'test-token', TOKEN_B: '' },
+      { TOKEN_A: '', TOKEN_B: 'test-token' },
+    ]) {
+      const result = runKeepalive('', pingScript(), tokens);
+      assert.strictEqual(result.status, 1, result.stdout);
+      assert.match(result.stdout, /SUPABASE_KEEPALIVE_REFS is empty/);
+    }
   });
 
   it('negative control: removing the zero-ref guard restores the false success', () => {

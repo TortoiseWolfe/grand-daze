@@ -56,6 +56,16 @@ jobs:
           set -uo pipefail
 
           if [ -z "${REFS:-}" ]; then
+            # NOTHING CONFIGURED IS NOT A FAILURE (#985). This repository has no Supabase
+            # project yet, so there is nothing that could pause, and a red run every five
+            # days teaches that red is normal. But the skip is only for the case where the
+            # whole set is absent: tokens WITHOUT a ref list is a half-finished setup, and
+            # an emptied variable on a configured repository must still fail, because that
+            # is a keepalive that stops keeping anything alive while looking healthy.
+            if [ -z "${TOKEN_A:-}" ] && [ -z "${TOKEN_B:-}" ]; then
+              echo "::notice::No Supabase project configured, so there is nothing to keep alive. Set the SUPABASE_KEEPALIVE_REFS repository VARIABLE and the SUPABASE_ACCESS_TOKEN repository SECRET to enable this job."
+              exit 0
+            fi
             echo "::error::vars.SUPABASE_KEEPALIVE_REFS is empty — nothing is being kept alive"
             exit 1
           fi
