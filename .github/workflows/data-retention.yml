@@ -39,21 +39,56 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      # IS THERE A PROJECT TO CLEAN? (#985)
+      #
+      # This repository has no Supabase project yet, so the script had nothing to delete
+      # from and exited 1 on a missing token every night. Same preflight as the drift
+      # workflows, for the same reasons: a step rather than a job-level `if:` because the
+      # `secrets` context is not available there, and HALF-CONFIGURED STILL FAILS because
+      # deleting the token must not silently retire a retention job that mutates
+      # production data. Every later step is gated on it, so an unconfigured repository
+      # does not even install dependencies.
+      - name: Is a Supabase project configured?
+        id: configured
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_PROJECT_REF" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "  Supabase project configured — the retention job will run"
+            exit 0
+          fi
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] && [ -z "$SUPABASE_PROJECT_REF" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No Supabase project configured, so there are no audit logs to prune. Set the SUPABASE_PROJECT_REF repository VARIABLE and the SUPABASE_ACCESS_TOKEN repository SECRET to enable this job."
+            exit 0
+          fi
+          echo "::error::Supabase is half-configured, which is not the same as unconfigured."
+          [ -n "$SUPABASE_PROJECT_REF" ] || echo "::error::  missing repository VARIABLE  SUPABASE_PROJECT_REF"
+          [ -n "$SUPABASE_ACCESS_TOKEN" ] || echo "::error::  missing repository SECRET    SUPABASE_ACCESS_TOKEN"
+          exit 1
+
       - name: Checkout code
+        if: steps.configured.outputs.configured == 'true'
         uses: actions/checkout@v5
 
       - name: Install pnpm
+        if: steps.configured.outputs.configured == 'true'
         uses: pnpm/action-setup@v6
         with:
           version: 10.16.1
 
       - name: Setup Node.js
+        if: steps.configured.outputs.configured == 'true'
         uses: actions/setup-node@v5
         with:
           node-version: 20.x
           cache: 'pnpm'
 
       - name: Install dependencies
+        if: steps.configured.outputs.configured == 'true'
         run: pnpm install --frozen-lockfile
 
       # The script deletes, then RE-COUNTS and fails if rows past the window
@@ -69,6 +104,7 @@ jobs:
       # is a quota incident, not a retention defect, and a job that goes red for
       # the duration of one trains people to ignore it.
       - name: Enforce auth_audit_logs retention
+        if: steps.configured.outputs.configured == 'true'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
