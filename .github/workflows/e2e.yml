@@ -56,8 +56,10 @@ on:
       - 'scripts/supabase/set-edge-function-secrets.ts'
       - 'scripts/__tests__/**'
       - 'tests/rebrand/**'
-  schedule:
-    - cron: '0 6 * * 1' # Monday 6 AM UTC — full 3-browser run
+  # PAUSED 2026-10-19: no Supabase backend configured; the quota gate fails the run.
+  # See https://github.com/TortoiseWolfe/grand-daze/issues/7. When one manual run is green, restore:
+  #   schedule:
+  #     - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
       budget_override:
