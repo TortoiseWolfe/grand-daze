@@ -1,0 +1,194 @@
+# basePath Project-Site Smoke, run against the LOCAL Supabase stack.
+#
+# WHY THIS EXISTS. Grand Daze is a GitHub Pages project site, so the live site is
+# served under a repo-name prefix (/GrandDaze). The class of bug where a sign-in
+# redirect or a hand-built URL drops that prefix cannot be seen by the root-served
+# suite, so tests/e2e/basepath/ builds the export WITH the prefix, serves it under
+# /GrandDaze and checks the sign-up request carries the prefixed redirect (#157).
+#
+# The same smoke test also lives in e2e.yml as "basePath Project-Site Smoke". That
+# copy needs a cloud Supabase project (SUPABASE_PROJECT_REF plus service-role
+# secrets) and this fork has none, so on every run it is skipped. A skipped test is
+# not a passing test. This workflow runs the same Playwright project (`basepath`)
+# against a Supabase stack that starts on the runner itself, so it needs no secret
+# and no cloud project, and it runs on every pull request and every push to main.
+#
+# NO PATH FILTER, deliberately. The Signup Mailer suite stayed red on main from
+# 28 Aug to 6 Nov because the pull requests that could have caused or fixed it
+# skipped it on a path filter. This job builds in about two minutes and runs one
+# test, so it is cheaper to always run it than to be wrong about when to.
+#
+# WHAT MAKES IT STRICT. The test step does not decide the verdict; the check after
+# it does, from the JSON results: at least one test must have executed, none may
+# fail, and none may be skipped.
+name: 'basePath Project-Site Smoke (local Supabase)'
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  basepath-local:
+    name: basePath Project-Site Smoke (local)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout the code under test
+        uses: actions/checkout@v5
+
+      - name: Local demo env (compose, build and tests share one set of credentials)
+        run: |
+          # .env.local-supabase is TRACKED and holds the well-known PUBLIC Supabase
+          # demo keys, the same file e2e-local.yml uses. No repository secret is
+          # read anywhere in this workflow.
+          cp .env.local-supabase .env
+          sed -i 's|host\.docker\.internal|localhost|g' .env
+          grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|TEST_USER_)' .env.local-supabase >> "$GITHUB_ENV"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
+            echo "SUPABASE_ADMIN_URL=http://localhost:54321"
+          } >> "$GITHUB_ENV"
+
+      - name: Bring up local Supabase
+        run: |
+          # The global setup of the shared Playwright config checks that Supabase
+          # answers and that the test users exist, before any project runs.
+          docker compose --profile supabase up -d \
+            supabase-db supabase-kong supabase-auth supabase-rest supabase-realtime supabase-storage
+
+      - name: Wait for the stack to answer
+        run: |
+          set +e   # a non-zero curl inside the loop must not kill the step
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+              -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+              http://localhost:54321/auth/v1/health)
+            [ "$code" = "200" ] && { echo "auth ready after ${i} attempt(s)"; break; }
+            sleep 3
+          done
+          [ "$code" = "200" ] || { echo "::error::local Supabase never became ready (last=$code)"; exit 1; }
+
+      - name: Setup pnpm and Node
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Seed the E2E users
+        run: pnpm tsx scripts/seed-test-users.ts
+
+      - name: Build the basePath-prefixed export
+        run: bash scripts/serve-basepath.sh build
+        env:
+          BASE_PATH: /GrandDaze
+          # DISABLE_BASE_PATH is deliberately NOT set: this build must keep the
+          # /GrandDaze prefix. A non-empty NEXT_PUBLIC_BASE_PATH (set by the script)
+          # is what next.config.ts honours.
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_e2e_dummy_not_a_real_key
+          NEXT_PUBLIC_PAYPAL_CLIENT_ID: e2e_dummy_paypal_client_id
+          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: e2e_dummy_web3forms_key
+
+      - name: Serve the export under /GrandDaze
+        run: |
+          set -euo pipefail
+          BASE_PATH=/GrandDaze bash scripts/serve-basepath.sh serve 3000 > serve.log 2>&1 &
+          SERVE_PID=$!
+          sleep 2
+          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+            echo "::error::serve exited immediately after launch"
+            cat serve.log || true
+            exit 1
+          fi
+          if ! npx wait-on http://localhost:3000/GrandDaze/sign-up/ --timeout 60000 --verbose; then
+            echo "::error::wait-on timed out: the prefixed serve never bound within 60s"
+            cat serve.log || true
+            exit 1
+          fi
+          echo "serving http://localhost:3000/GrandDaze/"
+
+      - name: Run the basepath Playwright project
+        # `|| true` so a failing run still leaves results.json behind; the check
+        # below is what fails the job.
+        run: |
+          scripts/ci/playwright-in-container.sh test \
+            --project=basepath \
+            --no-deps \
+            --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
+        env:
+          CI: 'true'
+          SKIP_WEBSERVER: 'true'
+          BASE_URL: http://localhost:3000/GrandDaze
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+          ZERO_ASSERTION_GATE_MODE: block
+          # Without these three the suite falls back to the workspace .env, whose
+          # host names are container-side (see e2e-local.yml, #830).
+          PLAYWRIGHT_REQUIRED_ENV: NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      - name: At least one test ran, and none failed or were skipped
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          try:
+              d = json.load(open("results.json"))
+          except Exception as e:
+              print(f"::error::no readable results.json ({e}): the run reported nothing")
+              sys.exit(1)
+          ran = skipped = failed = 0
+          names = []
+          def walk(s):
+              global ran, skipped, failed
+              for spec in s.get("specs", []):
+                  for t in spec.get("tests", []):
+                      st = t.get("status")   # expected|skipped|flaky|unexpected
+                      if st == "skipped":
+                          skipped += 1
+                          names.append("SKIPPED: " + spec.get("title", "?"))
+                          continue
+                      ran += 1
+                      if st not in ("expected", "flaky"):
+                          failed += 1
+                          names.append("FAILED: " + spec.get("title", "?"))
+              for c in s.get("suites", []): walk(c)
+          for s_ in d.get("suites", []): walk(s_)
+          print(f"executed {ran}, skipped {skipped}, failed {failed}")
+          for n in names[:10]:
+              print(f"::error::{n}")
+          if ran == 0:
+              print("::error::0 tests executed: a green tick here would be meaningless")
+              sys.exit(1)
+          if failed or skipped:
+              sys.exit(1)
+          EOF
+
+      - name: No passing test may have run zero assertions
+        if: always()
+        run: node scripts/ci/check-zero-assertions.mjs
+
+      - name: Upload results and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: basepath-local-results
+          path: |
+            results.json
+            playwright-report/
+            test-results/
+            serve.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: echo "## basePath Project-Site Smoke (local Supabase) complete" >> "$GITHUB_STEP_SUMMARY"

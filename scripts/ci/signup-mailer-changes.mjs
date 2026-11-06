@@ -37,6 +37,12 @@ import { execFileSync } from 'node:child_process';
  *   - `scripts/supabase/` carries the GoTrue settings, including the mailer URL paths the
  *     confirmation link depends on.
  *   - the lockfile: a dependency bump changes client behaviour with no source edit.
+ *   - the base-path chain (`next.config.ts`, `scripts/detect-project.js`,
+ *     `scripts/generate-manifest.js`): this suite serves a ROOT-anchored build
+ *     (`DISABLE_BASE_PATH=true`, `serve out`). If that build bakes in the repo-name
+ *     prefix, every script 404s, React never hydrates and the whole suite fails. That is
+ *     exactly what kept it red on main from 28 Aug to 6 Nov while every PR that could
+ *     have caused or fixed it skipped the suite.
  */
 export const SIGNUP_MAILER_PATHS = [
   'src/components/auth/',
@@ -54,6 +60,9 @@ export const SIGNUP_MAILER_PATHS = [
   'playwright.signup-mailer.config.ts',
   'docker-compose.yml',
   'pnpm-lock.yaml',
+  'next.config.ts',
+  'scripts/detect-project.js',
+  'scripts/generate-manifest.js',
   '.github/workflows/signup-mailer.yml',
 ];
 
@@ -78,11 +87,14 @@ function main(argv) {
     const yes = needsSignupMailer(['src/components/auth/SignUpForm/SignUpForm.tsx']);
     const no = needsSignupMailer(['README.md', 'src/components/atomic/Card/Card.tsx']);
     const captcha = needsSignupMailer(['src/config/captcha.config.ts']);
-    if (!yes || no || !captcha) {
-      console.error(`selftest FAILED: signup=${yes} unrelated=${no} captcha=${captcha}`);
+    const basePath = needsSignupMailer(['next.config.ts']);
+    if (!yes || no || !captcha || !basePath) {
+      console.error(
+        `selftest FAILED: signup=${yes} unrelated=${no} captcha=${captcha} basePath=${basePath}`
+      );
       process.exit(1);
     }
-    console.log('selftest ok: yes to the signup form, no to unrelated UI, yes to captcha config');
+    console.log('selftest ok: yes to the signup form, no to unrelated UI, yes to captcha config, yes to the base-path build config');
     return;
   }
 

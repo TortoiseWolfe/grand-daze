@@ -356,6 +356,10 @@ jobs:
 
   # ============================================
   # STEP 2b: basePath project-site smoke (#157)
+  # This is the CLOUD copy: it needs SUPABASE_PROJECT_REF and the cloud
+  # secrets, so it skips on every run in a fork with no backend. The copy that
+  # actually runs there, against a Supabase brought up in the job, is
+  # basepath-local.yml.
   # A GitHub Pages project-site fork needs a /RepoName basePath; the class of
   # bug where auth redirects / hand-built URLs escape that prefix is invisible
   # to the root-anchored suite. This job builds a DEDICATED basePath-prefixed
