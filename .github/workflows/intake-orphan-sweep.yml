@@ -41,10 +41,10 @@
 name: Intake Orphan Sweep
 
 on:
-  schedule:
-    # 04:00 UTC on Mondays. Nothing here is time-critical; weekly keeps the report
-    # infrequent enough to actually be read.
-    - cron: '0 4 * * 1'
+  # PAUSED 2026-10-19: no Supabase backend configured; the sweep cannot run.
+  # See https://github.com/TortoiseWolfe/grand-daze/issues/7. When one manual run is green, restore:
+  #   schedule:
+  #     - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       mode:
