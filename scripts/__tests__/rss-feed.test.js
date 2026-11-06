@@ -135,20 +135,12 @@ test('RSS and JSON feeds mirror the published site index at its configured origi
       assert.ok(rss.includes(`<link>${url}</link>`));
       assert.ok(rss.includes(`<guid isPermaLink="true">${url}</guid>`));
     }
-    assert.ok(rss.includes('Stripe, PayPal &amp; GDPR'));
+    assert.ok(rss.includes('Hello, world'));
     assert.deepStrictEqual(
       jsonFeed.items.find(
-        (item) =>
-          item.url === 'https://example.test/blog/ride-the-open-source-city/'
+        (item) => item.url === 'https://example.test/blog/hello-world/'
       ).tags,
-      [
-        'three-js',
-        'game-engine',
-        'open-source',
-        'react-three-fiber',
-        'game-dev',
-        'indie',
-      ]
+      ['example']
     );
   } finally {
     fs.rmSync(outputDir, { recursive: true, force: true });

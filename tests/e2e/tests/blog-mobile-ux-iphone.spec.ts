@@ -1,5 +1,10 @@
 import { test, expect, devices } from '@playwright/test';
 import { waitForLoadStateOrGiveUp } from '../utils/settle';
+import {
+  blogPostPaths,
+  readBlogPosts,
+  requireFirstBlogPostPath,
+} from '../utils/blog-fixtures';
 
 /**
  * Mobile UX Tests for Blog Posts - iPhone 12
@@ -23,7 +28,8 @@ test.use(iPhone12Config);
 test.describe('Blog Post Mobile UX - iPhone 12', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to a blog post
-    await page.goto('/blog/countdown-timer-tutorial');
+    // A post that exists in public/blog, never a template slug (#11)
+    await page.goto(requireFirstBlogPostPath());
     // Wait for content to load
     await page.waitForLoadState('networkidle');
   });
@@ -50,10 +56,9 @@ test.describe('Blog Post Mobile UX - iPhone 12', () => {
   test('should keep controls clear of long and short blog titles', async ({
     page,
   }) => {
-    const posts = [
-      '/blog/countdown-timer-tutorial',
-      '/blog/authentication-supabase-oauth',
-    ];
+    // Every post the site has (#11), instead of two template slugs a fork deletes.
+    // beforeEach already throws when there are none, so this cannot pass empty.
+    const posts = blogPostPaths(readBlogPosts());
 
     for (const width of [390, 500]) {
       await page.setViewportSize({ width, height: 900 });

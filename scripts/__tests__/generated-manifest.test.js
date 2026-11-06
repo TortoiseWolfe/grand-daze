@@ -70,15 +70,16 @@ const PROJECT_CONFIG_PATH = path.join(
  * where the suite happened to run.
  */
 function defaultBasePath() {
-  const src = fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8');
-  const match = /projectName:\s*'([^']+)'/.exec(src);
-  assert.ok(
-    match,
-    'could not read projectName from src/config/project.config.ts'
+  // detect-project.js builds the base path from the repository name, which is
+  // the package.json "name". The display name in project.config.ts ("Grand Daze")
+  // is not used for the URL, so it must not be used here.
+  const pkg = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')
   );
+  assert.ok(pkg.name, 'could not read "name" from package.json');
   // A custom domain serves from the apex, so there is no base path to add.
   const cnameExists = fs.existsSync(path.join(ROOT, 'public', 'CNAME'));
-  return cnameExists ? '' : `/${match[1]}`;
+  return cnameExists ? '' : `/${pkg.name}`;
 }
 
 const readManifest = () => JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));

@@ -21,6 +21,7 @@ import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { GroupKeyService } from '@/services/messaging/group-key-service';
 import { isBackendCaptchaProtected } from './captcha-guard';
 import { waitForLoadStateOrGiveUp } from './settle';
+import { suppressSeasonalBanner } from './seasonal-banner';
 
 /**
  * Key used for PROGRAMMATIC sign-ins in test setup.
@@ -1736,6 +1737,8 @@ export async function openAuthedPage(
   const context = await browser.newContext({
     storageState: { cookies: [], origins: [] },
   });
+  // From Oct 31 the seasonal countdown banner covers the Edit and Delete buttons (#11).
+  await suppressSeasonalBanner(context);
   const page = await context.newPage();
   await injectSessionIntoPage(page, session);
   return { page, context, close: () => context.close() };

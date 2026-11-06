@@ -114,6 +114,10 @@ jobs:
   #   gh workflow run e2e.yml -f budget_override='verifying the #575 cutover'
   budget:
     name: Cloud-quota budget
+    # No backend configured means nothing to meter or run against. A job-level `if:`
+    # that is false allocates no runner, so a repo with no SUPABASE_PROJECT_REF skips
+    # this job instead of failing it (same gate as ScriptHammer's e2e.yml).
+    if: vars.SUPABASE_PROJECT_REF != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

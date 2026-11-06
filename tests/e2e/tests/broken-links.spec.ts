@@ -441,8 +441,11 @@ test.describe('Broken Links Detection', () => {
         // Handle production URLs (github.io)
         if (url.includes('github.io')) {
           const prodUrl = new URL(url);
-          // Remove base path (/GrandDaze) from pathname
-          const path = prodUrl.pathname.replace(/^\/GrandDaze/, '');
+          // Remove the base path from the pathname. On GitHub Pages a project site is
+          // served under its repository name, which is always the first path segment
+          // (#11: this was hard-coded to the template's `/GrandDaze`, so in a fork every
+          // sitemap entry kept its prefix and 404ed against the root-served build).
+          const path = prodUrl.pathname.replace(/^\/[^/]+(?=\/|$)/, '');
           return `${baseUrl}${path}`;
         }
         // Already a localhost URL

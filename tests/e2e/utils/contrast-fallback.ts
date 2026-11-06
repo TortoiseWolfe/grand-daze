@@ -85,6 +85,13 @@ export function measureNullRatioNodes(targets: string[]): FallbackRow[] {
     return [d[0], d[1], d[2]];
   };
 
+  /** Like rgbOf, but null unless the colour is fully opaque (alpha 255 on the canvas). */
+  const opaqueRgbOf = (css: string): [number, number, number] | null => {
+    const rgb = rgbOf(css);
+    if (!rgb) return null;
+    return ctx.getImageData(0, 0, 1, 1).data[3] === 255 ? rgb : null;
+  };
+
   const luminance = ([r, g, b]: [number, number, number]): number => {
     const f = (c: number) => {
       const x = c / 255;
@@ -308,7 +315,17 @@ export function measureNullRatioNodes(targets: string[]): FallbackRow[] {
       mode = 'ancestor-gradient';
       const fg = rgbOf(cs.color);
       fgs = fg ? [fg] : [];
-      bgs = ancestorBg(el);
+      // An element with its OWN opaque background sits on that, whatever gradient
+      // is behind it. axe returns a null ratio whenever an ancestor has a gradient,
+      // even for a solid-filled badge, and measuring that badge against the page
+      // behind it reported white-on-cream at 1.25:1 for a button that is white on
+      // dark brown (the SEO badge on a 60-79 score, #11).
+      const ownOpaque = /rgba\(0, 0, 0, 0\)|transparent/.test(
+        cs.backgroundColor
+      )
+        ? null
+        : opaqueRgbOf(cs.backgroundColor);
+      bgs = ownOpaque ? [ownOpaque] : ancestorBg(el);
     }
 
     if (!fgs.length || !bgs.length) {
