@@ -17,14 +17,15 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { dismissCookieBanner } from '../utils/test-user-factory';
+import { isLocalBackend } from '../../utils/local-backend';
 
 // Auth comes from storageState (setup project) - no sign-in needed
 test.describe('Avatar Upload Flow', () => {
-  // Avatar upload requires Supabase Storage — Save button doesn't dismiss modal in CI
-  // because the upload to storage fails silently without a configured bucket
+  // Avatar upload writes to the `avatars` Storage bucket, so it needs a local
+  // Supabase (the local E2E lane brings one up), not a hosted project.
   test.skip(
-    !!process.env.CI,
-    'Avatar upload requires Supabase Storage — skipped in CI'
+    !isLocalBackend(),
+    'Uploads to the avatars bucket: needs a local Supabase, not a hosted one'
   );
   test.beforeEach(async ({ page }) => {
     // Navigate to Account Settings (already authenticated via storageState)
@@ -92,16 +93,11 @@ test.describe('Avatar Upload Flow', () => {
     // Check for error message - if present, upload failed
     const errorMessage = profilePictureCard.getByRole('alert');
     const hasError = await errorMessage.isVisible().catch(() => false);
-    if (hasError) {
-      const errorText = await errorMessage
-        .textContent()
-        .catch(() => 'Unknown error');
-      test.skip(
-        true,
-        `Upload failed (Supabase storage may not be configured): ${errorText}`
-      );
-      return;
-    }
+    // A failed upload must fail the test, never skip it.
+    expect(
+      hasError,
+      `Upload failed: ${await errorMessage.textContent().catch(() => '')}`
+    ).toBe(false);
 
     // Verify upload succeeded by checking avatar URL changed
     await expect(async () => {
