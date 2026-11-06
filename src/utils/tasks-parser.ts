@@ -44,8 +44,9 @@ export async function parseTasksFile(): Promise<TaskProgress> {
 
     // Check if we're on GitHub Pages (*.github.io)
     if (window.location.hostname.endsWith('.github.io')) {
-      const projectName =
-        process.env.NEXT_PUBLIC_PROJECT_NAME || 'Grand Daze';
+      // The deploy base path is the repository name (see scripts/detect-project.js),
+      // not the display name, so the fallback must be the repository name too.
+      const projectName = process.env.NEXT_PUBLIC_PROJECT_NAME || 'grand-daze';
       baseUrl = `/${projectName}`;
     }
     // For localhost and custom domains, use root
