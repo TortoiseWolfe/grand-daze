@@ -28,6 +28,7 @@ import {
   assertLocalBackend,
   type IsolatedAdmin,
 } from '../utils/test-user-factory';
+import { isLocalBackend } from '../../utils/local-backend';
 
 // ADMIN_EMAIL / ADMIN_PASSWORD are gone: this file no longer signs in as the shared
 // fixture user. See the beforeAll below (#914).
@@ -45,7 +46,10 @@ const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 // side via NEXT_PUBLIC_SUPABASE_URL — so this file no longer restates that mapping (#121).
 
 test.describe('Admin Dashboard E2E', () => {
-  test.skip(!!process.env.CI, 'Skipped in CI: requires local Docker Supabase');
+  test.skip(
+    !isLocalBackend(),
+    'Seeds an admin and mutates data: needs a local Supabase, not a hosted one'
+  );
   test.describe.configure({ mode: 'serial' });
 
   // SEED A THROWAWAY ADMIN — never promote the shared fixture user (#914).

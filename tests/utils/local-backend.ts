@@ -42,6 +42,15 @@ export function resolveBackendUrl(env = process.env): string {
   return env.SUPABASE_ADMIN_URL || env.NEXT_PUBLIC_SUPABASE_URL || '';
 }
 
+/**
+ * Is the backend this run would reach a local Supabase stack? Specs that seed data
+ * use it to skip only when they could not run safely, instead of skipping whenever
+ * `CI` is set: the local E2E lane sets `CI` and ALSO has a local stack.
+ */
+export function isLocalBackend(env = process.env): boolean {
+  return isLocalSupabaseUrl(resolveBackendUrl(env));
+}
+
 export function assertLocalBackend(what = 'this spec'): void {
   const resolved = resolveBackendUrl();
   if (isLocalSupabaseUrl(resolved)) return;

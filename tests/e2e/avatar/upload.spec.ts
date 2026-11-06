@@ -17,14 +17,15 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { dismissCookieBanner } from '../utils/test-user-factory';
+import { isLocalBackend } from '../../utils/local-backend';
 
 // Auth comes from storageState (setup project) - no sign-in needed
 test.describe('Avatar Upload Flow', () => {
-  // Avatar upload requires Supabase Storage — Save button doesn't dismiss modal in CI
-  // because the upload to storage fails silently without a configured bucket
+  // Avatar upload needs a Supabase Storage bucket. The local stack has one; a hosted
+  // project may not, and the Save button then never dismisses the modal.
   test.skip(
-    !!process.env.CI,
-    'Avatar upload requires Supabase Storage — skipped in CI'
+    !isLocalBackend(),
+    'Avatar upload requires Supabase Storage: needs the local stack'
   );
   test.beforeEach(async ({ page }) => {
     // Navigate to Account Settings (already authenticated via storageState)

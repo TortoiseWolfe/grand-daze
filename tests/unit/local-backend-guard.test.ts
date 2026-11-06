@@ -1,7 +1,31 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { isLocalSupabaseUrl, assertLocalBackend } from '../utils/local-backend';
+import {
+  isLocalSupabaseUrl,
+  assertLocalBackend,
+  isLocalBackend,
+} from '../utils/local-backend';
+
+describe('isLocalBackend (decides whether a seeding E2E spec skips)', () => {
+  it('is true for a local stack, whether or not CI is set', () => {
+    expect(
+      isLocalBackend({
+        CI: 'true',
+        SUPABASE_ADMIN_URL: 'http://localhost:54321',
+      } as unknown as NodeJS.ProcessEnv)
+    ).toBe(true);
+  });
+
+  it('is false for a hosted project and for an empty environment', () => {
+    expect(
+      isLocalBackend({
+        NEXT_PUBLIC_SUPABASE_URL: 'https://abc.supabase.co',
+      } as unknown as NodeJS.ProcessEnv)
+    ).toBe(false);
+    expect(isLocalBackend({} as unknown as NodeJS.ProcessEnv)).toBe(false);
+  });
+});
 
 /**
  * The local-backend guard must be able to REFUSE (#944).
