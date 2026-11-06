@@ -91,7 +91,8 @@ describe('shipped blog images contain an image (#439)', () => {
   it('finds raster images to check', () => {
     // A sweep that silently measures nothing reads as a pass. #411 is the same
     // shape: a green gate that covered 4 of 43 routes.
-    expect(files.length).toBeGreaterThan(10);
+    // The rebrand removed the template's blog images, so only the shipped ones remain.
+    expect(files.length).toBeGreaterThan(0);
   });
 
   it.each(files.map((f) => [relative(ROOT, f), f]))(

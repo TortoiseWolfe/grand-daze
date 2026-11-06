@@ -1,5 +1,9 @@
 import { test, expect, devices } from '@playwright/test';
 import { TOUCH_TARGET_STANDARDS } from '@/config/touch-targets';
+import { requireFirstBlogPostPath } from '../utils/blog-fixtures';
+
+/** A post that exists in public/blog, never a template slug (#11). */
+const BLOG_POST = requireFirstBlogPostPath();
 
 /**
  * Touch Target Standards for Blog (T013)
@@ -74,7 +78,7 @@ test.describe('Blog Touch Target Standards - iPhone 12', () => {
   });
 
   test('Blog post interactive elements meet 44x44px', async ({ page }) => {
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
     await page.waitForLoadState('networkidle');
 
     // Test buttons (SEO badge, TOC, etc.)

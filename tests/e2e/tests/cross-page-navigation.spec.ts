@@ -85,9 +85,10 @@ test.describe('Cross-Page Navigation', () => {
       await expect(nav).toBeVisible();
 
       // Check key navigation links are present
-      const homeLink = page
-        .locator('a:has-text("Home"), a:has-text("Grand Daze")')
-        .first();
+      // By accessible name, not visible text (#11): the logo link is labelled
+      // "<project name> — Home" (GlobalNav.tsx), and its visible text is the repo slug,
+      // so a brand-name text match fails in any fork that has not matched the two.
+      const homeLink = page.getByRole('link', { name: /home/i }).first();
       await expect(homeLink).toBeVisible();
 
       // Check footer links are consistent

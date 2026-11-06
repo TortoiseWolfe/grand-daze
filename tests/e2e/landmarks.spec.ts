@@ -8,6 +8,7 @@ import {
   type IsolatedAdmin,
 } from './utils/test-user-factory';
 import { join } from 'node:path';
+import { blogRouteInstances, readBlogPosts } from './utils/blog-fixtures';
 
 /**
  * WCAG 2.4.1 Bypass Blocks + one `<main>` per document, on every route (#475).
@@ -42,6 +43,9 @@ import { join } from 'node:path';
 
 const APP_DIR = join(process.cwd(), 'src/app');
 
+/** A real post and tag from public/blog, never the template's (#11). */
+const BLOG = blogRouteInstances(readBlogPosts());
+
 /** Routes that cannot be measured, each with the reason. Never silent. */
 const EXCLUDED: Record<string, string> = {
   '/auth/callback':
@@ -50,12 +54,12 @@ const EXCLUDED: Record<string, string> = {
     'twin payloads are privacy-gated and gitignored; absent in a fresh checkout',
   '/chatt':
     'Cesium canvas host; the widget owns the viewport and headless Firefox has no WebGL',
+  ...BLOG.excluded,
 };
 
 /** Dynamic segments need a real instance — the template alone proves nothing. */
 const INSTANCES: Record<string, string> = {
-  '/blog/[slug]': '/blog/playable-city-chattanooga',
-  '/blog/tags/[tag]': '/blog/tags/digital-twin',
+  ...BLOG.instances,
   '/docs/[slug]': '/docs/install-and-first-run',
 };
 

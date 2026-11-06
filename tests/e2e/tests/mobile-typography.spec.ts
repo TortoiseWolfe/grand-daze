@@ -9,6 +9,10 @@
 
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
+import { requireFirstBlogPostPath } from '../utils/blog-fixtures';
+
+/** A post that exists in public/blog, never a template slug (#11). */
+const BLOG_POST = requireFirstBlogPostPath();
 
 /**
  * Wait for layout to stabilize after viewport/page change
@@ -36,7 +40,7 @@ test.describe('Mobile Typography', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
@@ -59,7 +63,7 @@ test.describe('Mobile Typography', () => {
 
   test('Line height is comfortable (≥1.5)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
@@ -83,7 +87,7 @@ test.describe('Mobile Typography', () => {
 
   test('Headings scale appropriately on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
@@ -255,7 +259,7 @@ test.describe('Mobile Typography', () => {
 
   test('Text does not overflow containers on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
