@@ -191,8 +191,8 @@ test.describe('Failed Payment Retry Logic', () => {
       fixture = await seedIsolatedSubscription('past_due', {
         provider: 'stripe',
       });
-      test.skip(!fixture, 'Admin client unavailable to seed subscription');
-      if (!fixture) return;
+      // A missing fixture fails the run; it never skips it.
+      if (!fixture) throw new Error('Could not seed a subscription');
 
       opened = await openSubscriptionsAs(browser, fixture);
       const { page } = opened;
