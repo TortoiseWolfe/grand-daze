@@ -21,6 +21,7 @@ import {
   getAdminClient,
   deleteTestUser,
   ISO_ADMIN_PREFIX,
+  ISO_AVATAR_PREFIX,
 } from './utils/test-user-factory';
 
 const AUTH_FILE = 'tests/e2e/fixtures/storage-state-auth.json';
@@ -61,7 +62,10 @@ async function sweepOrphanedAdmins(): Promise<void> {
     }
     const users = data?.users ?? [];
     for (const u of users) {
-      if (u.email?.includes(ISO_ADMIN_PREFIX)) {
+      if (
+        u.email?.includes(ISO_ADMIN_PREFIX) ||
+        u.email?.includes(ISO_AVATAR_PREFIX)
+      ) {
         orphans.push({ id: u.id, email: u.email });
       }
     }

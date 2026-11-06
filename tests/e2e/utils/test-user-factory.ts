@@ -109,6 +109,13 @@ export interface TestUser {
  */
 export const ISO_ADMIN_PREFIX = 'iso-admin';
 
+/**
+ * Email prefix for the throwaway avatar-upload user (#21). Exported for the same
+ * reason as {@link ISO_ADMIN_PREFIX}: the orphan sweep must match the seeder's
+ * own string.
+ */
+export const ISO_AVATAR_PREFIX = 'iso-avatar';
+
 let adminClient: SupabaseClient | null = null;
 
 /**
@@ -2912,6 +2919,40 @@ export async function deleteIsolatedAdmin(
   if (!fixture) return;
   await deleteTestUser(fixture.user.id);
   console.log('✓ Isolated admin torn down');
+}
+
+/**
+ * A throwaway, keyed, signed-in user with no special rights, for a spec that
+ * must not share the storage-state user's login session (#21). The avatar upload
+ * writes to Storage and then updates the auth user (`PUT /auth/v1/user`); if any
+ * other spec in the same run revokes the shared user's session, that update
+ * answers 403 "Auth session missing!" and the upload rolls back. A session that
+ * only this spec holds cannot be revoked by anyone else.
+ */
+export interface IsolatedUser {
+  user: TestUser;
+  session: InjectableSession;
+}
+
+/** Seed a throwaway user. Returns null if the admin client is unavailable. */
+export async function seedIsolatedUser(
+  prefix: string = ISO_AVATAR_PREFIX
+): Promise<IsolatedUser | null> {
+  if (!getAdminClient()) return null;
+  const stamp = Date.now().toString().slice(-8);
+  const created = await createKeyedUserWithSession(prefix, 'isousr', stamp);
+  if (!created) return null;
+  console.log(`✓ Isolated user ${created.user.id}`);
+  return { user: created.user, session: created.session };
+}
+
+/** Tear down a throwaway user. Safe with null. */
+export async function deleteIsolatedUser(
+  fixture: IsolatedUser | null
+): Promise<void> {
+  if (!fixture) return;
+  await deleteTestUser(fixture.user.id);
+  console.log('✓ Isolated user torn down');
 }
 
 /**

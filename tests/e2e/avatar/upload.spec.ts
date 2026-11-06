@@ -16,10 +16,22 @@
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { dismissCookieBanner } from '../utils/test-user-factory';
+import {
+  dismissCookieBanner,
+  injectSessionIntoPage,
+  seedIsolatedUser,
+  deleteIsolatedUser,
+  type IsolatedUser,
+} from '../utils/test-user-factory';
 import { isLocalBackend } from '../../utils/local-backend';
 
-// Auth comes from storageState (setup project) - no sign-in needed
+// Auth does NOT come from the shared storageState here (#21). The upload writes
+// to Storage and then updates the auth user; when another spec in the same run
+// revoked the shared user's login session, that update answered 403 "Auth
+// session missing!" and the upload rolled back. A throwaway user's session is
+// held by this spec alone, so nobody else can revoke it.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Avatar Upload Flow', () => {
   // Avatar upload writes to the `avatars` Storage bucket, so it needs a local
   // Supabase (the local E2E lane brings one up), not a hosted project.
@@ -27,8 +39,26 @@ test.describe('Avatar Upload Flow', () => {
     !isLocalBackend(),
     'Uploads to the avatars bucket: needs a local Supabase, not a hosted one'
   );
+
+  let fixture: IsolatedUser | null = null;
+
+  test.beforeAll(async () => {
+    if (!isLocalBackend()) return;
+    fixture = await seedIsolatedUser();
+    // A missing fixture fails the run; it never skips it.
+    if (!fixture) {
+      throw new Error('Avatar upload spec: could not seed a throwaway user');
+    }
+  });
+
+  test.afterAll(async () => {
+    await deleteIsolatedUser(fixture);
+    fixture = null;
+  });
+
   test.beforeEach(async ({ page }) => {
-    // Navigate to Account Settings (already authenticated via storageState)
+    if (!fixture) throw new Error('No throwaway user was seeded');
+    await injectSessionIntoPage(page, fixture.session);
     await page.goto('/account');
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
