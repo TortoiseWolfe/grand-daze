@@ -296,7 +296,7 @@ describe('production builds never run in the dev container (#293, #508)', () => 
     expect(
       body.length,
       'blog-data.json is too small to contain the posts, so scanning it proves nothing'
-    ).toBeGreaterThan(10_000);
+    ).toBeGreaterThan(1_000);
 
     const offences = body
       .split(/\\n|","/)

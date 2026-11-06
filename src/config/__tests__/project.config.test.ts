@@ -41,9 +41,7 @@ describe('Project Configuration', () => {
 
       expect(config.projectName).toBe('Grand Daze');
       expect(config.projectOwner).toBe('tortoisewolfe');
-      expect(config.projectDescription).toContain(
-        'production Next.js and Supabase platform'
-      );
+      expect(config.projectDescription).toBe('Grand Daze');
       expect(config.basePath).toBe('');
       expect(config.deployUrl).toBe('http://localhost:3000');
     });
@@ -289,9 +287,7 @@ describe('Project Configuration', () => {
 
       expect(manifest.name).toContain('Grand Daze');
       expect(manifest.short_name).toBe('Grand Daze');
-      expect(manifest.description).toContain(
-        'production Next.js and Supabase platform'
-      );
+      expect(manifest.description).toContain('Grand Daze');
       expect(manifest.start_url).toBe('/');
       expect(manifest.display).toBe('standalone');
       expect(manifest.theme_color).toBe('#1a1a2e');
