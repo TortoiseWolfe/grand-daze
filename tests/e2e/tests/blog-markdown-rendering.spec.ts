@@ -3,16 +3,17 @@ import { dismissCookieBanner } from '../utils/test-user-factory';
 import { readBlogPosts } from '../utils/blog-fixtures';
 
 /**
- * This spec asserts on the exact tables, quotes, code and `<details>` of three template
- * posts. `scripts/rebrand.sh` deletes those posts in a fork, so there the spec has
- * nothing to measure and used to fail on a 404 (#11). It now skips, with the missing
- * slugs printed, so the lost coverage is visible. A fork that writes its own posts with
- * these features should replace the fixtures below with its own.
+ * This spec asserts on the exact tables, quotes, code and `<details>` of three posts in
+ * `public/blog/`. They began as template posts that `scripts/rebrand.sh` deletes in a
+ * fork, so the spec used to fail on a 404 (#11) and then skipped. This project now owns
+ * three posts written for these features. If you rename or remove one, the spec skips
+ * with the missing slugs printed, so the lost coverage stays visible. A fork that writes
+ * its own posts with these features should replace the fixtures below with its own.
  */
 const REQUIRED_SLUGS = [
-  'reject-without-taking-over',
-  'cursor-github-identity',
-  'countdown-timer-tutorial',
+  'review-without-rewriting',
+  'scoped-tokens-for-automation',
+  'component-generator-tutorial',
 ] as const;
 const PRESENT_SLUGS = new Set(readBlogPosts().map((post) => post.slug));
 const MISSING_SLUGS = REQUIRED_SLUGS.filter((s) => !PRESENT_SLUGS.has(s));
@@ -29,21 +30,21 @@ const TABLE_SCROLLER = '[data-blog-table-scroll]';
 
 const TABLE_POSTS = [
   {
-    slug: 'reject-without-taking-over',
+    slug: 'review-without-rewriting',
     headers: [
       'Approach',
-      "Author's name on it?",
-      "Author's agent stays in the loop?",
+      'Does the author keep credit for the change?',
+      "Does the author's own toolchain still run?",
       'Good for',
     ],
     rowCount: 4,
     quoteCount: 3,
-    firstQuote: 'A fixup commit on their branch',
+    firstQuote: "Suggest, don't overwrite",
     mustScroll: true,
   },
   {
-    slug: 'cursor-github-identity',
-    headers: ['Permission', 'Access', 'Why the agent needs it'],
+    slug: 'scoped-tokens-for-automation',
+    headers: ['Permission', 'Access', 'Why the automation needs it'],
     rowCount: 5,
     quoteCount: 6,
     firstQuote: 'The core idea',
@@ -271,7 +272,7 @@ async function assertExistingBlogBehaviors(
   await expect(
     content.getByRole('heading', {
       level: 2,
-      name: /A Token Is an Identity: Let Cursor Commit as Themselves/,
+      name: /A Token Is an Identity: Scope One Per Automation/,
     })
   ).toBeVisible();
   const anchoredHeading = content.locator(
@@ -333,7 +334,7 @@ async function assertExistingBlogBehaviors(
 }
 
 async function assertSafeAuthoredHtml(page: Page): Promise<void> {
-  const content = await openPost(page, 'countdown-timer-tutorial');
+  const content = await openPost(page, 'component-generator-tutorial');
   const details = content
     .locator('details')
     .filter({ hasText: 'CLI Arguments for Automation' });
@@ -364,7 +365,7 @@ test.describe('Blog markdown rendering', () => {
     }) => {
       test.skip(
         MISSING_SLUGS.length > 0,
-        `public/blog has no ${MISSING_SLUGS.join(', ')} (template posts removed by rebrand.sh)`
+        `public/blog has no ${MISSING_SLUGS.join(', ')} (the fixture posts this spec asserts on)`
       );
       await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
       await installClipboardCapture(page);
@@ -375,7 +376,7 @@ test.describe('Blog markdown rendering', () => {
         });
       }
 
-      // cursor-github-identity is intentionally the final table fixture so the
+      // scoped-tokens-for-automation is intentionally the final table fixture so the
       // compatibility checks can continue against the page already in view.
       const compatibilityContent = page.locator(BLOG_CONTENT);
       await expect(compatibilityContent).toBeVisible();

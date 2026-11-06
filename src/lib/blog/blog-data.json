@@ -1,6 +1,198 @@
 {
   "posts": [
     {
+      "id": "post_853431c8",
+      "slug": "component-generator-tutorial",
+      "title": "Generate a Component in One Command",
+      "content": "\n# Generate a Component in One Command\n\nEach component here is five files: the component, a barrel export (a small file that re-exports it), unit tests, a Storybook story (a live preview page) and an accessibility test. Writing those by hand invites mistakes, so the project ships a generator.\n\n## Run it with prompts\n\n```bash\ndocker compose exec grand-daze pnpm run generate:component\n```\n\nThe generator asks for a name and a category, then writes all five files. It also accepts the same answers as arguments on the command-line interface (CLI, the text prompt you type commands into), which is useful when a script runs it. The panel below shows how.\n\n<details>\n<summary>CLI Arguments for Automation</summary>\n\n**For scripting and automation:**\n\n```bash\ndocker compose exec grand-daze pnpm run generate:component -- \\\n  --name CountdownBanner \\\n  --category atomic \\\n  --hasProps true\n```\n\n**Available categories:** `subatomic`, `atomic`, `molecular`, `organisms`, `templates`\n\n</details>\n\n## After it runs\n\nOpen the new folder, fill in the component and run its tests. The generated tests already pass, so a red test means something you changed.\n",
+      "excerpt": "Every component in this project needs five files. The generator writes them for you, either through a short set of prompts or from a single command.",
+      "publishedAt": "2026-08-30T00:00:00.000Z",
+      "updatedAt": "2026-08-30T00:00:00.000Z",
+      "status": "published",
+      "author": {
+        "id": "default",
+        "name": "tortoisewolfe"
+      },
+      "metadata": {
+        "tags": [
+          "tutorial",
+          "components"
+        ],
+        "categories": [
+          "tutorials"
+        ],
+        "readingTime": 1,
+        "wordCount": 175,
+        "showToc": true,
+        "showAuthor": true,
+        "showShareButtons": true,
+        "featured": false,
+        "featuredImage": "/blog-images/component-generator-tutorial/featured.svg",
+        "featuredImageAlt": "A dark card reading \"Generate a component\" above a one-line command."
+      },
+      "seo": {
+        "title": "Generate a Component in One Command",
+        "description": "Every component in this project needs five files. The generator writes them for you, either through a short set of prompts or from a single command.",
+        "keywords": [
+          "tutorial",
+          "components"
+        ],
+        "ogTitle": "Generate a Component in One Command",
+        "ogDescription": "Use the component generator interactively, or give it arguments for scripts and automation.",
+        "ogImage": "/blog-images/component-generator-tutorial/og.png",
+        "twitterCard": "summary_large_image"
+      },
+      "frontMatter": {
+        "title": "Generate a Component in One Command",
+        "author": "tortoisewolfe",
+        "date": "2026-08-30T00:00:00.000Z",
+        "slug": "component-generator-tutorial",
+        "tags": [
+          "tutorial",
+          "components"
+        ],
+        "categories": [
+          "tutorials"
+        ],
+        "excerpt": "Every component in this project needs five files. The generator writes them for you, either through a short set of prompts or from a single command.",
+        "featuredImage": "/blog-images/component-generator-tutorial/featured.svg",
+        "featuredImageAlt": "A dark card reading \"Generate a component\" above a one-line command.",
+        "ogImage": "/blog-images/component-generator-tutorial/og.png",
+        "ogTitle": "Generate a Component in One Command",
+        "ogDescription": "Use the component generator interactively, or give it arguments for scripts and automation.",
+        "twitterCard": "summary_large_image"
+      }
+    },
+    {
+      "id": "post_c9034646",
+      "slug": "scoped-tokens-for-automation",
+      "title": "A Token Is an Identity: Scope One Per Automation",
+      "content": "\n# A Token Is an Identity: Scope One Per Automation\n\nSooner or later something other than you needs to act on your repository: a script, a scheduled job, or an assistant in an editor such as [Cursor](https://cursor.com/). It needs credentials, and those credentials decide who [GitHub](https://github.com/) believes is acting.\n\n> **The core idea.** A token is not a key you copy around. It is an identity. Whatever holds it acts as the person or service it was issued to.\n\n## 🔒 The trap: sharing your own token\n\nHanding over a copy of your Personal Access Token (PAT, a password-like string that lets software act as you) is quick. It breaks three things at once:\n\n- **Attribution.** Every commit and issue the automation creates is recorded under your name.\n- **Security.** One leaked copy exposes everything your account can reach.\n- **Revocation.** You cannot cut off the automation without also cutting off yourself.\n\n> **Short version.** Shared tokens trade five minutes of setup for a mess you cannot undo.\n\n## Fine-Grained Tokens and Least Privilege\n\nLeast privilege means giving a task the smallest set of permissions that lets it finish. GitHub's fine-grained tokens let you choose one repository and a short list of permissions. This table shows a typical set for an automation that opens issues and pull requests.\n\n| Permission    | Access       | Why the automation needs it                      |\n| ------------- | ------------ | ------------------------------------------------ |\n| Contents      | Read & write | To push a branch with its changes                |\n| Pull requests | Read & write | To open the pull request and answer review notes |\n| Issues        | Read & write | To open and label issues                         |\n| Metadata      | Read-only    | Required by GitHub for every fine-grained token  |\n\n> **Start from nothing.** Add a permission only when something fails without it.\n\n> **Pick an expiry.** A token that lapses in 30 days is a token that cannot be forgotten.\n\n> **Name it for the job.** `issue-bot-grand-daze` tells you what to revoke. `my-token` does not.\n\n## Check who you are before you act\n\nBefore an automation does anything, confirm which identity it holds:\n\n```bash\n# Shows the account and the token's scopes\ngh auth status\n```\n\nIf the answer is not the identity you meant, stop and fix it. Everything that follows will be recorded under that name.\n\n> **Check, then act.** A one-second status command is cheaper than rewriting history.\n\n## Summary\n\n- One token per automation, one repository per token.\n- The smallest permissions that work, with an expiry date.\n- Confirm the identity first.\n",
+      "excerpt": "When a script or an assistant acts on your repository, whose name does GitHub record? A short guide to fine-grained tokens and least privilege.",
+      "publishedAt": "2026-08-29T00:00:00.000Z",
+      "updatedAt": "2026-08-29T00:00:00.000Z",
+      "status": "published",
+      "author": {
+        "id": "default",
+        "name": "tortoisewolfe"
+      },
+      "metadata": {
+        "tags": [
+          "github",
+          "security",
+          "automation"
+        ],
+        "categories": [
+          "security"
+        ],
+        "readingTime": 3,
+        "wordCount": 433,
+        "showToc": true,
+        "showAuthor": true,
+        "showShareButtons": true,
+        "featured": false,
+        "featuredImage": "/blog-images/scoped-tokens-for-automation/featured.svg",
+        "featuredImageAlt": "A dark card reading \"A token is an identity\" above the words \"scope one per automation\"."
+      },
+      "seo": {
+        "title": "A Token Is an Identity: Scope One Per Automation",
+        "description": "When a script or an assistant acts on your repository, whose name does GitHub record? A short guide to fine-grained tokens and least privilege.",
+        "keywords": [
+          "github",
+          "security",
+          "automation"
+        ],
+        "ogTitle": "A Token Is an Identity",
+        "ogDescription": "Why every automation should get its own narrowly scoped GitHub token, and how to set one up.",
+        "ogImage": "/blog-images/scoped-tokens-for-automation/og.png",
+        "twitterCard": "summary_large_image"
+      },
+      "frontMatter": {
+        "title": "A Token Is an Identity: Scope One Per Automation",
+        "author": "tortoisewolfe",
+        "date": "2026-08-29T00:00:00.000Z",
+        "slug": "scoped-tokens-for-automation",
+        "tags": [
+          "github",
+          "security",
+          "automation"
+        ],
+        "categories": [
+          "security"
+        ],
+        "excerpt": "When a script or an assistant acts on your repository, whose name does GitHub record? A short guide to fine-grained tokens and least privilege.",
+        "featuredImage": "/blog-images/scoped-tokens-for-automation/featured.svg",
+        "featuredImageAlt": "A dark card reading \"A token is an identity\" above the words \"scope one per automation\".",
+        "ogImage": "/blog-images/scoped-tokens-for-automation/og.png",
+        "ogTitle": "A Token Is an Identity",
+        "ogDescription": "Why every automation should get its own narrowly scoped GitHub token, and how to set one up.",
+        "twitterCard": "summary_large_image"
+      }
+    },
+    {
+      "id": "post_c9a068dc",
+      "slug": "review-without-rewriting",
+      "title": "Review Without Rewriting",
+      "content": "\n# Review Without Rewriting\n\nA collaborator opens a pull request (a proposed change that waits for review before it joins the main code). You spot a problem. The quickest move is to push a fix onto their branch yourself. This post explains why that is usually the wrong move, and what to do instead.\n\n> **Suggest, don't overwrite.** A fixup commit on their branch puts your name on their work and skips the checks they run on their own machine.\n\n## The three approaches\n\nThe table below compares the ways a reviewer can ask for a change. Scroll sideways on a phone to see every column.\n\n| Approach                                                        | Does the author keep credit for the change? | Does the author's own toolchain still run?                           | Good for                                        |\n| --------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------- |\n| **Fixup commit** pushed to `feature/their-branch-name-here`     | No. The commit carries the reviewer's name  | No. Their pre-commit hooks never see the change                      | Almost never, for a collaborator's pull request |\n| **Inline suggestion** accepted with one click                   | Yes. Accepting it commits as the author     | Partly. It lands on the branch before their local checks have run it | A truly trivial one-line typo                   |\n| **Request changes** with a short note saying what to do and why | Yes. The author writes and commits the fix  | Yes. Their editor, hooks and type checks all run                     | Anything with more than one moving part         |\n\nAn inline suggestion keeps the author's name on the commit, which is the whole point of the feature. It still lands without the author's local checks, so keep it for trivia.\n\n## Why the note matters\n\nA bare \"please fix\" costs the author a round trip. A note that names the file, says what is wrong and explains the reason lets them fix it in one pass.\n\n> **Say what and why.** \"The button is 36 pixels tall, and our touch-target rule is 44\" beats \"make this bigger\".\n\n## When you can overrule this\n\nSome changes belong to the reviewer: a release the author cannot cut, or a fix to the shared build. Say so in the review, so the author knows why their branch changed.\n\n> **Tell them before it happens.** A surprise commit on your branch feels like a correction. The same commit, announced in advance, feels like help.\n",
+      "excerpt": "How to ask for a change on someone else's pull request without putting your own commit on their branch, and which approach fits which kind of change.",
+      "publishedAt": "2026-08-28T00:00:00.000Z",
+      "updatedAt": "2026-08-28T00:00:00.000Z",
+      "status": "published",
+      "author": {
+        "id": "default",
+        "name": "tortoisewolfe"
+      },
+      "metadata": {
+        "tags": [
+          "code-review",
+          "collaboration"
+        ],
+        "categories": [
+          "process"
+        ],
+        "readingTime": 2,
+        "wordCount": 398,
+        "showToc": true,
+        "showAuthor": true,
+        "showShareButtons": true,
+        "featured": false,
+        "featuredImage": "/blog-images/review-without-rewriting/featured.svg",
+        "featuredImageAlt": "A dark card reading \"Review without rewriting\" above three short lines, one for each way to ask for a change."
+      },
+      "seo": {
+        "title": "Review Without Rewriting",
+        "description": "How to ask for a change on someone else's pull request without putting your own commit on their branch, and which approach fits which kind of change.",
+        "keywords": [
+          "code-review",
+          "collaboration"
+        ],
+        "ogTitle": "Review Without Rewriting",
+        "ogDescription": "Three ways to ask for a change on a collaborator's pull request, and what each one costs.",
+        "ogImage": "/blog-images/review-without-rewriting/og.png",
+        "twitterCard": "summary_large_image"
+      },
+      "frontMatter": {
+        "title": "Review Without Rewriting",
+        "author": "tortoisewolfe",
+        "date": "2026-08-28T00:00:00.000Z",
+        "slug": "review-without-rewriting",
+        "tags": [
+          "code-review",
+          "collaboration"
+        ],
+        "categories": [
+          "process"
+        ],
+        "excerpt": "How to ask for a change on someone else's pull request without putting your own commit on their branch, and which approach fits which kind of change.",
+        "featuredImage": "/blog-images/review-without-rewriting/featured.svg",
+        "featuredImageAlt": "A dark card reading \"Review without rewriting\" above three short lines, one for each way to ask for a change.",
+        "ogImage": "/blog-images/review-without-rewriting/og.png",
+        "ogTitle": "Review Without Rewriting",
+        "ogDescription": "Three ways to ask for a change on a collaborator's pull request, and what each one costs.",
+        "twitterCard": "summary_large_image"
+      }
+    },
+    {
       "id": "post_a1d955ae",
       "slug": "hello-world",
       "title": "Hello, world",
@@ -61,11 +253,21 @@
       }
     }
   ],
-  "count": 1,
+  "count": 4,
   "tags": [
+    "tutorial",
+    "components",
+    "github",
+    "security",
+    "automation",
+    "code-review",
+    "collaboration",
     "example"
   ],
   "categories": [
+    "tutorials",
+    "security",
+    "process",
     "example"
   ]
 }
