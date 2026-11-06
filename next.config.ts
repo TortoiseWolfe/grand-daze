@@ -10,7 +10,17 @@ function detectProjectConfig() {
     console.warn('Could not run detection script');
   }
 
-  // Use environment variable if set (from .env.local or CI/CD)
+  // An explicit root-anchored build (the E2E jobs that `serve out -l 3000`)
+  // must win over everything below. An earlier step can already have written
+  // NEXT_PUBLIC_BASE_PATH=/<repo> into the local env file (detect-project.js
+  // does that when it runs without this flag), and Next loads that file before
+  // this one runs, so without this check the prefix is baked into every asset
+  // URL.
+  if (process.env.DISABLE_BASE_PATH === 'true') {
+    return '';
+  }
+
+  // Use environment variable if set (from the local env file or CI/CD)
   // Treat empty string as undefined to allow auto-detection in forks
   const envBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
   if (envBasePath !== undefined && envBasePath !== '') {
