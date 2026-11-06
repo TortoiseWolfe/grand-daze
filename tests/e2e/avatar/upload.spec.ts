@@ -123,11 +123,13 @@ test.describe('Avatar Upload Flow', () => {
     // Check for error message - if present, upload failed
     const errorMessage = profilePictureCard.getByRole('alert');
     const hasError = await errorMessage.isVisible().catch(() => false);
-    // A failed upload must fail the test, never skip it.
-    expect(
-      hasError,
-      `Upload failed: ${await errorMessage.textContent().catch(() => '')}`
-    ).toBe(false);
+    // A failed upload must fail the test, never skip it. The alert's text is
+    // read only when it exists: textContent() on a missing element waits out
+    // the whole test timeout, which is what made this test time out in CI.
+    if (hasError) {
+      const reason = await errorMessage.textContent({ timeout: 2000 });
+      throw new Error(`Upload failed: ${reason}`);
+    }
 
     // Verify upload succeeded by checking avatar URL changed
     await expect(async () => {
@@ -252,8 +254,9 @@ test.describe('Avatar Upload Flow', () => {
 
     await removeButton.click();
 
-    // Wait for removal to complete and reload to verify
-    await page.waitForTimeout(1000);
+    // The Remove button goes away once the removal has been saved. Reloading
+    // before then raced the request and showed the old picture.
+    await expect(removeButton).toBeHidden({ timeout: 15000 });
     await page.reload();
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
@@ -369,9 +372,11 @@ test.describe('Avatar Upload Flow', () => {
       .locator('nav, header')
       .getByRole('img', { name: /avatar/i })
       .first();
-    await expect(navAvatar).toBeVisible();
-    const navAvatarSrc = await navAvatar.getAttribute('src');
-    expect(navAvatarSrc).toMatch(/avatars/);
+    // The nav picks the new picture up a moment after the account card does.
+    await expect(async () => {
+      await expect(navAvatar).toBeVisible();
+      expect(await navAvatar.getAttribute('src')).toMatch(/avatars/);
+    }).toPass({ timeout: 15000 });
 
     // Note: Nav avatar may not match account avatar immediately due to caching
     // This is a known limitation (Feature 038 FR-001). Reload verifies sync.
