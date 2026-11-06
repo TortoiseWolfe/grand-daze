@@ -8,8 +8,9 @@
  * and assert the panel's rendered state (count, per-item retry badge,
  * online/offline, clear). No payment provider / creds needed. The panel only
  * mounts when a provider is configured; CI sets dummy Stripe/PayPal keys so it
- * renders (see e2e.yml), locally it may be hidden — every test guards on
- * panel.count() the way the "#4" render test does.
+ * renders (see e2e.yml). A run with no provider keys therefore FAILS at
+ * openHubPanel rather than skipping: a hidden panel is a broken setup, and a
+ * skip would let the whole file go green while testing nothing.
  */
 
 import { test, expect } from '@playwright/test';
@@ -18,6 +19,7 @@ import {
   dismissCookieBanner,
   seedPaymentQueue,
   clearPaymentQueue,
+  getAdminClient,
 } from '../utils/test-user-factory';
 
 test.describe('Offline Payment Queue', () => {
@@ -86,26 +88,19 @@ test.describe('Offline Payment Queue', () => {
     }
     await dismissCookieBanner(page);
 
-    // The panel only renders when a provider is configured (the queue itself
-    // works regardless). When unconfigured, assert the page at least loads.
+    // The panel only renders when a provider is configured; CI sets dummy keys.
     const panel = page.getByTestId('payment-queue-panel');
-    if (await panel.count()) {
-      await expect(panel).toBeVisible({ timeout: 30000 });
-      await expect(page.getByTestId('queue-count')).toBeVisible();
-      // Empty queue → retry + clear are present but disabled.
-      await expect(page.getByTestId('queue-retry')).toBeDisabled();
-      await expect(page.getByTestId('queue-clear')).toBeDisabled();
-    } else {
-      await expect(
-        page.getByRole('heading', { name: 'Payments', level: 1 })
-      ).toBeVisible({ timeout: 30000 });
-    }
+    await expect(panel).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('queue-count')).toBeVisible();
+    // Empty queue → retry + clear are present but disabled.
+    await expect(page.getByTestId('queue-retry')).toBeDisabled();
+    await expect(page.getByTestId('queue-clear')).toBeDisabled();
   });
 
   // ── Populated-queue flows ────────────────────────────────────────────────
-  // Open the /payment hub and return the PaymentQueuePanel locator, or null when
-  // the panel isn't rendered (no provider configured — the queue is client-side
-  // and seedable regardless, but the panel is what these tests assert against).
+  // Open the /payment hub and return the PaymentQueuePanel locator once it is
+  // visible. It renders only when a provider is configured (CI sets dummy keys),
+  // so a missing panel fails the test instead of skipping it.
   async function openHubPanel(page: Page) {
     await page.goto('/payment', { waitUntil: 'networkidle' });
     if (page.url().includes('/sign-in')) {
@@ -114,18 +109,15 @@ test.describe('Offline Payment Queue', () => {
     }
     await dismissCookieBanner(page);
     const panel = page.getByTestId('payment-queue-panel');
-    return (await panel.count()) ? panel : null;
+    await expect(panel).toBeVisible({ timeout: 30000 });
+    return panel;
   }
 
   test('should show queued items and the Offline badge when offline', async ({
     page,
     context,
   }) => {
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     // Seed + render the queue while ONLINE (reloading offline errors with
     // ERR_INTERNET_DISCONNECTED). IndexedDB rows persist across the offline
@@ -162,11 +154,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should handle multiple queued payments', async ({ page }) => {
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     await seedPaymentQueue(page, [
       { type: 'payment_intent' },
@@ -184,11 +172,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should persist queue across page reloads', async ({ page }) => {
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     await seedPaymentQueue(page, [
       { type: 'payment_intent' },
@@ -205,11 +189,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should show retry count on queued items', async ({ page }) => {
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     // A pending item that has already failed twice renders "Attempt 2/5". We
     // assert the DISPLAYED retry count/error, not wall-clock backoff timing
@@ -227,11 +207,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should show Max-retries badge after max attempts', async ({ page }) => {
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     // retries >= maxRetries(5) → the panel shows a "Max retries" badge-error.
     await seedPaymentQueue(page, [
@@ -246,28 +222,64 @@ test.describe('Offline Payment Queue', () => {
     await clearPaymentQueue(page);
   });
 
-  // KEEP-AS-MARKER: draining the queue via "Retry now" runs the REAL sync
-  // (paymentQueue.sync → provider charge → Supabase upsert). Against the dummy
-  // provider keys CI uses, the charge can't complete, so the item stays pending
-  // — the panel only empties with a live provider/backend. Asserting the drain
-  // needs real Stripe/PayPal sandbox creds, so this stays a documented skip.
-  // (The retry button's presence/enablement is covered by the "#4" render test;
-  // the sync/backoff LOGIC is covered by base-queue unit tests.)
-  test.skip('should drain the queue on Retry (needs live provider)', async ({
-    page,
-  }) => {
-    test.skip(
-      true,
-      'Retry runs a real provider charge — needs live Stripe/PayPal sandbox creds'
-    );
+  // "Retry now" runs the real sync: a queued payment_intent is written to the
+  // payment_intents table with the signed-in user's token (no provider is called
+  // at this step; the provider is only reached later, from the checkout button).
+  // So the drain is real end to end here. The item stays listed as completed,
+  // which is why the count reads "0 pending (1 total)" rather than empty.
+  test('should drain the queue on Retry', async ({ page }) => {
+    await openHubPanel(page);
+    const idempotencyKey = crypto.randomUUID();
+    const admin = getAdminClient();
+    if (!admin) throw new Error('No admin client to check the drained row');
+    try {
+      await seedPaymentQueue(page, [
+        {
+          type: 'payment_intent',
+          data: {
+            amount: 2500,
+            currency: 'usd',
+            type: 'one_time',
+            customer_email: 'queue-drain@example.com',
+            description: 'Queued while offline',
+            idempotency_key: idempotencyKey,
+          },
+        },
+      ]);
+      await page.reload({ waitUntil: 'networkidle' });
+      await dismissCookieBanner(page);
+      await expect(page.getByTestId('queue-count')).toContainText('1 pending', {
+        timeout: 15000,
+      });
+
+      await page.getByTestId('queue-retry').click();
+      await expect(page.getByTestId('queue-count')).toContainText('0 pending', {
+        timeout: 15000,
+      });
+
+      await expect
+        .poll(
+          async () => {
+            const { data } = await admin
+              .from('payment_intents')
+              .select('amount')
+              .eq('idempotency_key', idempotencyKey);
+            return data?.[0]?.amount ?? null;
+          },
+          { timeout: 15000 }
+        )
+        .toBe(2500);
+    } finally {
+      await admin
+        .from('payment_intents')
+        .delete()
+        .eq('idempotency_key', idempotencyKey);
+      await clearPaymentQueue(page);
+    }
   });
 
   test('should clear the queue manually', async ({ page }) => {
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     await seedPaymentQueue(page, [
       { type: 'payment_intent' },
@@ -320,11 +332,7 @@ test.describe('Offline Payment Queue', () => {
       }
     });
 
-    const panel = await openHubPanel(page);
-    test.skip(
-      !panel,
-      'PaymentQueuePanel not rendered (no provider configured)'
-    );
+    await openHubPanel(page);
 
     // Seed an item so the queue is non-empty (realistic near-full scenario).
     await seedPaymentQueue(page, [{ type: 'payment_intent' }]);

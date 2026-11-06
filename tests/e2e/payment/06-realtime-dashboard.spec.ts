@@ -1,11 +1,11 @@
 /**
  * Integration Test: Dashboard Real-Time Updates - T060
- * Tests Supabase realtime subscription for payment status updates
+ * Tests the Supabase realtime subscriptions behind the payment pages.
  *
- * NOTE: Most tests are skipped because:
- * 1. /payment/dashboard route doesn't exist (only /payment-demo)
- * 2. Real-time status updates require actual payment processing
- * 3. Tests assume UI elements that aren't implemented
+ * Every test seeds its rows with the service-role key (no payment provider is
+ * involved), opens the page signed in as that throwaway user, changes the row
+ * from the server side, and asserts the page follows without a reload. The
+ * reconnect state machine is unit-tested instead: see the note near the end.
  */
 
 import { test, expect, type Page } from '@playwright/test';
@@ -14,6 +14,7 @@ import {
   getAdminClient,
   seedIsolatedPayment,
   deleteIsolatedPayment,
+  openAuthedPage,
   openPaymentHubAs,
   seedIsolatedSubscription,
   deleteIsolatedSubscription,
@@ -127,14 +128,40 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     ).toBeVisible();
   });
 
-  test.skip('should show real-time payment status updates', async ({
-    page,
-  }) => {
-    // Skip: Requires actual payment processing and real-time updates
-    test.skip(
-      true,
-      'Real-time payment status updates require actual Stripe integration'
-    );
+  test('should show real-time payment status updates', async ({ browser }) => {
+    // The result page follows ONE payment row. Change its status from the server
+    // side (what a provider webhook does) and assert the page follows live.
+    let fixture: IsolatedPayment | null = null;
+    let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
+    try {
+      fixture = await seedIsolatedPayment();
+      const admin = getAdminClient();
+      if (!fixture || !admin) throw new Error('Could not seed a payment');
+
+      opened = await openAuthedPage(browser, fixture.session);
+      const { page } = opened;
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      await page.goto(`${basePath}/payment-result?id=${fixture.resultId}`, {
+        waitUntil: 'domcontentloaded',
+      });
+      await dismissCookieBanner(page);
+      await expect(page.getByText('SUCCEEDED', { exact: true })).toBeVisible({
+        timeout: 30000,
+      });
+
+      const { error } = await admin
+        .from('payment_results')
+        .update({ status: 'refunded' })
+        .eq('id', fixture.resultId);
+      expect(error).toBeNull();
+
+      await expect(page.getByText('REFUNDED', { exact: true })).toBeVisible({
+        timeout: 15000,
+      });
+    } finally {
+      if (opened) await opened.close();
+      await deleteIsolatedPayment(fixture);
+    }
   });
 
   test('should update payment list when new payment added', async ({
@@ -147,8 +174,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
+      if (!fixture) throw new Error('Could not seed a payment');
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
@@ -164,11 +190,44 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     }
   });
 
-  test.skip('should update webhook verification status in real-time', async ({
-    page,
+  test('should update webhook verification status in real-time', async ({
+    browser,
   }) => {
-    // Skip: Requires actual webhook processing
-    test.skip(true, 'Webhook verification requires actual Stripe webhooks');
+    // A provider webhook marks the row `webhook_verified`. This stands in for the
+    // webhook by flipping the column with the service-role key, and asserts the
+    // "Webhook Verified" line appears on an already-open result page.
+    let fixture: IsolatedPayment | null = null;
+    let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
+    try {
+      fixture = await seedIsolatedPayment();
+      const admin = getAdminClient();
+      if (!fixture || !admin) throw new Error('Could not seed a payment');
+
+      opened = await openAuthedPage(browser, fixture.session);
+      const { page } = opened;
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      await page.goto(`${basePath}/payment-result?id=${fixture.resultId}`, {
+        waitUntil: 'domcontentloaded',
+      });
+      await dismissCookieBanner(page);
+      await expect(page.getByText('SUCCEEDED', { exact: true })).toBeVisible({
+        timeout: 30000,
+      });
+      await expect(page.getByText('Webhook Verified')).toHaveCount(0);
+
+      const { error } = await admin
+        .from('payment_results')
+        .update({ webhook_verified: true })
+        .eq('id', fixture.resultId);
+      expect(error).toBeNull();
+
+      await expect(page.getByText('Webhook Verified')).toBeVisible({
+        timeout: 15000,
+      });
+    } finally {
+      if (opened) await opened.close();
+      await deleteIsolatedPayment(fixture);
+    }
   });
 
   test('should handle subscription status changes in real-time', async ({
@@ -184,8 +243,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
         provider: 'stripe',
       });
       const admin = getAdminClient();
-      test.skip(!fixture || !admin, 'Admin client unavailable to seed');
-      if (!fixture || !admin) return;
+      if (!fixture || !admin) throw new Error('Could not seed a subscription');
 
       opened = await openSubscriptionsAs(browser, fixture);
       const { page } = opened;
@@ -218,8 +276,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
+      if (!fixture) throw new Error('Could not seed a payment');
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
@@ -247,8 +304,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
+      if (!fixture) throw new Error('Could not seed a payment');
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const status = opened.page.getByTestId('realtime-status');
@@ -270,13 +326,6 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
   // heartbeat timeout, which is long and variable) — an E2E assertion here flakes.
   // The "Live" indicator itself is covered by the connection-status test above;
   // the transient "Reconnecting…" badge is the same badge map, exercised in unit.
-  test.skip('should show "Reconnecting…" on a channel drop (unit-covered)', async () => {
-    test.skip(
-      true,
-      'Reconnect state machine is deterministically unit-tested; a real WS drop is not deterministic in E2E'
-    );
-  });
-
   test('should coalesce a burst of updates into an "N updates" indicator', async ({
     browser,
   }) => {
@@ -287,8 +336,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
+      if (!fixture) throw new Error('Could not seed a payment');
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
@@ -332,8 +380,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
+      if (!fixture) throw new Error('Could not seed a payment');
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
@@ -363,8 +410,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
+      if (!fixture) throw new Error('Could not seed a payment');
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
