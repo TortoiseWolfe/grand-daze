@@ -5,6 +5,18 @@
 
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
+import { firstBlogTagPath, readBlogPosts } from '../utils/blog-fixtures';
+
+/**
+ * The blog index puts one post on the wide lead plate and the REST in cards
+ * (`src/app/blog/page.tsx`), so a site with a single post has zero `.card` there. The
+ * template shipped twelve posts and this spec never met that case; a fork that keeps
+ * only `hello-world` did, and failed with "no cards found" (#11).
+ */
+const POSTS = readBlogPosts();
+const INDEX_CARDS = Math.max(POSTS.length - 1, 0);
+/** The tag page lists every post with that tag as a card, lead plate or not. */
+const TAG_PATH = firstBlogTagPath(POSTS);
 
 /**
  * Wait for layout to stabilize after viewport change
@@ -33,6 +45,11 @@ async function waitForLayoutStability(page: import('@playwright/test').Page) {
 
 test.describe('Mobile Card Layout', () => {
   test('Cards stack vertically on mobile (320px-767px)', async ({ page }) => {
+    test.skip(
+      INDEX_CARDS < 2,
+      `/blog/ shows ${INDEX_CARDS} card(s) (one post leads, the rest are cards); ` +
+        'stacking needs two, so there is nothing to measure until the site has three posts'
+    );
     await page.setViewportSize({ width: 390, height: 844 });
     // `/blog/`, not `/` (#842). The home page has ZERO `[class*="card"]` elements —
     // the 2a refresh (#376) replaced its cards with grid layouts — so every
@@ -92,9 +109,17 @@ test.describe('Mobile Card Layout', () => {
   test('Cards fit within viewport at all mobile widths', async ({ page }) => {
     const widths = [320, 390, 428];
 
+    // The index when it has cards; otherwise the tag page, which lists every post
+    // with the tag as a card (#11). Skips only when neither has one.
+    const cardsPath = INDEX_CARDS > 0 ? '/blog/' : TAG_PATH;
+    test.skip(
+      !cardsPath,
+      'no post-card page to measure: /blog/ has no cards and no post declares a tag'
+    );
+
     for (const width of widths) {
       await page.setViewportSize({ width, height: 800 });
-      await page.goto('/blog/', { waitUntil: 'domcontentloaded' });
+      await page.goto(cardsPath!, { waitUntil: 'domcontentloaded' });
       await dismissCookieBanner(page);
       await waitForLayoutStability(page);
 

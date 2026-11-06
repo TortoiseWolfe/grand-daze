@@ -1,4 +1,8 @@
 import { test, expect, devices } from '@playwright/test';
+import { requireFirstBlogPostPath } from '../utils/blog-fixtures';
+
+/** A post that exists in public/blog, never a template slug (#11). */
+const BLOG_POST = requireFirstBlogPostPath();
 
 /**
  * Mobile UX Tests - Mobile Chrome (Pixel 5)
@@ -20,7 +24,7 @@ test.use(pixel5Config);
 
 test.describe('Blog Post Mobile UX - Pixel 5', () => {
   test('should display footer at bottom', async ({ page }) => {
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(500);
 
@@ -30,7 +34,7 @@ test.describe('Blog Post Mobile UX - Pixel 5', () => {
   });
 
   test('should not have horizontal scroll', async ({ page }) => {
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(BLOG_POST);
 
     const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
     const viewportWidth = page.viewportSize()?.width || 0;

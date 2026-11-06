@@ -98,8 +98,17 @@ import { join } from 'node:path';
 import { CRITICAL_MOBILE_WIDTHS } from '@/config/test-viewports';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { waitForLoadStateOrGiveUp } from '../utils/settle';
+import {
+  blogRouteInstances,
+  firstBlogTablePostPath,
+  readBlogPosts,
+  requireFirstBlogPostPath,
+} from '../utils/blog-fixtures';
 
 const APP_DIR = join(process.cwd(), 'src/app');
+
+/** A real post and tag from public/blog, never the template's (#11). */
+const BLOG = blogRouteInstances(readBlogPosts());
 
 /** Routes that cannot be measured, each with the reason. Never silent. */
 const EXCLUDED: Record<string, string> = {
@@ -107,12 +116,12 @@ const EXCLUDED: Record<string, string> = {
     'transient OAuth handler — redirects on load, there is no UI to measure',
   '/twins/[slug]':
     'twin payloads are privacy-gated and gitignored; absent in a fresh checkout',
+  ...BLOG.excluded,
 };
 
 /** Dynamic segments need a real instance — the template alone proves nothing. */
 const INSTANCES: Record<string, string> = {
-  '/blog/[slug]': '/blog/playable-city-chattanooga',
-  '/blog/tags/[tag]': '/blog/tags/digital-twin',
+  ...BLOG.instances,
   '/docs/[slug]': '/docs/install-and-first-run',
 };
 
@@ -338,7 +347,7 @@ test.describe('Horizontal Scroll Detection', () => {
 
   test('Images do not cause horizontal overflow', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(requireFirstBlogPostPath());
     await dismissCookieBanner(page);
     await page.waitForTimeout(800);
 
@@ -366,7 +375,17 @@ test.describe('Horizontal Scroll Detection', () => {
     // so this loop never entered its body and the test reported zero assertions on
     // every shard. Tables live inside posts, and only since #421 taught the markdown
     // processor to render them (before that they shipped as literal pipe rows).
-    await page.goto('/blog/cursor-github-identity/');
+    //
+    // The post is whichever one in public/blog has a table (#11). A fork whose posts
+    // have none skips here, with this reason printed, rather than failing on a 404 for a
+    // template post it deleted; the coverage floor below still guards a post that HAS a
+    // table in its markdown but renders none.
+    const tablePost = firstBlogTablePostPath();
+    test.skip(
+      !tablePost,
+      'no post in public/blog contains a markdown table, so there is nothing to measure'
+    );
+    await page.goto(tablePost!);
     await dismissCookieBanner(page);
     await page.waitForTimeout(800);
 
@@ -404,7 +423,7 @@ test.describe('Horizontal Scroll Detection', () => {
 
   test('Pre/code blocks are responsive', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto(requireFirstBlogPostPath());
     await dismissCookieBanner(page);
     await page.waitForTimeout(800);
 

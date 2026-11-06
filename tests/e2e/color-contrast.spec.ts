@@ -9,6 +9,7 @@ import {
 } from './utils/test-user-factory';
 import { dirname, join } from 'node:path';
 import { waitForLoadStateOrGiveUp } from './utils/settle';
+import { blogRouteInstances, readBlogPosts } from './utils/blog-fixtures';
 import {
   measureNullRatioNodes,
   UNRESOLVABLE_ALLOWLIST,
@@ -96,6 +97,8 @@ const THEMES = HOUSE_THEMES;
  */
 const APP_DIR = join(process.cwd(), 'src/app');
 
+const BLOG = blogRouteInstances(readBlogPosts());
+
 /** Routes that cannot be measured, each with the reason. Never silent. */
 const EXCLUDED: Record<string, string> = {
   '/auth/callback':
@@ -131,16 +134,14 @@ const EXCLUDED: Record<string, string> = {
     'continuous WebGL render loop; the readiness wait cannot settle under software ' +
     'rendering (synchronous GPU readback, #719) — HUD chrome measured instead by ' +
     'cod-skeleton-hud-contrast.spec.ts',
+  ...BLOG.excluded,
 };
 
 /** Dynamic segments need a real instance — the template alone proves nothing. */
 const INSTANCES: Record<string, string> = {
-  '/blog/[slug]': '/blog/playable-city-chattanooga',
-  // Was excluded with the reason "no post declares a tag". That was wrong: I
-  // read `post.tags` at the top level, where nothing lives. Tags are under
-  // `metadata.tags` — 53 distinct across 12 posts — and
-  // blog/tags/[tag]/page.tsx:45 builds its params from exactly that field.
-  '/blog/tags/[tag]': '/blog/tags/digital-twin',
+  // A real post and tag from public/blog, never the template's (#11). Tags live
+  // under `metadata.tags`, which blog/tags/[tag]/page.tsx builds its params from.
+  ...BLOG.instances,
   // Without this the sweep visits the literal path `/docs/[slug]`, which 404s
   // — so it measured the not-found page and reported the failure against
   // `/docs/[slug]`. That accident is what found #425; the 404 page's own

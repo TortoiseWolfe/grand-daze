@@ -1,5 +1,26 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
+import { readBlogPosts } from '../utils/blog-fixtures';
+
+/**
+ * This spec asserts on the exact tables, quotes, code and `<details>` of three template
+ * posts. `scripts/rebrand.sh` deletes those posts in a fork, so there the spec has
+ * nothing to measure and used to fail on a 404 (#11). It now skips, with the missing
+ * slugs printed, so the lost coverage is visible. A fork that writes its own posts with
+ * these features should replace the fixtures below with its own.
+ */
+const REQUIRED_SLUGS = [
+  'reject-without-taking-over',
+  'cursor-github-identity',
+  'countdown-timer-tutorial',
+] as const;
+const PRESENT_SLUGS = new Set(readBlogPosts().map((post) => post.slug));
+const MISSING_SLUGS = REQUIRED_SLUGS.filter((s) => !PRESENT_SLUGS.has(s));
+if (MISSING_SLUGS.length) {
+  console.log(
+    `[blog-markdown-rendering] skipped: public/blog has no ${MISSING_SLUGS.join(', ')}`
+  );
+}
 
 const WIDTHS = [390, 500] as const;
 const VIEWPORT_HEIGHT = 900;
@@ -341,6 +362,10 @@ test.describe('Blog markdown rendering', () => {
     test(`${width}px preserves semantic rich content and existing behavior`, async ({
       page,
     }) => {
+      test.skip(
+        MISSING_SLUGS.length > 0,
+        `public/blog has no ${MISSING_SLUGS.join(', ')} (template posts removed by rebrand.sh)`
+      );
       await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
       await installClipboardCapture(page);
 

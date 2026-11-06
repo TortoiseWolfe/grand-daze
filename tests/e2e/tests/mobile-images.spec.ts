@@ -5,6 +5,10 @@
 
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
+import { requireFirstBlogPostPath } from '../utils/blog-fixtures';
+
+/** A post that exists in public/blog, never a template slug (#11). */
+const BLOG_POST = requireFirstBlogPostPath();
 
 /**
  * Wait for layout to stabilize after viewport/page change
@@ -33,7 +37,7 @@ test.describe('Mobile Responsive Images', () => {
   for (const width of widths) {
     test(`Images fit within ${width}px viewport`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      await page.goto('/blog/countdown-timer-tutorial');
+      await page.goto(BLOG_POST);
       await dismissCookieBanner(page);
       await waitForLayoutStability(page);
 
