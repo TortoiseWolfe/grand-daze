@@ -5,7 +5,7 @@
  * in a WebKit run, even though playwright.config.ts sets serviceWorkers: 'block'?
  * It prints one SWPROBE line per run and fails when any worker is registered.
  */
-import { test, expect } from '../fixtures/test';
+import { test, expect } from '@playwright/test';
 
 test.describe('SW probe', () => {
   test('no service worker is registered or controlling the page', async ({
