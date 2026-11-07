@@ -907,7 +907,24 @@ export async function handleReAuthModal(
     await passwordInput.fill(testPassword);
 
     const submitBtn = modal.locator('button[type="submit"]').first();
-    await submitBtn.click();
+    // The unlock click sometimes stalls 15 s in headed Firefox on a bare display
+    // (#41). Whether the window has focus when it stalls is still unproven, so
+    // record it: the line below goes to the job log whether the click works or not.
+    const windowState = () =>
+      page
+        .evaluate(
+          () => `hasFocus=${document.hasFocus()} ${document.visibilityState}`
+        )
+        .catch(() => 'window state unreadable');
+    const stateBefore = await windowState();
+    try {
+      await submitBtn.click();
+    } catch (error) {
+      console.log(
+        `[handleReAuthModal] ✗ Unlock click failed on attempt ${attempt}/${MAX_ATTEMPTS}. Before: ${stateBefore}. After: ${await windowState()}`
+      );
+      throw error;
+    }
 
     // Wait for modal to close. Argon2id key derivation is CPU-intensive
     // and under 24-shard CI load with WebCrypto thread contention can take
