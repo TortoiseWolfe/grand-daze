@@ -394,12 +394,13 @@ jobs:
           for SERVER in serve pyhttp; do
           echo "=== DIAG SERVER $SERVER ==="
           if [ "$SERVER" = serve ]; then
-            npx serve out -l 3000 &
+            setsid npx serve out -l 3000 &
           else
-            (cd out && exec python3 -m http.server 3000) &
+            setsid bash -c 'cd out && exec python3 -m http.server 3000' &
           fi
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 60000
+          echo "DIAG probe $SERVER: $(curl -sI http://localhost:3000/pricing/ | tr -d '\r' | grep -i -E '^(HTTP|server|connection)' | tr '\n' ' ')"
           # JSON as well as line: parity is decided on COUNTS, and the line
           # reporter's summary is not machine-readable. `|| true` so a failing
           # shard still uploads its results — a parity run that discards the
@@ -455,8 +456,9 @@ jobs:
               $WORKERS_FLAG \
               --grep-invert='@hosted' --grep 'diag: baseline' pricing-links-diag \
               --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
-            kill $SERVER_PID || true
+            kill -- -$SERVER_PID || true
             sleep 3
+            if curl -s -o /dev/null http://localhost:3000/; then echo "::error::port 3000 still answering after killing $SERVER"; exit 1; fi
           done
         env:
           CI: 'true'
