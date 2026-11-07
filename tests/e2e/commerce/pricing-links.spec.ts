@@ -80,7 +80,26 @@ test.describe('pricing → checkout links', () => {
           /* fall through to the assertion below, which reports the SKU */
         });
 
-      const body = (await page.locator('main').innerText()) ?? '';
+      // Let the page finish its own loads before the next goto replaces it. On
+      // WebKit, navigating while the previous page still has route prefetches
+      // and chunks in flight cancels them, and WebKit then sometimes fails to
+      // load the NEXT page's own files ("WebKit encountered an internal error"):
+      // `main` stays empty and the wait above times out. Measured over 720
+      // checkout loads per way of moving between pages: moving on straight away
+      // failed 11 times, waiting for the network to go quiet first failed 0
+      // times (#28). Not a retry and not a longer timeout: it removes the cause.
+      await page.waitForLoadState('networkidle');
+
+      // A short per-action limit so a page that still comes up empty fails
+      // here, naming the SKU, rather than eating the whole 30 s test timeout.
+      const body = await page
+        .locator('main')
+        .innerText({ timeout: 5_000 })
+        .catch((e: Error) => {
+          throw new Error(
+            `/checkout/?sku=${sku} rendered no readable <main>: ${e.message.split('\n')[0]}`
+          );
+        });
       if (DEAD_END.test(body)) dead.push(sku);
     }
 
