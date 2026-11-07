@@ -343,6 +343,13 @@ jobs:
         env:
           E2E_BLOG_FIXTURES: 'true'
 
+      # The admin specs assert on demo data (50+ users, a seeded conversation).
+      # They skipped themselves in this lane until now, so nothing ever applied it.
+      - name: Seed the admin demo data
+        run: |
+          docker compose exec -T supabase-db psql -U postgres -d postgres \
+            -v ON_ERROR_STOP=1 -q < supabase/seed-admin-demo.sql
+
       - name: Build (root-served, pointed at the local stack)
         run: pnpm build
         env:

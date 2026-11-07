@@ -16,31 +16,81 @@
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { dismissCookieBanner } from '../utils/test-user-factory';
+import {
+  dismissCookieBanner,
+  injectSessionIntoPage,
+  signInAsInjectable,
+  seedIsolatedUser,
+  deleteIsolatedUser,
+  type IsolatedUser,
+} from '../utils/test-user-factory';
+import { isLocalBackend } from '../../utils/local-backend';
 
-// Auth comes from storageState (setup project) - no sign-in needed
+// Auth does NOT come from the shared storageState here (#21). The upload writes
+// to Storage and then updates the auth user; when another spec in the same run
+// revoked the shared user's login session, that update answered 403 "Auth
+// session missing!" and the upload rolled back. A throwaway user's session is
+// held by this spec alone, so nobody else can revoke it.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Avatar Upload Flow', () => {
-  // Avatar upload requires Supabase Storage — Save button doesn't dismiss modal in CI
-  // because the upload to storage fails silently without a configured bucket
+  // Avatar upload writes to the `avatars` Storage bucket, so it needs a local
+  // Supabase (the local E2E lane brings one up), not a hosted project.
   test.skip(
-    !!process.env.CI,
-    'Avatar upload requires Supabase Storage — skipped in CI'
+    !isLocalBackend(),
+    'Uploads to the avatars bucket: needs a local Supabase, not a hosted one'
   );
+
+  let fixture: IsolatedUser | null = null;
+
+  test.beforeAll(async () => {
+    if (!isLocalBackend()) return;
+    fixture = await seedIsolatedUser();
+    // A missing fixture fails the run; it never skips it.
+    if (!fixture) {
+      throw new Error('Avatar upload spec: could not seed a throwaway user');
+    }
+  });
+
+  test.afterAll(async () => {
+    await deleteIsolatedUser(fixture);
+    fixture = null;
+  });
+
   test.beforeEach(async ({ page }) => {
-    // Navigate to Account Settings (already authenticated via storageState)
+    if (!fixture) throw new Error('No throwaway user was seeded');
+    // Sign in again for every test instead of re-injecting the session minted in
+    // beforeAll. Each test refreshes the session (upload and remove both do), and
+    // local GoTrue rotates the refresh token every time, so by the second test the
+    // seed-time token is spent and its cached user has no avatar. That made the
+    // first attempt of "Remove avatar" and "nav and account" fail and only the
+    // retry (fresh worker, fresh user) pass.
+    const { session, error } = await signInAsInjectable(
+      fixture.user.email,
+      fixture.user.password
+    );
+    if (!session) {
+      throw new Error(
+        `Avatar upload spec: could not sign the throwaway user in (${error ?? 'no session'})`
+      );
+    }
+    await injectSessionIntoPage(page, session);
     await page.goto('/account');
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
   });
 
   test.afterEach(async ({ page }) => {
-    // Clean up: Remove avatar if exists
+    // Clean up: Remove avatar if exists. Removing asks for confirmation with a
+    // browser confirm(); Playwright dismisses an unhandled dialog, which cancelled
+    // the removal and left the avatar behind for the next test.
     const removeButton = page.getByRole('button', { name: /remove avatar/i });
     const isVisible = await removeButton.isVisible().catch(() => false);
 
     if (isVisible) {
-      await removeButton.click({ force: true }); // Force click to bypass any modal backdrops
-      await page.waitForTimeout(1000); // Wait for removal
+      page.once('dialog', (dialog) => dialog.accept());
+      await removeButton.click();
+      await expect(removeButton).toBeHidden({ timeout: 15000 });
     }
   });
 
@@ -92,15 +142,12 @@ test.describe('Avatar Upload Flow', () => {
     // Check for error message - if present, upload failed
     const errorMessage = profilePictureCard.getByRole('alert');
     const hasError = await errorMessage.isVisible().catch(() => false);
+    // A failed upload must fail the test, never skip it. The alert's text is
+    // read only when it exists: textContent() on a missing element waits out
+    // the whole test timeout, which is what made this test time out in CI.
     if (hasError) {
-      const errorText = await errorMessage
-        .textContent()
-        .catch(() => 'Unknown error');
-      test.skip(
-        true,
-        `Upload failed (Supabase storage may not be configured): ${errorText}`
-      );
-      return;
+      const reason = await errorMessage.textContent({ timeout: 2000 });
+      throw new Error(`Upload failed: ${reason}`);
     }
 
     // Verify upload succeeded by checking avatar URL changed
@@ -188,7 +235,10 @@ test.describe('Avatar Upload Flow', () => {
     });
     const uploadButton = page.getByRole('button', { name: /upload avatar/i });
 
-    // Ensure we have an avatar to remove (upload if needed)
+    // Ensure we have an avatar to remove (upload if needed). Wait for the card to
+    // finish loading first: an instant isVisible() during the profile spinner
+    // reports "no avatar" for a user who has one.
+    await expect(uploadButton).toBeVisible();
     const hasExistingAvatar = await accountAvatar
       .isVisible()
       .catch(() => false);
@@ -220,14 +270,13 @@ test.describe('Avatar Upload Flow', () => {
     await expect(removeButton).toBeVisible();
 
     // Accept the browser confirm() dialog
-    page.on('dialog', async (dialog) => {
-      await dialog.accept();
-    });
+    page.once('dialog', (dialog) => dialog.accept());
 
     await removeButton.click();
 
-    // Wait for removal to complete and reload to verify
-    await page.waitForTimeout(1000);
+    // The Remove button goes away once the removal has been saved. Reloading
+    // before then raced the request and showed the old picture.
+    await expect(removeButton).toBeHidden({ timeout: 15000 });
     await page.reload();
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
@@ -343,9 +392,11 @@ test.describe('Avatar Upload Flow', () => {
       .locator('nav, header')
       .getByRole('img', { name: /avatar/i })
       .first();
-    await expect(navAvatar).toBeVisible();
-    const navAvatarSrc = await navAvatar.getAttribute('src');
-    expect(navAvatarSrc).toMatch(/avatars/);
+    // The nav picks the new picture up a moment after the account card does.
+    await expect(async () => {
+      await expect(navAvatar).toBeVisible();
+      expect(await navAvatar.getAttribute('src')).toMatch(/avatars/);
+    }).toPass({ timeout: 15000 });
 
     // Note: Nav avatar may not match account avatar immediately due to caching
     // This is a known limitation (Feature 038 FR-001). Reload verifies sync.
@@ -448,6 +499,11 @@ test.describe('Avatar Upload Flow', () => {
 
     // Wait to ensure upload doesn't unexpectedly succeed
     await page.waitForTimeout(2000);
+
+    // The one thing that must hold while offline: no success message appeared.
+    // This is the test's hard assertion; the retry check below is optional
+    // because the retry button is not built yet.
+    await expect(page.getByText(/uploaded successfully/i)).not.toBeVisible();
 
     // Restore network
     await context.setOffline(false);

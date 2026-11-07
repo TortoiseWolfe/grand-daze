@@ -23,13 +23,14 @@ import {
   assertLocalBackend,
   type IsolatedAdmin,
 } from '../utils/test-user-factory';
+import { isLocalBackend } from '../../utils/local-backend';
 
 // ADMIN_EMAIL / ADMIN_PASSWORD are gone with the shared-user sign-in they served (#914).
 
 // Next.js basePath — empty in local dev, '/GrandDaze' in CI/prod
 const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-// Local-only spec (skipped in CI). The Node test process reaches local Kong via
+// Local-backend spec (runs in the local E2E lane, which has a local Supabase). The Node test process reaches local Kong via
 // SUPABASE_ADMIN_URL (compose-internal supabase-kong:8000); the browser reaches
 // it via NEXT_PUBLIC_SUPABASE_URL (host.docker.internal:54321). No proxy /
 // --host-resolver-rules hack needed — see #121.
@@ -38,7 +39,10 @@ const SUPABASE_ADMIN_URL =
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 test.describe('Admin User Pagination E2E', () => {
-  test.skip(!!process.env.CI, 'Skipped in CI: requires local Docker Supabase');
+  test.skip(
+    !isLocalBackend(),
+    'Seeds an admin and mutates data: needs a local Supabase, not a hosted one'
+  );
   test.describe.configure({ mode: 'serial' });
 
   // SEED A THROWAWAY ADMIN — never promote the shared fixture user (#914).

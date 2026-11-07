@@ -42,6 +42,10 @@ import { execFileSync } from 'node:child_process';
  *     covered by `tests/e2e/signup-mailer/`. Deleting or editing a sign-up test is a
  *     sign-up change: PR 22 removed the old full-registration test and this suite, the
  *     test named as covering it, was skipped because none of those paths were listed.
+ *   - `tests/e2e/utils/test-user-factory.ts` and `tests/utils/local-backend.ts`: the
+ *     journey spec (`signup-confirm.spec.ts`) imports the first, and the first imports the
+ *     second. Changing a helper the suite imports changes what it creates and deletes, and
+ *     the unskip pull request (19) edited both while this suite was reported skipped.
  */
 export const SIGNUP_MAILER_PATHS = [
   'src/components/auth/',
@@ -58,6 +62,8 @@ export const SIGNUP_MAILER_PATHS = [
   'tests/e2e/auth/',
   'tests/e2e/security/brute-force.spec.ts',
   'tests/e2e/utils/mailpit.ts',
+  'tests/e2e/utils/test-user-factory.ts',
+  'tests/utils/local-backend.ts',
   'playwright.signup-mailer.config.ts',
   'docker-compose.yml',
   'pnpm-lock.yaml',

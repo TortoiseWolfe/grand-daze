@@ -8,7 +8,7 @@
 BEGIN;
 
 -- ============================================================================
--- 1. USERS (8 demo users + existing admin stays untouched)
+-- 1. USERS (8 demo users, 50 filler users for pagination; existing admin stays untouched)
 -- ============================================================================
 -- Fixed UUIDs so FKs are deterministic. Ordered for canonical_ordering
 -- constraint on conversations (participant_1_id < participant_2_id).
@@ -99,7 +99,61 @@ VALUES
   ('11111111-1111-1111-1111-111111111106', 'frank',   'Frank Wilson',   false, false, now() - interval '58 days', now()),
   ('11111111-1111-1111-1111-111111111107', 'grace',   'Grace Lee',      false, false, now() - interval '40 days', now()),
   ('11111111-1111-1111-1111-111111111108', 'hank',    'Hank Taylor',    true,  false, now() - interval '20 days', now())
+-- DO UPDATE, NOT DO NOTHING. The on_auth_user_created trigger has already inserted a bare
+-- profile (id only, username and display_name NULL) for each auth.users row above, so DO NOTHING
+-- skipped every row here and the demo users had no names. The admin user search matches on
+-- username and display_name, so searching "alice" found nobody.
+ON CONFLICT (id) DO UPDATE SET
+  username = EXCLUDED.username,
+  display_name = EXCLUDED.display_name,
+  welcome_message_sent = EXCLUDED.welcome_message_sent,
+  is_admin = EXCLUDED.is_admin,
+  created_at = EXCLUDED.created_at;
+
+-- Filler users so the admin Users page has more than one page (its page size is 50).
+-- The pagination spec needs 51 or more non-admin users and the eight above are not enough.
+-- Names avoid "test", "alice" and the other demo names, because the specs search for those.
+INSERT INTO auth.users (
+  id, instance_id, email, encrypted_password, email_confirmed_at,
+  created_at, updated_at, last_sign_in_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, role, aud,
+  confirmation_token, recovery_token, email_change_token_new, email_change
+)
+SELECT
+  ('22222222-2222-2222-2222-' || lpad(n::text, 12, '0'))::uuid,
+  '00000000-0000-0000-0000-000000000000',
+  'pagefill' || lpad(n::text, 2, '0') || '@demo.test',
+  crypt('DemoPass123!', gen_salt('bf')),
+  now() - interval '90 days', now() - (n || ' days')::interval, now(),
+  now() - (n || ' hours')::interval,
+  '{"provider":"email","providers":["email"]}', '{}', false, 'authenticated', 'authenticated',
+  '', '', '', ''
+FROM generate_series(1, 50) AS n
 ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.identities (provider_id, id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+SELECT u.id, gen_random_uuid(), u.id,
+  jsonb_build_object('sub', u.id::text, 'email', u.email),
+  'email', u.last_sign_in_at, u.created_at, u.updated_at
+FROM auth.users u
+WHERE u.email LIKE 'pagefill%@demo.test'
+  AND NOT EXISTS (
+    SELECT 1 FROM auth.identities i WHERE i.user_id = u.id AND i.provider = 'email'
+  );
+
+INSERT INTO user_profiles (id, username, display_name, welcome_message_sent, is_admin, created_at, updated_at)
+SELECT
+  ('22222222-2222-2222-2222-' || lpad(n::text, 12, '0'))::uuid,
+  'pagefill' || lpad(n::text, 2, '0'),
+  'Pagination Filler ' || lpad(n::text, 2, '0'),
+  true, false, now() - (n || ' days')::interval, now()
+FROM generate_series(1, 50) AS n
+ON CONFLICT (id) DO UPDATE SET
+  username = EXCLUDED.username,
+  display_name = EXCLUDED.display_name,
+  welcome_message_sent = EXCLUDED.welcome_message_sent,
+  is_admin = EXCLUDED.is_admin,
+  created_at = EXCLUDED.created_at;
 
 -- ============================================================================
 -- 2. PAYMENT INTENTS + RESULTS (~30 transactions over 14 days)

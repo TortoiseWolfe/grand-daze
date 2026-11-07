@@ -26,13 +26,14 @@ import {
   assertLocalBackend,
   type IsolatedAdmin,
 } from '../utils/test-user-factory';
+import { isLocalBackend } from '../../utils/local-backend';
 import { STALE_THRESHOLD_MS } from '../../../src/components/organisms/AdminConversationList/AdminConversationList';
 
 // ADMIN_EMAIL / ADMIN_PASSWORD are gone with the shared-user sign-in they served (#914).
 
 const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-// Local-only spec (skipped in CI). The Node test process reaches local Kong via
+// Local-backend spec (runs in the local E2E lane, which has a local Supabase). The Node test process reaches local Kong via
 // SUPABASE_ADMIN_URL (compose-internal supabase-kong:8000); the browser reaches
 // it via NEXT_PUBLIC_SUPABASE_URL (host.docker.internal:54321). No proxy /
 // --host-resolver-rules hack needed — see #121.
@@ -53,7 +54,10 @@ const STALE_LAST_MESSAGE = new Date(
 const STALE_CONV_ID = 'eeeeeeee-eeee-4eee-aeee-000000000e2e';
 
 test.describe('Admin Conversation List E2E', () => {
-  test.skip(!!process.env.CI, 'Skipped in CI: requires local Docker Supabase');
+  test.skip(
+    !isLocalBackend(),
+    'Seeds an admin and mutates data: needs a local Supabase, not a hosted one'
+  );
   test.describe.configure({ mode: 'serial' });
 
   let serviceClient: SupabaseClient;
@@ -150,6 +154,9 @@ test.describe('Admin Conversation List E2E', () => {
     test.skip(!admin, 'Admin client unavailable to seed an admin');
     if (!admin) return;
     await injectSessionIntoPage(page, admin.session);
+    // injectSessionIntoPage leaves the page on `/`. Neither test here navigated, so both
+    // measured the home page and the list never appeared.
+    await page.goto(`${BP}/admin/messaging`);
     await page.waitForLoadState('networkidle');
   });
 
