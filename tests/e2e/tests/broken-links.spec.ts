@@ -298,10 +298,12 @@ test.describe('Broken Links Detection', () => {
   }
 
   test('check all internal links for 404s', async ({ page, baseURL }) => {
-    test.skip(
-      !!process.env.CI,
-      'Crawl too slow in CI (120s timeout exceeded with authenticated storageState)'
-    );
+    // The crawl visits every internal page one after another, so it needs far
+    // more than the file's 120s default. It used to be skipped in CI for being
+    // too slow; a long limit lets it run, and the line at the end records how
+    // long it took so the CI log shows the real duration.
+    test.setTimeout(600000);
+    const crawlStartedAt = Date.now();
     baseUrl = baseURL || 'http://localhost:3000';
 
     // Start from homepage
@@ -338,6 +340,10 @@ test.describe('Broken Links Detection', () => {
         );
       }
     }
+
+    console.log(
+      `Internal link crawl: ${visitedUrls.size} pages visited in ${Date.now() - crawlStartedAt} ms`
+    );
 
     // Assert no broken links were found
     expect(brokenLinks).toEqual([]);
