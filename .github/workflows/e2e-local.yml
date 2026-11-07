@@ -391,7 +391,7 @@ jobs:
       # MANDATORY' -- and CI was the one place that ignored it.
       - name: Run ${{ matrix.browser }}-${{ matrix.slice.project }} ${{ matrix.slice.shard }}
         run: |
-          for SERVER in serve pyhttp; do
+          for SERVER in serve pyhttp serve pyhttp serve pyhttp; do
           echo "=== DIAG SERVER $SERVER ==="
           if [ "$SERVER" = serve ]; then
             setsid npx serve out -l 3000 &
