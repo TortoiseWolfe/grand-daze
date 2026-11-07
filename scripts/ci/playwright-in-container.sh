@@ -59,6 +59,11 @@ fi
 #   skip themselves (#39). Headed Firefox on a virtual display gets software
 #   WebGL, so start one and export DISPLAY (playwright.config.ts reads it). Not
 #   xvfb-run: it hangs in this image. Chromium and WebKit ignore the display.
+#   The screen is 4096x2304 on purpose: an X pointer starts at the screen
+#   centre, and on a 1280x1024 screen that is inside the Firefox window, so the
+#   page's submit button sat in :hover and the AAA contrast test measured its
+#   darker hover colour (6.54:1) instead of the resting one. At this size the
+#   centre (2048,1152) is outside every test viewport.
 exec docker run --rm --network=host \
   --user "$(id -u):$(id -g)" \
   --env-file "$ENV_FILE" \
@@ -66,7 +71,7 @@ exec docker run --rm --network=host \
   -v "$PWD":/work -w /work \
   "$IMAGE" \
   bash -c '
-    Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp >/dev/null 2>&1 &
+    Xvfb :99 -screen 0 4096x2304x24 -nolisten tcp >/dev/null 2>&1 &
     for _ in $(seq 50); do
       [ -S /tmp/.X11-unix/X99 ] && break
       sleep 0.1
