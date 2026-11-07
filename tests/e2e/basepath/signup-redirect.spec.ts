@@ -17,7 +17,8 @@
  * the signup POST is intercepted and fulfilled with a stub response.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 const BASE_PATH = '/GrandDaze';

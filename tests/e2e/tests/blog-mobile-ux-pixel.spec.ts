@@ -1,4 +1,5 @@
-import { test, expect, devices } from '@playwright/test';
+import { expect, devices } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { requireFirstBlogPostPath } from '../utils/blog-fixtures';
 
 /** A post that exists in public/blog, never a template slug (#11). */

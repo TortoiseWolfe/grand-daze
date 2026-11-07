@@ -11,7 +11,8 @@
  * Email domain is derived from TEST_USER_PRIMARY_EMAIL.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   createTestUser,
   deleteTestUserByEmail,

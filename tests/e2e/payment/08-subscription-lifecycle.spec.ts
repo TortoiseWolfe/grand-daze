@@ -18,7 +18,8 @@
  *    is the only provider-side check, and the stubbed test above covers the page.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedLiveStripeSubscription,
   deleteLiveStripeSubscription,

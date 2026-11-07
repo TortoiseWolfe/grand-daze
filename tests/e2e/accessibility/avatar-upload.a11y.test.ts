@@ -15,7 +15,8 @@
  * - Test user authenticated
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 // Auth comes from storageState (setup project) - no sign-in needed

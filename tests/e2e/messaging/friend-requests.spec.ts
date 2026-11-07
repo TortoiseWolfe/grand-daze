@@ -17,7 +17,8 @@
  * 4. Duplicate requests are prevented.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConnection,
   deleteIsolatedConnection,

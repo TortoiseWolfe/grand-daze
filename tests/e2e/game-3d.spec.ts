@@ -13,7 +13,8 @@
  * their respective task phases.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures/test';
 
 test.describe('/game/3d — FR-008: WebGL Fallback', () => {
   test('renders FallbackPanel when WebGL is unavailable (probe returns null)', async ({

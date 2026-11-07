@@ -92,7 +92,8 @@
  *      do not exist there.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { CRITICAL_MOBILE_WIDTHS } from '@/config/test-viewports';

@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { injectAxe } from 'axe-playwright';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { expectNoA11yViolations } from '../utils/expect-no-a11y-violations';

@@ -17,7 +17,8 @@
  *     pnpm exec playwright test tests/e2e/admin/admin-conversation-list.spec.ts --project=chromium
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   seedIsolatedAdmin,

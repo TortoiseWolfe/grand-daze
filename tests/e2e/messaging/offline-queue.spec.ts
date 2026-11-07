@@ -19,7 +19,8 @@
  * 5. should show failed status after max retries
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { settleFrames } from '../utils/settle';
 import {
   seedIsolatedConversation,

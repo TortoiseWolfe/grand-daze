@@ -17,7 +17,8 @@
  * See tests/e2e/utils/test-user-factory.ts and the #116 roadmap for rationale.
  */
 
-import { test, expect, type Page, type Browser } from '@playwright/test';
+import { expect, type Page, type Browser } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { settleFrames } from '../utils/settle';
 import {
   seedIsolatedConversation,

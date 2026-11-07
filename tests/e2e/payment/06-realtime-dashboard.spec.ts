@@ -8,7 +8,8 @@
  * reconnect state machine is unit-tested instead: see the note near the end.
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
   getAdminClient,

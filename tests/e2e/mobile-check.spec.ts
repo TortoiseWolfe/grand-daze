@@ -1,4 +1,5 @@
-import { test, expect, devices } from '@playwright/test';
+import { expect, devices } from '@playwright/test';
+import { test } from './fixtures/test';
 import { dismissCookieBanner } from './utils/test-user-factory';
 
 // Strip defaultBrowserType + isMobile (Firefox doesn't support isMobile)

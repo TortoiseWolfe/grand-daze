@@ -11,7 +11,8 @@
  * Playwright pattern: https://playwright.dev/docs/auth
  */
 
-import { test as setup, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test as setup } from './fixtures/test';
 import {
   dismissCookieBanner,
   signInAsInjectable,

@@ -10,7 +10,8 @@
  * tests/e2e/utils/test-user-factory.ts and the #116 roadmap for the rationale.
  */
 
-import { test, expect, Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConversation,
   deleteIsolatedConversation,

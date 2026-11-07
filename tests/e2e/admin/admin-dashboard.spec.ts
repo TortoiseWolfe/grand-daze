@@ -19,7 +19,8 @@
  *     sh-feat-grand-daze-1 npx playwright test tests/e2e/admin/ --project=chromium
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { ADMIN_SECTIONS, ADMIN_SECTION_FLOOR } from '@/config/admin-sections';
 import {
   seedIsolatedAdmin,

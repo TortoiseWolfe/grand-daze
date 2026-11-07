@@ -9,7 +9,8 @@
  * Uses pre-existing test users from environment variables.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
   waitForAuthenticatedState,

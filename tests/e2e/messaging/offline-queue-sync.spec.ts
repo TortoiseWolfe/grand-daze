@@ -28,7 +28,8 @@
  *     grand-daze-grand-daze-1 npx playwright test tests/e2e/messaging/offline-queue-sync.spec.ts --project=chromium-msg-iso
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConversation,
   deleteIsolatedConversation,

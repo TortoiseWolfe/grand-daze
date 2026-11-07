@@ -31,7 +31,8 @@
  *     (`grep -riE "atlas|cesium" tests/e2e/` returned zero hits).
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from './fixtures/test';
 import { FOOTER_LINKS } from '@/config/footer-links';
 
 // The diorama's "it rendered" signal — a dock button, not the (occluded)

@@ -6,7 +6,8 @@
  * tests/e2e/signup-mailer/signup-confirm.spec.ts against a real mail catcher.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
   DEFAULT_TEST_PASSWORD,

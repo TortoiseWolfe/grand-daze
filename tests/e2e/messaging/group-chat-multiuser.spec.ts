@@ -11,7 +11,8 @@
  * that need a pre-existing group.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConnection,
   deleteIsolatedConnection,

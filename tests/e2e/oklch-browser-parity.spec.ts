@@ -20,7 +20,8 @@
  * This needs no app: `setContent` on a blank page is enough, so it costs no build and
  * cannot fail for a reason unrelated to colour.
  */
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures/test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { oklchToHex } from '../../scripts/theme-contrast/oklch.mjs';

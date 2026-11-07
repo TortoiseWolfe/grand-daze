@@ -13,7 +13,8 @@
  * skip would let the whole file go green while testing nothing.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import type { Page } from '@playwright/test';
 import {
   dismissCookieBanner,

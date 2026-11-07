@@ -2,7 +2,8 @@
 // Feature 017 - Task T016
 // Purpose: Test end-to-end payment data isolation between users
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 // Test users

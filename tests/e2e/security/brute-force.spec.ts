@@ -5,7 +5,8 @@
 // This test suite uses Playwright project ordering to run after rate-limiting
 // tests but before sign-up tests, preserving IP-based rate limit quota.
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { clearAllRateLimits } from '../utils/rate-limit-admin';
 import { skipIfBackendCaptchaProtected } from '../utils/captcha-guard';

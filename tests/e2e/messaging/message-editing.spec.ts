@@ -17,7 +17,8 @@
  * - Accessibility of edit mode + delete confirmation modal
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { settleFrames } from '../utils/settle';
 import {
   fillMessageInput,

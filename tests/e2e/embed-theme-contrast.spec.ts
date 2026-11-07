@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures/test';
 import { THEMES as ALL_THEMES } from '@/config/themes';
 import { DARK_THEMES as SOURCE_DARK_THEMES } from '@/utils/theme-utils';
 

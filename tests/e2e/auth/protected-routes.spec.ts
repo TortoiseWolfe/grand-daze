@@ -10,7 +10,8 @@
  * Tests that need unauthenticated state override storageState locally.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
   signOutViaDropdown,

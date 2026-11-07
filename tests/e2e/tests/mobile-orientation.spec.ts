@@ -7,7 +7,8 @@
  * This test should FAIL initially if layout switches incorrectly (TDD RED phase)
  */
 
-import { test, expect, devices } from '@playwright/test';
+import { expect, devices } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 // Strip defaultBrowserType (forces webkit, breaks chromium project) and
