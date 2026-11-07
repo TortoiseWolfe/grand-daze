@@ -338,6 +338,11 @@ jobs:
       - name: Seed the E2E users
         run: pnpm tsx scripts/seed-test-users.ts
 
+      - name: Load the blog test fixtures (E2E build only)
+        run: node scripts/ci/apply-blog-fixtures.cjs
+        env:
+          E2E_BLOG_FIXTURES: 'true'
+
       # The admin specs assert on demo data (50+ users, a seeded conversation).
       # They skipped themselves in this lane until now, so nothing ever applied it.
       - name: Seed the admin demo data
