@@ -16,7 +16,15 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Test user credentials (same password for both)
-const TEST_PASSWORD = 'TestPassword123!';
+function getTestPassword(): string {
+  const value = process.env.TEST_USER_PRIMARY_PASSWORD;
+  if (!value) {
+    throw new Error(
+      'TEST_USER_PRIMARY_PASSWORD is not set. Add it to .env (see .env.example).'
+    );
+  }
+  return value;
+}
 
 // Helper: Convert ArrayBuffer to base64
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -125,7 +133,7 @@ async function seedMessages() {
       c.charCodeAt(0)
     );
     const keyPair = await keyDerivationService.deriveKeyPair({
-      password: TEST_PASSWORD,
+      password: getTestPassword(),
       salt: saltBytes,
     });
 
@@ -260,8 +268,12 @@ async function seedMessages() {
   console.log('Created', testMessages.length, 'encrypted messages');
   console.log('\nTo test:');
   console.log('1. Open http://localhost:3000/messages');
-  console.log('2. Sign in as test@example.com with TestPassword123!');
-  console.log('3. Enter TestPassword123! in the "Unlock Messaging" modal');
+  console.log(
+    '2. Sign in as test@example.com with the password in TEST_USER_PRIMARY_PASSWORD'
+  );
+  console.log(
+    '3. Enter the password in TEST_USER_PRIMARY_PASSWORD in the "Unlock Messaging" modal'
+  );
   console.log('4. You should see the decrypted messages!');
 }
 

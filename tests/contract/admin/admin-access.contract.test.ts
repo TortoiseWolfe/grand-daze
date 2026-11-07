@@ -17,6 +17,14 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -25,7 +33,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data } = await supabase.rpc('admin_payment_stats');
     expect(data).toEqual({});
@@ -35,7 +43,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data } = await supabase.rpc('admin_auth_stats');
     expect(data).toEqual({});
@@ -45,7 +53,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data } = await supabase.rpc('admin_user_stats');
     expect(data).toEqual({});
@@ -55,7 +63,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data } = await supabase.rpc('admin_messaging_stats');
     expect(data).toEqual({});
@@ -65,7 +73,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data, error } = await supabase.rpc('admin_payment_analytics', {
       p_from: '2025-01-01T00:00:00Z',
@@ -79,7 +87,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     // Non-admin still gets {} but this verifies the function signature
     // tolerates NULL params without raising a Postgres error.
@@ -95,7 +103,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data, error } = await supabase.rpc('admin_audit_analytics', {
       p_from: '2025-01-01T00:00:00Z',
@@ -109,7 +117,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data, error } = await supabase.rpc('admin_audit_analytics', {
       p_from: null,
@@ -123,7 +131,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     // Empty search + default limit. {} is the non-admin sentinel; an admin
     // would get a JSON array here.
@@ -139,7 +147,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     // Verifies the ILIKE '%...%' concat tolerates a real string — the JWT
     // guard short-circuits before the query runs, so this is a
@@ -156,7 +164,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     const { data, error } = await supabase.rpc('admin_messaging_analytics', {
       p_from: '2025-01-01T00:00:00Z',
@@ -170,7 +178,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     // JWT guard returns {} before the FULL OUTER JOIN runs, so this proves
     // Postgres accepts the signature with NULLs — not that the join is sound.
@@ -187,7 +195,7 @@ describe('Admin Access Contract Tests', () => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.auth.signInWithPassword({
       email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-      password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
     });
     // No args. The outer guard short-circuits before any of the four nested
     // _stats calls run, so this is strictly a signature + guard check. If the

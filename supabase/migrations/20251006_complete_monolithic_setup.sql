@@ -16,28 +16,10 @@
 --   - Webhook retry
 -- ============================================================================
 
--- Clean up any existing test user BEFORE transaction
--- (auth.users changes can't be rolled back, so do this first)
---
--- GUARDED, BECAUSE THIS IS THE FIRST STATEMENT AND IT USED TO ABORT EVERYTHING.
--- `auth.users` is owned by `supabase_auth_admin` on Supabase Cloud, and the
--- `postgres` role the Management API connects as has no DELETE on it. So this
--- line raised `42501: permission denied for schema auth` before the transaction
--- below even opened — the whole file applied nothing, and the error named the
--- schema rather than the statement, which sent the search to the auth.users
--- TRIGGER further down instead of here (#567 org migration).
---
--- The delete is convenience for re-running against a stack that already has a
--- seeded test user. It is not required for a fresh project, so failing to
--- perform it must not stop the schema from being created.
-DO $cleanup_test_user$
-BEGIN
-  DELETE FROM auth.users WHERE email = 'test@example.com';
-EXCEPTION
-  WHEN insufficient_privilege THEN
-    RAISE NOTICE 'skipping test-user cleanup: no DELETE on auth.users (expected on Supabase Cloud)';
-END
-$cleanup_test_user$;
+-- No test user is created or deleted here. This repository is public, so a
+-- password for one cannot live in this file. Test users are created after the
+-- stack is healthy by scripts/seed-test-users.ts, which reads the passwords
+-- from the environment.
 
 -- Wrap everything in a transaction - all or nothing
 BEGIN;
@@ -2222,105 +2204,13 @@ GRANT ALL ON products TO service_role;
 GRANT ALL ON orders TO service_role;
 
 -- ============================================================================
--- PART 8: SEED TEST USER (Primary)
+-- PART 8: TEST USERS (not seeded here)
 -- ============================================================================
--- Creates: test@example.com / TestPassword123!
--- Email is already confirmed (bypasses verification requirement)
--- Note: User was deleted at start of script for idempotency
---
--- Local-profile caveat: this whole block is wrapped in a DO/EXCEPTION guard.
--- On Supabase Cloud it runs exactly as before -- nothing throws, the handler
--- never fires. On a fresh local initdb it soft-skips, because at this point
--- in the boot GoTrue has not yet connected and run its ~40 numbered runtime
--- migrations. Two things are missing that this INSERT needs:
---
---   (1) auth.users.email_confirmed_at and .email_change_token_new -- the base
---       image ships the original 2016-era column names (confirmed_at,
---       email_change_token). GoTrue's migrations rename/add these later.
---   (2) auth.identities -- the whole table. Zero hits for "identities" in the
---       base image's initdb.d/. GoTrue creates it on first connect.
---
--- Unlike the storage.buckets and auth.jwt() forward-fills elsewhere in this
--- file, forward-filling here would BREAK GoTrue: its numbered migrations are
--- tracked in auth.schema_migrations and have no IF NOT EXISTS guards, so a
--- pre-existing email_confirmed_at column or identities table makes GoTrue's
--- own ADD COLUMN / CREATE TABLE crash on 42701/42P07. The DO/EXCEPTION wrap
--- is the only shape that is a no-op in both directions.
---
--- Local seeding is handled post-boot by scripts/seed-test-users.ts via the
--- admin API, after GoTrue has migrated itself. Nothing is lost.
-
-DO $seed_test_user$
-BEGIN
-  -- Create the user in auth.users with confirmed email
-  INSERT INTO auth.users (
-    id,
-    instance_id,
-    email,
-    encrypted_password,
-    email_confirmed_at,
-    created_at,
-    updated_at,
-    raw_app_meta_data,
-    raw_user_meta_data,
-    is_super_admin,
-    role,
-    aud,
-    confirmation_token,
-    recovery_token,
-    email_change_token_new,
-    email_change
-  )
-  VALUES (
-    gen_random_uuid(),
-    '00000000-0000-0000-0000-000000000000',
-    'test@example.com',
-    crypt('TestPassword123!', gen_salt('bf')),  -- Hashed password using bcrypt
-    now(),  -- Email already confirmed
-    now(),
-    now(),
-    '{"provider":"email","providers":["email"]}',
-    '{}',
-    false,
-    'authenticated',
-    'authenticated',
-    '',
-    '',
-    '',
-    ''
-  );
-
-  -- Create identity record (required for Supabase Auth)
-  INSERT INTO auth.identities (
-    provider_id,
-    id,
-    user_id,
-    identity_data,
-    provider,
-    last_sign_in_at,
-    created_at,
-    updated_at
-  )
-  SELECT
-    id,
-    gen_random_uuid(),
-    id,
-    jsonb_build_object('sub', id::text, 'email', email),
-    'email',
-    now(),
-    now(),
-    now()
-  FROM auth.users
-  WHERE email = 'test@example.com';
-
-EXCEPTION
-  WHEN undefined_column OR undefined_table THEN
-    RAISE NOTICE
-      'Skipping test-user seed (GoTrue has not migrated auth schema yet: %). '
-      'On the local profile this is expected -- run scripts/seed-test-users.ts '
-      'after the stack is healthy.', SQLERRM;
-END
-$seed_test_user$;
+-- This file used to insert test@example.com with a fixed password. The
+-- repository is public, so a fixed password in it is known to everyone, and
+-- it was removed. Run scripts/seed-test-users.ts after the stack is healthy:
+-- it creates the test users through the Auth admin API and reads every
+-- password from TEST_USER_*_PASSWORD in the environment.
 
 -- ============================================================================
 -- PART 9: USER MESSAGING SYSTEM (PRP-023)
@@ -3342,7 +3232,7 @@ COMMENT ON TABLE group_keys IS 'Encrypted symmetric group keys per member per ve
 --   ✅ Messaging policies: 17 policies (E2E encryption, user isolation, 15-min edit window)
 --   ✅ Group chat policies: 8 policies (membership access, key distribution)
 --   ✅ Permissions: Authenticated users + service role (all tables)
---   ✅ Test user: test@example.com (primary, email confirmed)
+--   ✅ Test users: created by scripts/seed-test-users.ts, not by this file
 --   ✅ Admin user: grand-daze (Feature 002 - welcome messages, is_admin = TRUE)
 -- ============================================================================
 

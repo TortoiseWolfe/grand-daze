@@ -23,6 +23,10 @@ import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { GroupKeyService } from '@/services/messaging/group-key-service';
 import { encryptionService } from '@/lib/messaging/encryption';
 
+// Fixed, non-secret input vector for local key derivation only. It is never
+// used to log in anywhere.
+const TEST_VECTOR_PASSWORD = 'unit-test-vector-not-a-real-password';
+
 /** base64 → Uint8Array, matching the fixture's stored-salt decode. */
 function b64ToBytes(b64: string): Uint8Array {
   return new Uint8Array(Buffer.from(b64, 'base64'));
@@ -32,7 +36,7 @@ describe('group-key fixture round-trip (real crypto)', () => {
   it('creator-wrapped group key unwraps for a member and decrypts a message', async () => {
     const kds = new KeyDerivationService();
     const gks = new GroupKeyService();
-    const password = 'TestPassword123!';
+    const password = TEST_VECTOR_PASSWORD;
 
     // Two members: creator C (= group_keys.created_by) and member B. The fixture
     // stores each user's salt as base64; re-derive from the base64 form to
@@ -100,7 +104,7 @@ describe('group-key fixture round-trip (real crypto)', () => {
   it('#243: group history survives the creator rotating their personal keys', async () => {
     const kds = new KeyDerivationService();
     const gks = new GroupKeyService();
-    const password = 'TestPassword123!';
+    const password = TEST_VECTOR_PASSWORD;
 
     const creatorSalt = kds.generateSalt();
     const memberSalt = kds.generateSalt();

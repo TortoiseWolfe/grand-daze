@@ -9,9 +9,17 @@ import {
   type ScrollFixture,
 } from '../utils/test-user-factory';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 // Test user credentials
-const TEST_USER_PASSWORD =
-  process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!';
+const getTestUserPassword = (): string =>
+  requireEnv('TEST_USER_PRIMARY_PASSWORD');
 const PRIMARY_EMAIL = process.env.TEST_USER_PRIMARY_EMAIL;
 
 // Issue #109: T007-T008 needs a thread tall enough to scroll, but the shared
@@ -143,7 +151,7 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
     await page.waitForLoadState('domcontentloaded');
     await dismissCookieBanner(page);
     // Handle ReAuthModal if encryption keys need unlocking
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
   });
 
   test('T003: Message input visible on mobile viewport (375x667)', async ({
@@ -153,7 +161,7 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
 
     // Click on a conversation to open chat (handles waiting internally)
     await clickFirstConversation(page);
@@ -179,7 +187,7 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
     await page.setViewportSize(VIEWPORTS.tablet);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
 
     await clickFirstConversation(page);
 
@@ -202,7 +210,7 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
     await page.setViewportSize(VIEWPORTS.desktop);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
 
     await clickFirstConversation(page);
 
@@ -226,7 +234,7 @@ test.describe('Messaging Scroll - User Story 2: Scroll Through Messages', () => 
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     await dismissCookieBanner(page);
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
   });
 
   test('T006: Scroll container constrained to MessageThread', async ({
@@ -236,7 +244,7 @@ test.describe('Messaging Scroll - User Story 2: Scroll Through Messages', () => 
     await page.setViewportSize(VIEWPORTS.desktop);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
 
     await clickFirstConversation(page);
 
@@ -278,7 +286,7 @@ test.describe('Messaging Scroll - User Story 3: Jump to Bottom Button', () => {
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
     await dismissCookieBanner(page);
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
   });
 
   test('T007-T008: Jump button appears when scrolled and does not overlap input', async ({
@@ -300,7 +308,7 @@ test.describe('Messaging Scroll - User Story 3: Jump to Bottom Button', () => {
     await page.goto(`/messages?conversation=${conversationId}`, {
       waitUntil: 'domcontentloaded',
     });
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
 
     const messageThread = page.locator('[data-testid="message-thread"]');
     await expect(messageThread).toBeVisible({ timeout: 30000 });
@@ -368,7 +376,7 @@ test.describe('Messaging Scroll - User Story 3: Jump to Bottom Button', () => {
     await page.setViewportSize(VIEWPORTS.desktop);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
-    await handleReAuthModal(page, TEST_USER_PASSWORD);
+    await handleReAuthModal(page, getTestUserPassword());
 
     await clickFirstConversation(page);
 

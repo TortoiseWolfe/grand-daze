@@ -44,10 +44,10 @@ git push
 
 The `scripts/rebrand.sh` script automates updating 932 files:
 
-| Category  | Changes                                                                                                          |
-| --------- | ---------------------------------------------------------------------------------------------------------------- |
+| Category  | Changes                                                                                                        |
+| --------- | -------------------------------------------------------------------------------------------------------------- |
 | **Code**  | Replaces every ASCII case style of "Grand Daze" across tracked text, while keeping prose and identifiers valid |
-| **Paths** | Renames brand-bearing files and directories from one collision-checked plan; binary bytes are never rewritten    |
+| **Paths** | Renames brand-bearing files and directories from one collision-checked plan; binary bytes are never rewritten  |
 
 ### Your brand mark is not covered by any of that
 
@@ -278,13 +278,17 @@ These enable full E2E test coverage:
 ```
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 TEST_USER_PRIMARY_EMAIL=yourname+test-a@gmail.com
-TEST_USER_PRIMARY_PASSWORD=TestPassword123!
+TEST_USER_PRIMARY_PASSWORD=<a strong password only you know>
 TEST_USER_SECONDARY_EMAIL=yourname+test-b@gmail.com
-TEST_USER_SECONDARY_PASSWORD=TestPassword456!
+TEST_USER_SECONDARY_PASSWORD=<a strong password only you know>
 TEST_USER_TERTIARY_EMAIL=yourname+test-c@gmail.com
-TEST_USER_TERTIARY_PASSWORD=TestPassword789!
+TEST_USER_TERTIARY_PASSWORD=<a strong password only you know>
 TEST_EMAIL_DOMAIN=yourname+e2e@gmail.com
 ```
+
+Pick a different strong password for each test user, and never reuse a password that
+appears anywhere in this repository's history. This repository is public, so any password
+committed to it must be treated as known to everyone.
 
 > **Important: Email Domain Requirements**
 >

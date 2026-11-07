@@ -75,7 +75,8 @@ Tests now search by username instead of email:
 const USER_B = {
   username: 'testuser-b', // Search uses exact username match
   email: process.env.TEST_USER_TERTIARY_EMAIL || 'test-user-b@example.com',
-  password: process.env.TEST_USER_TERTIARY_PASSWORD || 'TestPassword456!',
+  password:
+    process.env.TEST_USER_TERTIARY_PASSWORD || '$TEST_USER_SECONDARY_PASSWORD',
 };
 
 // Search by username

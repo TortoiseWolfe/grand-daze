@@ -15,6 +15,14 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { ConnectionService } from '@/services/messaging/connection-service';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -31,17 +39,17 @@ describe('ConnectionService Integration Tests', () => {
     // Create test users
     const { data: user1 } = await supabaseAdmin.auth.admin.createUser({
       email: 'connection-test-user1@example.com',
-      password: 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
       email_confirm: true,
     });
     const { data: user2 } = await supabaseAdmin.auth.admin.createUser({
       email: 'connection-test-user2@example.com',
-      password: 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
       email_confirm: true,
     });
     const { data: user3 } = await supabaseAdmin.auth.admin.createUser({
       email: 'connection-test-user3@example.com',
-      password: 'TestPassword123!',
+      password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
       email_confirm: true,
     });
 
@@ -330,7 +338,7 @@ describe('ConnectionService Integration Tests', () => {
       // Sign in as test user 1
       const { data: session } = await supabaseAdmin.auth.signInWithPassword({
         email: 'connection-test-user1@example.com',
-        password: 'TestPassword123!',
+        password: requireEnv('TEST_USER_PRIMARY_PASSWORD'),
       });
 
       const authenticatedClient = createClient(

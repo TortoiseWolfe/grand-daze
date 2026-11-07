@@ -12,6 +12,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { KeyDerivationService } from '../key-derivation';
 import { ARGON2_CONFIG, CRYPTO_PARAMS } from '@/types/messaging';
 
+// Fixed, non-secret input vector for local key derivation only. It is never
+// used to log in anywhere.
+const TEST_VECTOR_PASSWORD = 'unit-test-vector-not-a-real-password';
+
 describe('KeyDerivationService', () => {
   let service: KeyDerivationService;
 
@@ -47,7 +51,7 @@ describe('KeyDerivationService', () => {
 
   describe('deriveKeyPair', () => {
     it('should derive same key pair from same password and salt (determinism)', async () => {
-      const password = 'TestPassword123!';
+      const password = TEST_VECTOR_PASSWORD;
       const salt = service.generateSalt();
 
       const keyPair1 = await service.deriveKeyPair({ password, salt });
@@ -84,7 +88,7 @@ describe('KeyDerivationService', () => {
     });
 
     it('should derive valid P-256 ECDH key pair', async () => {
-      const password = 'TestPassword123!';
+      const password = TEST_VECTOR_PASSWORD;
       const salt = service.generateSalt();
 
       const keyPair = await service.deriveKeyPair({ password, salt });
@@ -107,7 +111,7 @@ describe('KeyDerivationService', () => {
     });
 
     it('should produce non-extractable private key for XSS resistance', async () => {
-      const password = 'TestPassword123!';
+      const password = TEST_VECTOR_PASSWORD;
       const salt = service.generateSalt();
 
       const keyPair = await service.deriveKeyPair({ password, salt });
@@ -122,7 +126,7 @@ describe('KeyDerivationService', () => {
     });
 
     it('should return base64-encoded salt in result', async () => {
-      const password = 'TestPassword123!';
+      const password = TEST_VECTOR_PASSWORD;
       const salt = service.generateSalt();
 
       const keyPair = await service.deriveKeyPair({ password, salt });
@@ -165,7 +169,7 @@ describe('KeyDerivationService', () => {
 
   describe('verifyPublicKey', () => {
     it('should return true for matching public keys', async () => {
-      const password = 'TestPassword123!';
+      const password = TEST_VECTOR_PASSWORD;
       const salt = service.generateSalt();
 
       const keyPair = await service.deriveKeyPair({ password, salt });
@@ -199,7 +203,7 @@ describe('KeyDerivationService', () => {
     });
 
     it('should compare x and y coordinates correctly', async () => {
-      const password = 'TestPassword123!';
+      const password = TEST_VECTOR_PASSWORD;
       const salt = service.generateSalt();
 
       const keyPair = await service.deriveKeyPair({ password, salt });

@@ -509,9 +509,20 @@ export function generateTestEmail(prefix = 'e2e-test'): string {
 }
 
 /**
- * Default test password that meets Supabase requirements
+ * Default test password for throwaway users the tests create and later log in
+ * as. Derived from TEST_USER_PRIMARY_PASSWORD so every Playwright worker
+ * process agrees on it (a random value would differ per process). Read lazily
+ * so files that import this module without needing it do not throw at import.
  */
-export const DEFAULT_TEST_PASSWORD = 'TestPassword123!';
+export function getDefaultTestPassword(): string {
+  const value = process.env.TEST_USER_PRIMARY_PASSWORD;
+  if (!value) {
+    throw new Error(
+      'TEST_USER_PRIMARY_PASSWORD is not set. Add it to .env (see .env.example).'
+    );
+  }
+  return value;
+}
 
 /**
  * Dismiss cookie consent banner and promotional banners if visible.
@@ -606,8 +617,7 @@ export async function handleReAuthModal(
   page: Page,
   password?: string
 ): Promise<boolean> {
-  const testPassword =
-    password || process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!';
+  const testPassword = password || getDefaultTestPassword();
 
   // Check if the CURRENT user's private key is in IndexedDB. After the
   // batch 7c migration, keys live in MessagingDB.messaging_private_keys
@@ -1536,14 +1546,14 @@ export async function seedIsolatedConversation(
     userTag: string
   ): Promise<TestUser | null> => {
     const email = generateTestEmail(prefix);
-    const user = await createTestUser(email, DEFAULT_TEST_PASSWORD, {
+    const user = await createTestUser(email, getDefaultTestPassword(), {
       username: `${userTag}${stamp}`,
     });
     if (!user) {
       console.warn(`seedIsolatedConversation: failed to create ${userTag}`);
       return null;
     }
-    const keysOk = await ensureEncryptionKeys(email, DEFAULT_TEST_PASSWORD);
+    const keysOk = await ensureEncryptionKeys(email, getDefaultTestPassword());
     if (!keysOk) {
       console.warn(`seedIsolatedConversation: failed to key ${userTag}`);
       await deleteTestUser(user.id);
@@ -1719,7 +1729,7 @@ export async function openConversationAs(
     waitUntil: 'domcontentloaded',
   });
   await dismissCookieBanner(page);
-  await handleReAuthModal(page, DEFAULT_TEST_PASSWORD);
+  await handleReAuthModal(page, getDefaultTestPassword());
   await page.waitForSelector('[data-testid="message-thread"]', {
     state: 'visible',
     timeout: 60000,
@@ -1885,7 +1895,7 @@ async function createKeyedUserWithSession(
 } | null> {
   const email = generateTestEmail(prefix);
   const displayName = `${userTag}${stamp}`;
-  const user = await createTestUser(email, DEFAULT_TEST_PASSWORD, {
+  const user = await createTestUser(email, getDefaultTestPassword(), {
     username: displayName,
   });
   if (!user) {
@@ -1904,7 +1914,7 @@ async function createKeyedUserWithSession(
       .update({ username: displayName, display_name: displayName })
       .eq('id', user.id);
   }
-  const keysOk = await ensureEncryptionKeys(email, DEFAULT_TEST_PASSWORD);
+  const keysOk = await ensureEncryptionKeys(email, getDefaultTestPassword());
   if (!keysOk) {
     console.warn(`createKeyedUserWithSession: failed to key ${userTag}`);
     await deleteTestUser(user.id);
@@ -2079,7 +2089,7 @@ export interface IsolatedGroup {
  *
  * Because member keypairs are DETERMINISTIC (Argon2id over password + stored
  * salt), we re-derive the creator's private key in Node from
- * DEFAULT_TEST_PASSWORD + the creator's stored `encryption_salt`, then wrap the
+ * getDefaultTestPassword() + the creator's stored `encryption_salt`, then wrap the
  * one group key for each member using `ECDH(creatorPriv, memberPub)`. Members'
  * PUBLIC keys are read straight from `user_encryption_keys` (no per-member
  * private-key derivation needed). `created_by` is the creator for every row, so
@@ -2120,7 +2130,7 @@ async function distributeGroupKeysForFixture(
     // salt ⇒ same keys the browser derives). The stored salt is base64.
     const kds = new KeyDerivationService();
     const creatorKeys = await kds.deriveKeyPair({
-      password: DEFAULT_TEST_PASSWORD,
+      password: getDefaultTestPassword(),
       salt: new Uint8Array(Buffer.from(creatorRow.encryption_salt, 'base64')),
     });
     // Cheap sanity guard: the re-derived public key must match what's stored,

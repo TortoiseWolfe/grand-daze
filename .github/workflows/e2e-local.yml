@@ -227,6 +227,9 @@ jobs:
           cp .env.local-supabase .env
           sed -i 's|host\.docker\.internal|localhost|g' .env
           grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|TEST_USER_)' .env.local-supabase >> "$GITHUB_ENV"
+          # The tracked file holds no passwords (this repo is public). Make a fresh
+          # random set for this job; it is masked in the log and never stored.
+          scripts/ci/generate-test-passwords.sh PRIMARY SECONDARY TERTIARY
           {
             echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
             echo "SUPABASE_ADMIN_URL=http://localhost:54321"

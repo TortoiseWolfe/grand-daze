@@ -14,17 +14,26 @@ requireApprovedTarget('initialize-test-keys');
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Test user credentials
-const TEST_USERS = [
-  { username: 'testuser', password: 'TestPassword123!' },
-  { username: 'testuser-b', password: 'TestPassword123!' },
-];
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
 
 async function initializeTestKeys() {
   if (!supabaseUrl || !serviceRoleKey) {
     console.error('Missing Supabase environment variables');
     process.exit(1);
   }
+
+  // Test user credentials (both users share the primary test password)
+  const sharedPassword = requireEnv('TEST_USER_PRIMARY_PASSWORD');
+  const TEST_USERS = [
+    { username: 'testuser', password: sharedPassword },
+    { username: 'testuser-b', password: sharedPassword },
+  ];
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
   const keyDerivationService = new KeyDerivationService();
@@ -121,7 +130,7 @@ async function initializeTestKeys() {
   }
 
   console.log(
-    '\n🎉 Done! Users can now unlock messaging with password: TestPassword123!'
+    '\n🎉 Done! Users can now unlock messaging with the password in TEST_USER_PRIMARY_PASSWORD'
   );
 }
 

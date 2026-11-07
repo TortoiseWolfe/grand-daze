@@ -103,7 +103,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 
 | Field                          | Value                                                        |
 | ------------------------------ | ------------------------------------------------------------ |
-| **Application name**           | `Grand Daze` (or your preferred name)                      |
+| **Application name**           | `Grand Daze` (or your preferred name)                        |
 | **Homepage URL**               | `http://localhost:3000` (development) or your production URL |
 | **Application description**    | (Optional) "Next.js template with authentication"            |
 | **Authorization callback URL** | `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`    |
@@ -260,7 +260,7 @@ docker compose exec grand-daze pnpm run dev
 **Step 3:** Create test account
 
 - Enter email: `test@example.com`
-- Enter password: `TestPassword123!`
+- Enter password: the value of `TEST_USER_PRIMARY_PASSWORD` from your local env file
 - Click **"Sign Up"**
 
 **Step 4:** Check email for verification

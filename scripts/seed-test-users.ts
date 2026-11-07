@@ -8,9 +8,9 @@
  *   - Tertiary: test-user-c@example.com (username: testuser-c) - group chat tests
  *
  * Passwords are read from environment variables:
- *   - TEST_USER_PRIMARY_PASSWORD (default: TestPassword123!)
- *   - TEST_USER_SECONDARY_PASSWORD (default: TestPassword456!)
- *   - TEST_USER_TERTIARY_PASSWORD (default: TestPassword789!)
+ *   - TEST_USER_PRIMARY_PASSWORD (required, no default)
+ *   - TEST_USER_SECONDARY_PASSWORD (required, no default)
+ *   - TEST_USER_TERTIARY_PASSWORD (required, no default)
  *
  * Usage: docker compose exec grand-daze pnpm exec tsx scripts/seed-test-users.ts
  * Environment: Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
@@ -470,7 +470,7 @@ async function main() {
   console.log('\n📋 Users:');
   console.log(`   Admin: ${ADMIN_USER.email} (for welcome messages)`);
   for (const user of TEST_USERS) {
-    console.log(`   Test: ${user.email} / ${user.password}`);
+    console.log(`   Test: ${user.email} (password from the env file)`);
   }
 
   console.log('\n📋 Next steps:');

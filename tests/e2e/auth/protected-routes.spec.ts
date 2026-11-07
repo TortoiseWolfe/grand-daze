@@ -18,15 +18,27 @@ import {
   performSignIn,
 } from '../utils/test-user-factory';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 // Use pre-existing test users (must exist in Supabase)
 const testUser = {
   email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-  password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+  get password(): string {
+    return requireEnv('TEST_USER_PRIMARY_PASSWORD');
+  },
 };
 
 const testUser2 = {
   email: process.env.TEST_USER_SECONDARY_EMAIL || 'test2@example.com',
-  password: process.env.TEST_USER_SECONDARY_PASSWORD || 'TestPassword123!',
+  get password(): string {
+    return requireEnv('TEST_USER_SECONDARY_PASSWORD');
+  },
 };
 
 // Skip all tests if test users not configured

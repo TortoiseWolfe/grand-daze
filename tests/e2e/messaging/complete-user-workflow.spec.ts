@@ -29,7 +29,7 @@ import {
   scrollThreadToBottom,
   getAdminClient,
   handleReAuthModal,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
   type IsolatedConversation,
 } from '../utils/test-user-factory';
 
@@ -197,7 +197,7 @@ test.describe('Conversations Page Loading (Feature 029)', () => {
       const page = viewer.page;
 
       await page.goto('/messages', { waitUntil: 'domcontentloaded' });
-      await handleReAuthModal(page, DEFAULT_TEST_PASSWORD);
+      await handleReAuthModal(page, getDefaultTestPassword());
 
       const startTime = Date.now();
 
