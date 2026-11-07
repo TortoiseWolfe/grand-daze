@@ -203,6 +203,14 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
       const admin = getAdminClient();
       if (!fixture || !admin) throw new Error('Could not seed a payment');
 
+      // seedIsolatedPayment records the payment as already webhook-verified.
+      // Undo that first, so the page opens in the state before the webhook.
+      const { error: resetError } = await admin
+        .from('payment_results')
+        .update({ webhook_verified: false })
+        .eq('id', fixture.resultId);
+      expect(resetError).toBeNull();
+
       opened = await openAuthedPage(browser, fixture.session);
       const { page } = opened;
       const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';

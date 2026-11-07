@@ -309,9 +309,11 @@ test.describe('Failed Payment Retry Logic', () => {
         await expect(page.getByText(/Reference:/)).toBeVisible({
           timeout: 30000,
         });
-        // seedIsolatedPayment stamps its transaction ids `iso_txn_…`.
+        // seedIsolatedPayment stamps its transaction ids `iso_txn_…`. The page
+        // shows that value twice (as "Transaction ID" and as "Reference"), so
+        // take the first rather than let strict mode reject the pair.
         await expect(
-          page.locator('code', { hasText: /^iso_txn_/ })
+          page.locator('code', { hasText: /^iso_txn_/ }).first()
         ).toBeVisible();
       }
     );
