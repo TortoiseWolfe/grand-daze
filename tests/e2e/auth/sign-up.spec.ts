@@ -17,7 +17,7 @@ import {
   createTestUser,
   deleteTestUserByEmail,
   isAdminClientAvailable,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
   dismissCookieBanner,
   waitForAuthenticatedState,
 } from '../utils/test-user-factory';
@@ -137,8 +137,8 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     await page.getByLabel('Email').fill(testEmail);
     await page
       .getByLabel('Password', { exact: true })
-      .fill(DEFAULT_TEST_PASSWORD);
-    await page.getByLabel('Confirm Password').fill(DEFAULT_TEST_PASSWORD);
+      .fill(getDefaultTestPassword());
+    await page.getByLabel('Confirm Password').fill(getDefaultTestPassword());
 
     // Submit form
     await page.getByRole('button', { name: /sign up/i }).click();
@@ -182,7 +182,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
 
     // Create a user first
     const existingEmail = generateSignUpEmail('existing');
-    const user = await createTestUser(existingEmail, DEFAULT_TEST_PASSWORD);
+    const user = await createTestUser(existingEmail, getDefaultTestPassword());
 
     if (!user) {
       test.skip(true, 'Could not create test user');
@@ -199,8 +199,8 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     await page.getByLabel('Email').fill(existingEmail);
     await page
       .getByLabel('Password', { exact: true })
-      .fill(DEFAULT_TEST_PASSWORD);
-    await page.getByLabel('Confirm Password').fill(DEFAULT_TEST_PASSWORD);
+      .fill(getDefaultTestPassword());
+    await page.getByLabel('Confirm Password').fill(getDefaultTestPassword());
 
     await page.getByRole('button', { name: /sign up/i }).click();
 
@@ -267,8 +267,8 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     await page.getByLabel('Email').fill('test@example.x');
     await page
       .getByLabel('Password', { exact: true })
-      .fill(DEFAULT_TEST_PASSWORD);
-    await page.getByLabel('Confirm Password').fill(DEFAULT_TEST_PASSWORD);
+      .fill(getDefaultTestPassword());
+    await page.getByLabel('Confirm Password').fill(getDefaultTestPassword());
 
     await page.getByRole('button', { name: /sign up/i }).click();
 
@@ -291,7 +291,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     await page.getByLabel('Email').fill(testEmail);
     await page
       .getByLabel('Password', { exact: true })
-      .fill(DEFAULT_TEST_PASSWORD);
+      .fill(getDefaultTestPassword());
     await page.getByLabel('Confirm Password').fill('DifferentPassword123!');
 
     await page.getByRole('button', { name: /sign up/i }).click();
@@ -350,7 +350,7 @@ test.describe('Sign-up with Admin Confirmation', () => {
 
     // Create user via admin API (email auto-confirmed)
     const testEmail = generateSignUpEmail('admin');
-    const user = await createTestUser(testEmail, DEFAULT_TEST_PASSWORD, {
+    const user = await createTestUser(testEmail, getDefaultTestPassword(), {
       createProfile: true,
     });
 
@@ -364,7 +364,7 @@ test.describe('Sign-up with Admin Confirmation', () => {
       await page.goto('/sign-in');
       await dismissCookieBanner(page);
       await page.getByLabel('Email').fill(testEmail);
-      await page.getByLabel('Password').fill(DEFAULT_TEST_PASSWORD);
+      await page.getByLabel('Password').fill(getDefaultTestPassword());
       await page.getByRole('button', { name: 'Sign In' }).click();
 
       // Should redirect and authenticate

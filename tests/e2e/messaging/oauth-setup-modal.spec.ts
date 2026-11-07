@@ -53,7 +53,7 @@ import {
   handleReAuthModal,
   promoteToOAuthAndReSignIn,
   deleteUserEncryptionKeys,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
   type IsolatedConversation,
   type InjectableSession,
 } from '../utils/test-user-factory';
@@ -187,7 +187,7 @@ test.describe('Feature 013 — OAuth Messaging Password', () => {
 
       // Then unlock with the real password to leave the page in a usable state
       // (proves the unlock path still works end-to-end for an email user).
-      await handleReAuthModal(viewer.page, DEFAULT_TEST_PASSWORD);
+      await handleReAuthModal(viewer.page, getDefaultTestPassword());
     } finally {
       await viewer.close();
     }

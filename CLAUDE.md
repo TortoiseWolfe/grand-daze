@@ -286,7 +286,7 @@ unchanged, back to 200 within ~2 minutes (watch for `[self-heal]` in
 **Primary** (required):
 
 - Email: `test@example.com`
-- Password: `TestPassword123!`
+- Password: the value of `TEST_USER_PRIMARY_PASSWORD` in your local env file (it is never written into the repo)
 
 **Secondary** (optional - for email verification tests):
 

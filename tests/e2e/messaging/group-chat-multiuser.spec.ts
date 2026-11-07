@@ -25,7 +25,7 @@ import {
   dismissCookieBanner,
   fillMessageInput,
   scrollThreadToBottom,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
   type IsolatedConnection,
   type IsolatedGroup,
 } from '../utils/test-user-factory';
@@ -42,7 +42,7 @@ async function openMessagesAsViewer(
   const opened = await openAuthedPage(browser, fixture.requesterSession);
   await opened.page.goto(`${BP}/messages`, { waitUntil: 'domcontentloaded' });
   await dismissCookieBanner(opened.page);
-  await handleReAuthModal(opened.page, DEFAULT_TEST_PASSWORD);
+  await handleReAuthModal(opened.page, getDefaultTestPassword());
   return opened;
 }
 
@@ -276,7 +276,7 @@ test.describe('Group Chat E2E', () => {
       const deadline = Date.now() + 90000;
       let navigated = false;
       while (Date.now() < deadline) {
-        await handleReAuthModal(viewer.page, DEFAULT_TEST_PASSWORD).catch(
+        await handleReAuthModal(viewer.page, getDefaultTestPassword()).catch(
           () => {}
         );
         // Static export: the app lands on /messages/?conversation=<id>, with a
@@ -300,7 +300,7 @@ test.describe('Group Chat E2E', () => {
         'group creation did not reach /messages/?conversation=<id> within 90s'
       ).toBe(true);
 
-      await handleReAuthModal(viewer.page, DEFAULT_TEST_PASSWORD).catch(
+      await handleReAuthModal(viewer.page, getDefaultTestPassword()).catch(
         () => {}
       );
 
@@ -331,7 +331,7 @@ test.describe('Group Chat E2E', () => {
       await viewer.page.goto(`${BP}/messages/new-group`, {
         waitUntil: 'domcontentloaded',
       });
-      await handleReAuthModal(viewer.page, DEFAULT_TEST_PASSWORD);
+      await handleReAuthModal(viewer.page, getDefaultTestPassword());
 
       await expect(viewer.page.locator('h1:has-text("New Group")')).toBeVisible(
         { timeout: 10000 }
@@ -447,7 +447,9 @@ test.describe('Group Chat E2E — deterministic encrypted round-trip (#182)', ()
         await scrollThreadToBottom(B.page);
         if (await bText.isVisible({ timeout: 12000 }).catch(() => false)) break;
         await B.page.reload({ waitUntil: 'domcontentloaded' });
-        await handleReAuthModal(B.page, DEFAULT_TEST_PASSWORD).catch(() => {});
+        await handleReAuthModal(B.page, getDefaultTestPassword()).catch(
+          () => {}
+        );
         await B.page.waitForSelector('[data-testid="message-thread"]', {
           state: 'visible',
           timeout: 30000,

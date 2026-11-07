@@ -10,7 +10,7 @@ import { expect } from '@playwright/test';
 import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
 } from '../utils/test-user-factory';
 
 /**
@@ -33,7 +33,7 @@ function generateRegistrationEmail(prefix: string): string {
 }
 
 test.describe('User Registration E2E', () => {
-  const testPassword = DEFAULT_TEST_PASSWORD;
+  const testPassword = getDefaultTestPassword();
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });

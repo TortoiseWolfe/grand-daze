@@ -19,10 +19,17 @@ import {
 } from '../utils/test-user-factory';
 import { skipIfBackendCaptchaProtected } from '../utils/captcha-guard';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 // Use pre-existing test user (must exist in Supabase)
 const testEmail = process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
-const testPassword =
-  process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!';
+const getTestPassword = (): string => requireEnv('TEST_USER_PRIMARY_PASSWORD');
 
 test.describe('Session Persistence E2E', () => {
   // These tests explicitly test sign-in/sign-out flows, so they need
@@ -55,7 +62,7 @@ test.describe('Session Persistence E2E', () => {
     page,
   }) => {
     // Sign in with Remember Me (already on sign-in page from beforeEach)
-    const result = await performSignIn(page, testEmail, testPassword, {
+    const result = await performSignIn(page, testEmail, getTestPassword(), {
       rememberMe: true,
     });
     if (!result.success) {
@@ -121,7 +128,7 @@ test.describe('Session Persistence E2E', () => {
     );
 
     // Sign in WITHOUT Remember Me (already on sign-in page from beforeEach)
-    const result = await performSignIn(page, testEmail, testPassword, {
+    const result = await performSignIn(page, testEmail, getTestPassword(), {
       rememberMe: false,
     });
     if (!result.success) {
@@ -163,7 +170,7 @@ test.describe('Session Persistence E2E', () => {
     page,
   }) => {
     // Sign in (already on sign-in page from beforeEach)
-    const result = await performSignIn(page, testEmail, testPassword);
+    const result = await performSignIn(page, testEmail, getTestPassword());
     if (!result.success) {
       throw new Error(`Sign-in failed: ${result.error}`);
     }
@@ -199,7 +206,7 @@ test.describe('Session Persistence E2E', () => {
     // Sign in with Remember Me
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
-    const result = await performSignIn(page, testEmail, testPassword, {
+    const result = await performSignIn(page, testEmail, getTestPassword(), {
       rememberMe: true,
     });
     if (!result.success) {
@@ -229,7 +236,7 @@ test.describe('Session Persistence E2E', () => {
 
   test('should clear session on sign out', async ({ page }) => {
     // Sign in (already on sign-in page from beforeEach)
-    const result = await performSignIn(page, testEmail, testPassword);
+    const result = await performSignIn(page, testEmail, getTestPassword());
     if (!result.success) {
       throw new Error(`Sign-in failed: ${result.error}`);
     }
@@ -315,7 +322,11 @@ test.describe('Session Persistence E2E', () => {
     // Sign in on page 1 with proper error detection
     await page1.goto('/sign-in');
     await dismissCookieBanner(page1);
-    const signInResult = await performSignIn(page1, testEmail, testPassword);
+    const signInResult = await performSignIn(
+      page1,
+      testEmail,
+      getTestPassword()
+    );
 
     // Fail fast with clear error if sign-in failed
     if (!signInResult.success) {
@@ -388,7 +399,7 @@ test.describe('Session Persistence E2E', () => {
     page,
   }) => {
     // Sign in (already on sign-in page from beforeEach)
-    const result = await performSignIn(page, testEmail, testPassword);
+    const result = await performSignIn(page, testEmail, getTestPassword());
     if (!result.success) {
       throw new Error(`Sign-in failed: ${result.error}`);
     }
@@ -414,7 +425,7 @@ test.describe('Session Persistence E2E', () => {
     // 4. Verify redirected to sign-in
 
     // For demonstration, test the refresh mechanism (already on sign-in page from beforeEach)
-    const result = await performSignIn(page, testEmail, testPassword);
+    const result = await performSignIn(page, testEmail, getTestPassword());
     if (!result.success) {
       throw new Error(`Sign-in failed: ${result.error}`);
     }

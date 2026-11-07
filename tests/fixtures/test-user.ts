@@ -14,8 +14,20 @@
  */
 export const TEST_EMAIL =
   process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
-export const TEST_PASSWORD =
-  process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!';
+
+/**
+ * Primary test user password, read lazily so importing this module never
+ * throws for files that do not need it.
+ */
+export function getTestPassword(): string {
+  const value = process.env.TEST_USER_PRIMARY_PASSWORD;
+  if (!value) {
+    throw new Error(
+      'TEST_USER_PRIMARY_PASSWORD is not set. Add it to .env (see .env.example).'
+    );
+  }
+  return value;
+}
 
 /**
  * Secondary test user - configurable for email verification tests
@@ -30,7 +42,8 @@ export const TEST_PASSWORD_SECONDARY = process.env.TEST_USER_SECONDARY_PASSWORD;
 export const TEST_EMAIL_TERTIARY =
   process.env.TEST_USER_TERTIARY_EMAIL || 'test-user-b@example.com';
 export const TEST_PASSWORD_TERTIARY =
-  process.env.TEST_USER_TERTIARY_PASSWORD || 'TestPassword456!';
+  process.env.TEST_USER_TERTIARY_PASSWORD ||
+  process.env.TEST_USER_SECONDARY_PASSWORD;
 export const TEST_USERNAME_TERTIARY = 'testuser-b';
 
 /**

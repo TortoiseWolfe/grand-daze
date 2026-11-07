@@ -31,7 +31,7 @@ import {
   scrollThreadToBottom,
   getAdminClient,
   handleReAuthModal,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
   type IsolatedConversation,
   type OpenedParticipant,
 } from '../utils/test-user-factory';
@@ -72,7 +72,7 @@ async function waitForConversationCached(page: Page) {
       `[waitForConversationCached] Attempt ${attempt + 1}/3: participant name not resolved, reloading...`
     );
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await handleReAuthModal(page, DEFAULT_TEST_PASSWORD);
+    await handleReAuthModal(page, getDefaultTestPassword());
   }
   // Last resort — proceed anyway and let sendMessage fail with a clear error
   console.warn(

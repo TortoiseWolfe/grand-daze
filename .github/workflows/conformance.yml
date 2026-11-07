@@ -100,6 +100,10 @@ jobs:
           # published ports on localhost. Normalize so a .env load can't hand the
           # test an unresolvable host.
           sed -i 's|host\.docker\.internal|localhost|g' .env
+          # The RLS suites create their users with a password read from the
+          # environment. This repository is public, so none is committed: make a
+          # fresh one for this job (masked in the log) and hand it to later steps.
+          scripts/ci/generate-test-passwords.sh PRIMARY SECONDARY
           # Export the anon + service-role keys (from the committed template, so
           # they're never duplicated here) for the test process, plus the
           # runner-reachable localhost URLs for the published stack ports. These

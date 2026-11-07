@@ -67,11 +67,22 @@ export interface TestUser {
 export const TEST_USERS = {
   userA: {
     email: 'test-user-a@grand-daze.test',
-    password: 'TestPassword123!',
+    // Getter: read lazily so importing this module never throws.
+    get password(): string {
+      return requireEnv(
+        process.env.TEST_USER_PRIMARY_PASSWORD,
+        'TEST_USER_PRIMARY_PASSWORD'
+      );
+    },
   },
   userB: {
     email: 'test-user-b@grand-daze.test',
-    password: 'TestPassword456!',
+    get password(): string {
+      return requireEnv(
+        process.env.TEST_USER_SECONDARY_PASSWORD,
+        'TEST_USER_SECONDARY_PASSWORD'
+      );
+    },
   },
   admin: {
     email: 'test-admin@grand-daze.test',

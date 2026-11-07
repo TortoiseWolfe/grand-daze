@@ -16,7 +16,12 @@ async function testAutoKeyGeneration() {
 
   // Test user credentials (testuser2)
   const testEmail = 'testuser2@example.com';
-  const testPassword = 'TestPassword123!';
+  const testPassword = process.env.TEST_USER_PRIMARY_PASSWORD;
+  if (!testPassword) {
+    throw new Error(
+      'TEST_USER_PRIMARY_PASSWORD is not set. Add it to .env (see .env.example).'
+    );
+  }
 
   try {
     // Step 1: Check if testuser2 has keys before login
@@ -50,7 +55,7 @@ async function testAutoKeyGeneration() {
       );
       console.log('   1. Go to http://localhost:3000/sign-in');
       console.log(`   2. Email: ${testEmail}`);
-      console.log(`   3. Password: ${testPassword}`);
+      console.log('   3. Password: the value of TEST_USER_PRIMARY_PASSWORD');
       console.log(
         "   4. Check browser console for 'Initializing encryption keys...'"
       );

@@ -21,6 +21,14 @@ import { validateAvatarFile } from '@/lib/avatar/validation';
 import { createCroppedImage } from '@/lib/avatar/image-processing';
 import { uploadAvatar, removeAvatar } from '@/lib/avatar/upload';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 describe('Avatar Upload Integration Flow', () => {
   const supabase = createClient();
   let userId: string;
@@ -29,8 +37,7 @@ describe('Avatar Upload Integration Flow', () => {
   beforeAll(async () => {
     // Sign in test user
     const testEmail = process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
-    const testPassword =
-      process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!';
+    const testPassword = requireEnv('TEST_USER_PRIMARY_PASSWORD');
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: testEmail,
@@ -245,8 +252,7 @@ describe('Avatar Upload Integration Flow', () => {
 
     // Re-authenticate for cleanup
     const testEmail = process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
-    const testPassword =
-      process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!';
+    const testPassword = requireEnv('TEST_USER_PRIMARY_PASSWORD');
     await supabase.auth.signInWithPassword({
       email: testEmail,
       password: testPassword,

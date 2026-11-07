@@ -11,14 +11,29 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { skipIfBackendCaptchaProtected } from '../utils/captcha-guard';
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set. Add it to .env (see .env.example).`);
+  }
+  return value;
+}
+
 const USER_A = {
   email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-  password: process.env.TEST_USER_PRIMARY_PASSWORD || 'TestPassword123!',
+  get password(): string {
+    return requireEnv('TEST_USER_PRIMARY_PASSWORD');
+  },
 };
 
 const USER_B = {
   email: process.env.TEST_USER_TERTIARY_EMAIL || 'test-user-b@example.com',
-  password: process.env.TEST_USER_TERTIARY_PASSWORD || 'TestPassword456!',
+  get password(): string {
+    return (
+      process.env.TEST_USER_TERTIARY_PASSWORD ||
+      requireEnv('TEST_USER_SECONDARY_PASSWORD')
+    );
+  },
 };
 
 let adminClient: SupabaseClient | null = null;

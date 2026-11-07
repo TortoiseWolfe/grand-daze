@@ -25,7 +25,7 @@ import {
   openAuthedPage,
   handleReAuthModal,
   dismissCookieBanner,
-  DEFAULT_TEST_PASSWORD,
+  getDefaultTestPassword,
   type IsolatedConnection,
 } from '../utils/test-user-factory';
 
@@ -44,7 +44,7 @@ async function openConnectionsTab(
     waitUntil: 'domcontentloaded',
   });
   await dismissCookieBanner(opened.page);
-  await handleReAuthModal(opened.page, DEFAULT_TEST_PASSWORD);
+  await handleReAuthModal(opened.page, getDefaultTestPassword());
   return opened;
 }
 
@@ -96,7 +96,7 @@ test.describe('Friend Request Flow', () => {
 
       // ===== Addressee sees the pending request in "Received" and accepts =====
       await addressee.page.reload({ waitUntil: 'domcontentloaded' });
-      await handleReAuthModal(addressee.page, DEFAULT_TEST_PASSWORD);
+      await handleReAuthModal(addressee.page, getDefaultTestPassword());
       const receivedTab = addressee.page.getByRole('tab', {
         name: /pending received|received/i,
       });
@@ -118,7 +118,7 @@ test.describe('Friend Request Flow', () => {
         await expect(pendingRequest).toBeHidden({ timeout: 30000 });
       } catch {
         await addressee.page.reload();
-        await handleReAuthModal(addressee.page, DEFAULT_TEST_PASSWORD);
+        await handleReAuthModal(addressee.page, getDefaultTestPassword());
         await expect(pendingRequest).toBeHidden({ timeout: 15000 });
       }
 
@@ -133,7 +133,7 @@ test.describe('Friend Request Flow', () => {
 
       // ===== ...and in the requester's "Accepted" tab =====
       await requester.page.reload();
-      await handleReAuthModal(requester.page, DEFAULT_TEST_PASSWORD);
+      await handleReAuthModal(requester.page, getDefaultTestPassword());
       const acceptedTabR = requester.page.getByRole('tab', {
         name: /accepted/i,
       });

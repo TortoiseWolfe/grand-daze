@@ -84,6 +84,9 @@ jobs:
           # Authoritative env for the build + test process (win over the copied
           # .env; dotenv.config() does not override existing process.env).
           grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY)=' .env.local-supabase >> "$GITHUB_ENV"
+          # No password lives in the tracked file (this repo is public): make a fresh
+          # random one for this job. It is masked in the log and never stored.
+          scripts/ci/generate-test-passwords.sh PRIMARY
           {
             echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
             # Admin client (cleanup) runs on the runner → reach the published port.
@@ -164,7 +167,6 @@ jobs:
           # generated addresses plus-routed. Nothing leaves the machine: local
           # Supabase delivers to Mailpit, so there is no bounce risk (#361).
           TEST_USER_PRIMARY_EMAIL: grand-daze.e2e+local@gmail.com
-          TEST_USER_PRIMARY_PASSWORD: LocalStackTestPassword123!
         run: scripts/ci/playwright-in-container.sh test --config playwright.signup-mailer.config.ts
 
       - name: Dump logs on failure
