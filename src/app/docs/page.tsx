@@ -49,7 +49,7 @@ const REFERENCE: readonly { when: string; docs: readonly Doc[] }[] = [
   ]},
   { when: 'How the pieces work', docs: [
     { label: 'Security',           hint: 'RLS · Vault · secrets',               href: gh('.github/SECURITY.md') },
-    { label: 'Auto-configuration', hint: 'project detection · defaults',        href: '/blog/auto-configuration-system', internal: true },
+    { label: 'Auto-configuration', hint: 'project detection · defaults',        href: gh('docs/TEMPLATE-GUIDE.md') },
   ]},
   { when: 'Contributing back', docs: [
     { label: 'Contributing',  hint: 'PR workflow · code style',           href: gh('CONTRIBUTING.md') },
