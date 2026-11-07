@@ -64,6 +64,13 @@ const MSG_ISO_GLOBS = [
  * Scoped to the iso projects so real hangs elsewhere still fail fast. */
 const MSG_ISO_TIMEOUT = 180_000;
 
+// Headless Firefox in the CI image gets no WebGL at all (Playwright 1.55 image,
+// Firefox 141, Mesa 25), so the 3D game and twin tests skip themselves (#39).
+// Headed Firefox on a virtual display gets software WebGL. scripts/ci/
+// playwright-in-container.sh starts that display and exports DISPLAY, so Firefox
+// runs headed only where a display exists in CI; local dev containers stay headless.
+const FIREFOX_HEADLESS = !(process.env.CI && process.env.DISPLAY);
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -264,6 +271,7 @@ export default defineConfig({
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Firefox'],
+        headless: FIREFOX_HEADLESS,
         storageState: './tests/e2e/fixtures/storage-state-auth.json',
       },
     },
@@ -275,6 +283,7 @@ export default defineConfig({
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Firefox'],
+        headless: FIREFOX_HEADLESS,
         storageState: './tests/e2e/fixtures/storage-state-auth.json',
       },
     },
@@ -293,6 +302,7 @@ export default defineConfig({
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Firefox'],
+        headless: FIREFOX_HEADLESS,
         storageState: './tests/e2e/fixtures/storage-state-auth.json',
       },
     },
