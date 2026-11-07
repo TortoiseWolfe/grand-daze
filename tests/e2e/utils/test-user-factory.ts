@@ -619,6 +619,13 @@ export async function handleReAuthModal(
 ): Promise<boolean> {
   const testPassword = password || getDefaultTestPassword();
 
+  // CI runs Firefox headed on a bare virtual display with no window manager, and
+  // tests open the viewer and the partner at the same moment, each in its own
+  // window. A window that is not frontmost can leave Playwright's click waiting
+  // 15 s on "stable" or on dispatch (#41), so make this one the active window
+  // before the first click on the unlock dialog.
+  await page.bringToFront();
+
   // Check if the CURRENT user's private key is in IndexedDB. After the
   // batch 7c migration, keys live in MessagingDB.messaging_private_keys
   // as non-extractable CryptoKey objects (no longer in localStorage).
