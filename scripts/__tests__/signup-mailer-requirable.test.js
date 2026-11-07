@@ -154,6 +154,14 @@ describe('Signup Mailer can be a required check (#870)', () => {
         'tests/e2e/security/brute-force.spec.ts',
         "the suite's captcha-blocked project runs this spec",
       ],
+      [
+        'tests/e2e/utils/test-user-factory.ts',
+        'signup-confirm.spec.ts imports it to create and delete users',
+      ],
+      [
+        'tests/utils/local-backend.ts',
+        'test-user-factory.ts imports it for the local-backend guard',
+      ],
     ]) {
       assert.ok(needsSignupMailer([f]), `${f} must require the suite — ${why}`);
     }

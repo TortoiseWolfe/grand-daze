@@ -19,6 +19,7 @@ import path from 'path';
 import {
   dismissCookieBanner,
   injectSessionIntoPage,
+  signInAsInjectable,
   seedIsolatedUser,
   deleteIsolatedUser,
   type IsolatedUser,
@@ -58,20 +59,38 @@ test.describe('Avatar Upload Flow', () => {
 
   test.beforeEach(async ({ page }) => {
     if (!fixture) throw new Error('No throwaway user was seeded');
-    await injectSessionIntoPage(page, fixture.session);
+    // Sign in again for every test instead of re-injecting the session minted in
+    // beforeAll. Each test refreshes the session (upload and remove both do), and
+    // local GoTrue rotates the refresh token every time, so by the second test the
+    // seed-time token is spent and its cached user has no avatar. That made the
+    // first attempt of "Remove avatar" and "nav and account" fail and only the
+    // retry (fresh worker, fresh user) pass.
+    const { session, error } = await signInAsInjectable(
+      fixture.user.email,
+      fixture.user.password
+    );
+    if (!session) {
+      throw new Error(
+        `Avatar upload spec: could not sign the throwaway user in (${error ?? 'no session'})`
+      );
+    }
+    await injectSessionIntoPage(page, session);
     await page.goto('/account');
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
   });
 
   test.afterEach(async ({ page }) => {
-    // Clean up: Remove avatar if exists
+    // Clean up: Remove avatar if exists. Removing asks for confirmation with a
+    // browser confirm(); Playwright dismisses an unhandled dialog, which cancelled
+    // the removal and left the avatar behind for the next test.
     const removeButton = page.getByRole('button', { name: /remove avatar/i });
     const isVisible = await removeButton.isVisible().catch(() => false);
 
     if (isVisible) {
-      await removeButton.click({ force: true }); // Force click to bypass any modal backdrops
-      await page.waitForTimeout(1000); // Wait for removal
+      page.once('dialog', (dialog) => dialog.accept());
+      await removeButton.click();
+      await expect(removeButton).toBeHidden({ timeout: 15000 });
     }
   });
 
@@ -216,7 +235,10 @@ test.describe('Avatar Upload Flow', () => {
     });
     const uploadButton = page.getByRole('button', { name: /upload avatar/i });
 
-    // Ensure we have an avatar to remove (upload if needed)
+    // Ensure we have an avatar to remove (upload if needed). Wait for the card to
+    // finish loading first: an instant isVisible() during the profile spinner
+    // reports "no avatar" for a user who has one.
+    await expect(uploadButton).toBeVisible();
     const hasExistingAvatar = await accountAvatar
       .isVisible()
       .catch(() => false);
@@ -248,9 +270,7 @@ test.describe('Avatar Upload Flow', () => {
     await expect(removeButton).toBeVisible();
 
     // Accept the browser confirm() dialog
-    page.on('dialog', async (dialog) => {
-      await dialog.accept();
-    });
+    page.once('dialog', (dialog) => dialog.accept());
 
     await removeButton.click();
 
