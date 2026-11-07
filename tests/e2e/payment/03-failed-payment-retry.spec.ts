@@ -2,19 +2,58 @@
  * Integration Test: Failed Payment Retry - T057
  * Tests error handling UI and retry logic for failed payments
  *
- * NOTE: Tests that require actual Stripe Checkout redirect are skipped
- * because CI does not have Stripe API keys configured.
+ * The failed-payment screens are driven from a seeded `payment_results` row
+ * with status='failed' (no Stripe Checkout needed): the page renders whatever
+ * the database says happened, so the decline is inserted directly.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Browser, type Page } from '@playwright/test';
 import {
   dismissCookieBanner,
   waitForAuthenticatedState,
   seedIsolatedSubscription,
   deleteIsolatedSubscription,
   openSubscriptionsAs,
+  seedIsolatedPayment,
+  deleteIsolatedPayment,
+  openAuthedPage,
   type IsolatedSubscription,
+  type IsolatedPayment,
 } from '../utils/test-user-factory';
+
+/**
+ * Seed a throwaway user with one FAILED payment, open its result page signed in
+ * as that user, run `fn`, then tear everything down. A missing admin client
+ * throws (a skip here would hide a CI that lost its seeding credentials).
+ */
+async function withFailedPayment(
+  browser: Browser,
+  failure: { errorCode: string; errorMessage?: string; retryCount?: number },
+  fn: (page: Page, fixture: IsolatedPayment) => Promise<void>
+): Promise<void> {
+  const fixture = await seedIsolatedPayment({
+    prefix: 'iso-fail',
+    failure,
+  });
+  if (!fixture) {
+    throw new Error(
+      'seedIsolatedPayment returned null: no admin client or insert failed'
+    );
+  }
+  const opened = await openAuthedPage(browser, fixture.session);
+  try {
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    await opened.page.goto(
+      `${basePath}/payment-result?id=${fixture.intentId}`,
+      { waitUntil: 'domcontentloaded' }
+    );
+    await dismissCookieBanner(opened.page);
+    await fn(opened.page, fixture);
+  } finally {
+    await opened.close();
+    await deleteIsolatedPayment(fixture);
+  }
+}
 
 test.describe('Failed Payment Retry Logic', () => {
   test.describe.configure({ timeout: 60000 });
@@ -48,13 +87,18 @@ test.describe('Failed Payment Retry Logic', () => {
       .waitFor({ state: 'visible', timeout: 15000 });
   });
 
-  test.skip('should display retry button for failed payment', async ({
-    page,
+  test('should display retry button for failed payment', async ({
+    browser,
   }) => {
-    // Skip: Requires actual Stripe Checkout
-    test.skip(
-      true,
-      'Stripe API keys not configured - skipping Checkout flow test'
+    await withFailedPayment(
+      browser,
+      { errorCode: 'card_declined' },
+      async (page) => {
+        await expect(
+          page.getByRole('button', { name: 'Retry failed payment' })
+        ).toBeEnabled({ timeout: 30000 });
+        await expect(page.getByText('Attempt 1 of 3')).toBeVisible();
+      }
     );
   });
 
@@ -147,8 +191,8 @@ test.describe('Failed Payment Retry Logic', () => {
       fixture = await seedIsolatedSubscription('past_due', {
         provider: 'stripe',
       });
-      test.skip(!fixture, 'Admin client unavailable to seed subscription');
-      if (!fixture) return;
+      // A missing fixture fails the run; it never skips it.
+      if (!fixture) throw new Error('Could not seed a subscription');
 
       opened = await openSubscriptionsAs(browser, fixture);
       const { page } = opened;
@@ -178,32 +222,63 @@ test.describe('Failed Payment Retry Logic', () => {
     }
   });
 
-  test.skip('should mount SwitchProviderPanel when "Use a different payment method" is clicked', async ({
-    page,
+  test('should mount SwitchProviderPanel when "Use a different payment method" is clicked', async ({
+    browser,
   }) => {
-    // Skip: requires a real failed payment_results row with status='failed'
-    // to render the failed-state block, which can only be produced by an
-    // actual Stripe Checkout decline. Same gate as the other Stripe-Checkout
-    // skips in this file. The component path is exercised by:
-    //   src/components/payment/PaymentStatusDisplay/PaymentStatusDisplay.test.tsx
-    //     "clicking the switch button toggles the SwitchProviderPanel"
-    //   src/components/payment/SwitchProviderPanel/SwitchProviderPanel.test.tsx
-    //     "renders PaymentButton pre-filled from the parent intent"
-    test.skip(
-      true,
-      'Stripe API keys not configured - skipping Checkout-driven failure flow'
+    await withFailedPayment(
+      browser,
+      { errorCode: 'card_declined' },
+      async (page) => {
+        const toggle = page.getByRole('button', {
+          name: 'Use a different payment method',
+        });
+        await expect(toggle).toBeVisible({ timeout: 30000 });
+        await expect(page.locator('#switch-provider-panel')).toHaveCount(0);
+
+        await toggle.click();
+
+        await expect(page.locator('#switch-provider-panel')).toBeVisible();
+        // The same button now reads "Cancel" and closes the panel again.
+        await page.getByRole('button', { name: 'Cancel' }).click();
+        await expect(page.locator('#switch-provider-panel')).toHaveCount(0);
+      }
     );
   });
 
-  test.skip('should expand recovery list at retry_count >= 2', async ({
-    page,
+  test('should expand recovery list at retry_count >= 2', async ({
+    browser,
   }) => {
-    // Skip: same gate as above. The escalation logic is exercised by:
-    //   src/components/payment/PaymentStatusDisplay/PaymentStatusDisplay.test.tsx
-    //     "renders expanded recovery list at retry_count=2 (FR-016/017)"
-    test.skip(
-      true,
-      'Stripe API keys not configured - skipping Checkout-driven failure flow'
+    await withFailedPayment(
+      browser,
+      { errorCode: 'card_declined', retryCount: 2 },
+      async (page) => {
+        await expect(page.getByText('Attempt 3 of 3')).toBeVisible({
+          timeout: 30000,
+        });
+        // At two used retries the "Need more help?" list is open by default.
+        const help = page.locator('details', { hasText: 'Need more help?' });
+        await expect(help).toHaveAttribute('open', '');
+        await expect(
+          help.getByRole('link', { name: 'Contact support' })
+        ).toBeVisible();
+      }
+    );
+  });
+
+  test('should keep the recovery list collapsed before the second retry', async ({
+    browser,
+  }) => {
+    await withFailedPayment(
+      browser,
+      { errorCode: 'card_declined', retryCount: 1 },
+      async (page) => {
+        await expect(page.getByText('Attempt 2 of 3')).toBeVisible({
+          timeout: 30000,
+        });
+        const help = page.locator('details', { hasText: 'Need more help?' });
+        await expect(help).toBeVisible();
+        await expect(help).not.toHaveAttribute('open', '');
+      }
     );
   });
 
@@ -221,19 +296,47 @@ test.describe('Failed Payment Retry Logic', () => {
     });
   });
 
-  test.skip('should log error details for debugging', async ({ page }) => {
-    // Skip: Requires actual Stripe Checkout
-    test.skip(
-      true,
-      'Stripe API keys not configured - skipping Checkout flow test'
+  test('should show the transaction reference so a failure can be traced', async ({
+    browser,
+  }) => {
+    // Replaces the old "should log error details for debugging" placeholder:
+    // the page logs nothing about a failure, the debugging handle it gives a
+    // user is the transaction reference they quote to support.
+    await withFailedPayment(
+      browser,
+      { errorCode: 'card_declined' },
+      async (page) => {
+        await expect(page.getByText(/Reference:/)).toBeVisible({
+          timeout: 30000,
+        });
+        // seedIsolatedPayment stamps its transaction ids `iso_txn_…`. The page
+        // shows that value twice (as "Transaction ID" and as "Reference"), so
+        // take the first rather than let strict mode reject the pair.
+        await expect(
+          page.locator('code', { hasText: /^iso_txn_/ }).first()
+        ).toBeVisible();
+      }
     );
   });
 
-  test.skip('should display user-friendly error messages', async ({ page }) => {
-    // Skip: Requires actual Stripe Checkout
-    test.skip(
-      true,
-      'Stripe API keys not configured - skipping Checkout flow test'
+  test('should display user-friendly error messages', async ({ browser }) => {
+    await withFailedPayment(
+      browser,
+      {
+        errorCode: 'card_declined',
+        errorMessage: 'do_not_honor: raw provider text',
+      },
+      async (page) => {
+        await expect(page.getByText('Your card was declined.')).toBeVisible({
+          timeout: 30000,
+        });
+        await expect(
+          page.getByText(/contact your card issuer or try a different/i)
+        ).toBeVisible();
+        // The provider's own wording and code never reach the user (NFR-001).
+        await expect(page.getByText(/do_not_honor/)).toHaveCount(0);
+        await expect(page.getByText(/card_declined/)).toHaveCount(0);
+      }
     );
   });
 
