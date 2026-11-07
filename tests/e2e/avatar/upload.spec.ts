@@ -478,9 +478,6 @@ test.describe('Avatar Upload Flow', () => {
     page,
     context,
   }) => {
-    // Simulate network failure during upload
-    await context.setOffline(true);
-
     const uploadButton = page.getByRole('button', { name: /upload avatar/i });
     const fileChooserPromise = page.waitForEvent('filechooser');
     await uploadButton.click();
@@ -492,7 +489,13 @@ test.describe('Avatar Upload Flow', () => {
     );
     await fileChooser.setFiles(testImagePath);
 
-    await page.getByRole('button', { name: /save/i }).click();
+    // The network fails during the upload, not before the crop dialog opens.
+    // Going offline earlier kept WebKit from ever showing the Save button
+    // (the dialog never rendered), so the test timed out on the click.
+    const saveButton = page.getByRole('button', { name: /save/i });
+    await expect(saveButton).toBeVisible();
+    await context.setOffline(true);
+    await saveButton.click();
 
     // TODO: Network error handling not yet implemented (T050 enhancement)
     // For now, upload silently fails when offline - no error message shown
