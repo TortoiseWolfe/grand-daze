@@ -3,12 +3,14 @@ import { dismissCookieBanner } from '../utils/test-user-factory';
 import { readBlogPosts } from '../utils/blog-fixtures';
 
 /**
- * This spec asserts on the exact tables, quotes, code and `<details>` of three posts in
- * `public/blog/`. They began as template posts that `scripts/rebrand.sh` deletes in a
- * fork, so the spec used to fail on a 404 (#11) and then skipped. This project now owns
- * three posts written for these features. If you rename or remove one, the spec skips
- * with the missing slugs printed, so the lost coverage stays visible. A fork that writes
- * its own posts with these features should replace the fixtures below with its own.
+ * This spec asserts on the exact tables, quotes, code and `<details>` of three posts.
+ * Those posts are test fixtures kept in `tests/fixtures/blog/`; they are not on the live
+ * site. The two E2E workflows copy them into `public/blog/` before the build
+ * (`scripts/ci/apply-blog-fixtures.cjs`, only when E2E_BLOG_FIXTURES=true), so they exist
+ * in the E2E build and nowhere else. Run that script with the flag set to get them
+ * locally. If you rename or remove one, the spec skips with the missing slugs printed,
+ * so the lost coverage stays visible. A fork that writes its own posts with these
+ * features should replace the fixtures with its own.
  */
 const REQUIRED_SLUGS = [
   'review-without-rewriting',
@@ -19,7 +21,7 @@ const PRESENT_SLUGS = new Set(readBlogPosts().map((post) => post.slug));
 const MISSING_SLUGS = REQUIRED_SLUGS.filter((s) => !PRESENT_SLUGS.has(s));
 if (MISSING_SLUGS.length) {
   console.log(
-    `[blog-markdown-rendering] skipped: public/blog has no ${MISSING_SLUGS.join(', ')}`
+    `[blog-markdown-rendering] skipped: public/blog has no ${MISSING_SLUGS.join(', ')} (fixtures load when E2E_BLOG_FIXTURES=true)`
   );
 }
 
@@ -365,7 +367,7 @@ test.describe('Blog markdown rendering', () => {
     }) => {
       test.skip(
         MISSING_SLUGS.length > 0,
-        `public/blog has no ${MISSING_SLUGS.join(', ')} (the fixture posts this spec asserts on)`
+        `public/blog has no ${MISSING_SLUGS.join(', ')} (fixture posts from tests/fixtures/blog, loaded when E2E_BLOG_FIXTURES=true)`
       );
       await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
       await installClipboardCapture(page);

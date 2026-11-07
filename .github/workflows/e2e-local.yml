@@ -338,6 +338,11 @@ jobs:
       - name: Seed the E2E users
         run: pnpm tsx scripts/seed-test-users.ts
 
+      - name: Load the blog test fixtures (E2E build only)
+        run: node scripts/ci/apply-blog-fixtures.cjs
+        env:
+          E2E_BLOG_FIXTURES: 'true'
+
       - name: Build (root-served, pointed at the local stack)
         run: pnpm build
         env:

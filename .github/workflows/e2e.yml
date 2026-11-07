@@ -189,6 +189,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Load the blog test fixtures (E2E build only)
+        run: node scripts/ci/apply-blog-fixtures.cjs
+        env:
+          E2E_BLOG_FIXTURES: 'true'
+
       - name: Build application
         run: pnpm build
         env:
