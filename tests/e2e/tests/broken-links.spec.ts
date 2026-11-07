@@ -207,11 +207,22 @@ test.describe('Broken Links Detection', () => {
       return;
     }
 
+    // The 404 check is about the PAGE, not the #fragment on it. Playwright's
+    // goto() returns null when the target differs from the current URL only by
+    // its hash (a same-document jump), and null was being reported as "No
+    // response received" for perfectly good anchor links such as
+    // /docs/auth-and-sessions/#part-2. Visit the page without the fragment,
+    // and count it once however many anchors point at it.
+    const pageUrl = targetUrl.split('#')[0];
+    if (visitedUrls.has(pageUrl)) {
+      return;
+    }
+    visitedUrls.add(pageUrl);
     visitedUrls.add(targetUrl);
 
     try {
       // Navigate to the target URL (use domcontentloaded - faster and sufficient for 404 check)
-      const response = await page.goto(targetUrl, {
+      const response = await page.goto(pageUrl, {
         waitUntil: 'domcontentloaded',
         timeout: 15000,
       });
@@ -265,7 +276,7 @@ test.describe('Broken Links Detection', () => {
       }
 
       // If successful, crawl this page for more links
-      await crawlPage(page, targetUrl);
+      await crawlPage(page, pageUrl);
     } catch (error) {
       brokenLinks.push({
         sourceUrl,
