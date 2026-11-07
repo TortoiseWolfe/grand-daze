@@ -391,7 +391,14 @@ jobs:
       # MANDATORY' -- and CI was the one place that ignored it.
       - name: Run ${{ matrix.browser }}-${{ matrix.slice.project }} ${{ matrix.slice.shard }}
         run: |
-          npx serve out -l 3000 &
+          for SERVER in serve pyhttp; do
+          echo "=== DIAG SERVER $SERVER ==="
+          if [ "$SERVER" = serve ]; then
+            npx serve out -l 3000 &
+          else
+            (cd out && exec python3 -m http.server 3000) &
+          fi
+          SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 60000
           # JSON as well as line: parity is decided on COUNTS, and the line
           # reporter's summary is not machine-readable. `|| true` so a failing
@@ -446,8 +453,11 @@ jobs:
             scripts/ci/playwright-in-container.sh test \
               --project=${{ matrix.browser }}-${{ matrix.slice.project }} --shard=${{ matrix.slice.shard }} \
               $WORKERS_FLAG \
-              --grep-invert='@hosted' pricing-links-diag \
+              --grep-invert='@hosted' --grep 'diag: baseline' pricing-links-diag \
               --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
+            kill $SERVER_PID || true
+            sleep 3
+          done
         env:
           CI: 'true'
           SKIP_WEBSERVER: 'true'
