@@ -41,10 +41,13 @@ export default function PWAInstall() {
 
         logger.debug('Registering Service Worker', { path: swPath });
 
-        // Add timestamp to force update
-        const swUrl = `${swPath}?v=${Date.now()}`;
-
-        navigator.serviceWorker.register(swUrl).then(
+        // Register the same address on every load. The browser already
+        // re-fetches the worker script and installs it only when its bytes
+        // changed (and registration.update() below asks again), so a new
+        // ?v=<timestamp> address added nothing except a fresh install,
+        // skipWaiting and clients.claim on every page load, and a navigation
+        // that landed in that window can make WebKit throw an internal error.
+        navigator.serviceWorker.register(swPath).then(
           (registration) => {
             // Defensive: register() is spec'd to resolve with a
             // ServiceWorkerRegistration, but in some hosting setups
