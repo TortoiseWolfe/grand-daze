@@ -2688,7 +2688,7 @@ export async function seedIsolatedPayment(opts?: {
   prefix?: string;
   /**
    * Seed the FIRST payment as a failed one instead of a succeeded one — what
-   * `/payment-result?id=<resultId>` renders after a provider decline, which a
+   * `/payment-result?id=<intentId>` renders after a provider decline, which a
    * real Stripe Checkout is not needed to produce. `retryCount` sets how many
    * retries the parent intent has already used (the page shows "Attempt N of 3"
    * and expands the recovery list from 2). The intent is backdated past the

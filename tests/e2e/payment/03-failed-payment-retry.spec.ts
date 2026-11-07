@@ -44,7 +44,7 @@ async function withFailedPayment(
   try {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     await opened.page.goto(
-      `${basePath}/payment-result?id=${fixture.resultId}`,
+      `${basePath}/payment-result?id=${fixture.intentId}`,
       { waitUntil: 'domcontentloaded' }
     );
     await dismissCookieBanner(opened.page);

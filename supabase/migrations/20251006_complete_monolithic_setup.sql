@@ -77,9 +77,13 @@ CREATE INDEX IF NOT EXISTS idx_payment_intents_expires_at ON payment_intents(exp
 ALTER TABLE payment_intents
   ADD COLUMN IF NOT EXISTS idempotency_key TEXT;
 
+-- Plain (not partial) unique index: PostgREST's upsert sends
+-- ON CONFLICT (idempotency_key) with no WHERE clause, and Postgres only
+-- infers a partial index when the statement repeats its predicate. NULLs
+-- never collide in a unique index, so rows without a key stay unconstrained.
+DROP INDEX IF EXISTS idx_payment_intents_idempotency_key;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_payment_intents_idempotency_key
-  ON payment_intents(idempotency_key)
-  WHERE idempotency_key IS NOT NULL;
+  ON payment_intents(idempotency_key);
 
 -- Retry tracking (#43, B1). Each retry creates a new INSERT-only row that
 -- references its parent and bumps retry_count. The "Payment intents are

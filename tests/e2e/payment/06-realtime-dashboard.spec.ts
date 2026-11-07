@@ -141,7 +141,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
       opened = await openAuthedPage(browser, fixture.session);
       const { page } = opened;
       const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-      await page.goto(`${basePath}/payment-result?id=${fixture.resultId}`, {
+      await page.goto(`${basePath}/payment-result?id=${fixture.intentId}`, {
         waitUntil: 'domcontentloaded',
       });
       await dismissCookieBanner(page);
@@ -206,7 +206,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
       opened = await openAuthedPage(browser, fixture.session);
       const { page } = opened;
       const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-      await page.goto(`${basePath}/payment-result?id=${fixture.resultId}`, {
+      await page.goto(`${basePath}/payment-result?id=${fixture.intentId}`, {
         waitUntil: 'domcontentloaded',
       });
       await dismissCookieBanner(page);
