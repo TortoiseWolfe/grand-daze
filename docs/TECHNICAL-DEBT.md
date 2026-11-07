@@ -413,12 +413,11 @@ Tests now have proper `beforeAll` hooks that create connections AND conversation
 
 Environment-dependent tests.
 
-| File                             | Skips | Reason               |
-| -------------------------------- | ----- | -------------------- |
-| `auth/sign-up.spec.ts`           | 5     | Service key required |
-| `auth/protected-routes.spec.ts`  | 3     | Service key required |
-| `auth/rate-limiting.spec.ts`     | 2     | Email domain config  |
-| `auth/user-registration.spec.ts` | 1     | Full flow test       |
+| File                            | Skips | Reason               |
+| ------------------------------- | ----- | -------------------- |
+| `auth/sign-up.spec.ts`          | 5     | Service key required |
+| `auth/protected-routes.spec.ts` | 3     | Service key required |
+| `auth/rate-limiting.spec.ts`    | 2     | Email domain config  |
 
 **Unblock by**: Configure GitHub Secrets or make tests resilient
 

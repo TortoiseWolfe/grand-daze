@@ -96,3 +96,13 @@ Consequence for the counts, if anyone re-runs the local lane on `de0f7f0` itself
 tier-2 comparison in `e2e-local.yml` would see **1789** passed rather than 1807, with
 `skipped` and `flaky` unchanged. Tier 2 only fires on that SHA, so nothing reads this
 today — but the number is wrong the moment someone does.
+
+### 3 more entries are INTENTIONALLY missing: the deleted full-registration test
+
+`auth/user-registration.spec.ts` no longer contains "should complete full registration flow
+from sign-up to protected access" (it was `test.skip` on the baseline run too, so it never
+ran). The journey it described is covered by
+`tests/e2e/signup-mailer/signup-confirm.spec.ts`, which signs up through the form and
+confirms with the link from a real mail catcher. A local-lane report diffed against this
+baseline therefore shows 3 more `missing` entries (chromium, firefox and webkit-gen),
+alongside the 18 above. They are skipped-on-baseline, so they carry no lost coverage.

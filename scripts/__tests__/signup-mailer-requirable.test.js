@@ -146,6 +146,14 @@ describe('Signup Mailer can be a required check (#870)', () => {
         'pnpm-lock.yaml',
         'a dependency bump changes client behaviour with no source edit',
       ],
+      [
+        'tests/e2e/auth/user-registration.spec.ts',
+        'deleting or editing a sign-up test is a sign-up change; the suite covers the journey',
+      ],
+      [
+        'tests/e2e/security/brute-force.spec.ts',
+        "the suite's captcha-blocked project runs this spec",
+      ],
     ]) {
       assert.ok(needsSignupMailer([f]), `${f} must require the suite — ${why}`);
     }
