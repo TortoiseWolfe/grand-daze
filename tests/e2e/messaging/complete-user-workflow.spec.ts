@@ -18,7 +18,8 @@
  * - Retry button appears on the conversations error state (FR-005).
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConversation,
   deleteIsolatedConversation,

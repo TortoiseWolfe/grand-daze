@@ -27,7 +27,8 @@
  * WHAT THIS CANNOT CHECK: that the menu is USABLE at that width — only that nothing in
  * it crosses the viewport edge. Stated so a green run is not over-read.
  */
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { CRITICAL_MOBILE_WIDTHS } from '@/config/test-viewports';
 
 /** Controls that open a dropdown and are expected to exist at mobile widths. */

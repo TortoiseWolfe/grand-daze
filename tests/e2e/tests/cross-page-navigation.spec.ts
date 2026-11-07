@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { THEMES, THEME_COUNT } from '@/config/themes';
 import { waitForLoadStateOrGiveUp } from '../utils/settle';

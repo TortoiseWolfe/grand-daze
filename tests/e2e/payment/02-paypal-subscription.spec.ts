@@ -10,7 +10,8 @@
  * answer. They do not prove PayPal accepts the request; only a live sandbox can.
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
   getAdminClient,

@@ -15,7 +15,8 @@
  * conversation. See tests/e2e/utils/test-user-factory.ts and the #116 roadmap.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConversation,
   deleteIsolatedConversation,

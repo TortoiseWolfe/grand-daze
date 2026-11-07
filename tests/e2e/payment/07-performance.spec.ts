@@ -9,7 +9,8 @@
  * lives in 05-offline-queue + 06-realtime-dashboard), were removed.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 test.describe('Payment System Performance', () => {

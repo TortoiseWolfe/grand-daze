@@ -27,7 +27,8 @@
  * layout. Neither looks at where anything renders.
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures/test';
 import { waitForLoadStateOrGiveUp } from './utils/settle';
 
 /** Routes with at least two labelled fields in one form. */

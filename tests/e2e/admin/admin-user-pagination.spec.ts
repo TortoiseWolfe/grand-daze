@@ -15,7 +15,8 @@
  *     grand-daze-grand-daze-1 npx playwright test tests/e2e/admin/admin-user-pagination.spec.ts --project=chromium
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedAdmin,
   injectSessionIntoPage,

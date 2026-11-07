@@ -3,7 +3,8 @@
  * Tests payment consent modal and script loading behavior
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 test.describe('GDPR Payment Consent Flow', () => {

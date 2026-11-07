@@ -1,4 +1,5 @@
-import { test, expect, devices } from '@playwright/test';
+import { expect, devices } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { waitForLoadStateOrGiveUp } from '../utils/settle';
 import {
   blogPostPaths,

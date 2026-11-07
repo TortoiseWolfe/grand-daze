@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { THEME_COUNT } from '@/config/themes';
 import { THEMES as ALL_THEMES } from '@/config/themes';

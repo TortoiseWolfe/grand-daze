@@ -1,4 +1,5 @@
-import { test, expect, Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 /**

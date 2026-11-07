@@ -11,7 +11,8 @@
  * Cancel/resume lifecycle lives in 08-subscription-lifecycle.spec.ts.
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 /**

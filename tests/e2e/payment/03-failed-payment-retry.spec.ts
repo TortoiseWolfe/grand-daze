@@ -7,7 +7,8 @@
  * the database says happened, so the decline is inserted directly.
  */
 
-import { test, expect, type Browser, type Page } from '@playwright/test';
+import { expect, type Browser, type Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   dismissCookieBanner,
   waitForAuthenticatedState,

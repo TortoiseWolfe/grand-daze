@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { THEMES, HOUSE_THEMES } from '@/config/themes';
 
 /**

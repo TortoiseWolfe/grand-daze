@@ -31,7 +31,8 @@
 // which pin the same client-id shapes this file asserts from the browser. Do not delete
 // either without re-reading #725.
 
-import { test, expect, Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { test } from '../fixtures/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { assertValidOAuthClientId } from '../utils/oauth-validity';
 

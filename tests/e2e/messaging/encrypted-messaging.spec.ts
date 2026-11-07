@@ -16,7 +16,8 @@
  * 5. Verify private keys never sent to server
  */
 
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 import {
   seedIsolatedConversation,
   deleteIsolatedConversation,

@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures/test';
 import { HOUSE_THEMES } from '@/config/themes';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';

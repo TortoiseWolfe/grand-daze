@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/test';
 
 /**
  * Every buy button on /pricing must lead somewhere you can actually buy.

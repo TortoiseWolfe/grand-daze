@@ -28,7 +28,7 @@
  *
  * @module tests/e2e/utils/captcha-guard
  */
-import { test } from '@playwright/test';
+import { test } from '../fixtures/test';
 
 let cached: Promise<boolean> | null = null;
 
