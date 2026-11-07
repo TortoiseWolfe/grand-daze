@@ -1,11 +1,13 @@
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, posix } from 'node:path';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkHtml from 'remark-html';
 import { rehype } from 'rehype';
 import rehypeSlug from 'rehype-slug';
+import { detectedConfig } from '@/config/project-detected';
+import { DOCS } from './registry';
 
 /**
  * Markdown → HTML for `/docs` (#380).
@@ -59,7 +61,46 @@ export async function renderDoc(file: string): Promise<RenderedDoc> {
       .process(bare)
   );
 
-  return { html: withIds, headings: headingsFrom(withIds) };
+  const html = rewriteRepoLinks(withIds, file);
+  return { html, headings: headingsFrom(html) };
+}
+
+/**
+ * Make every relative link in a rendered document land somewhere real.
+ *
+ * The seven documents are written for GitHub, where `docs/FORKING.md` is a
+ * file next to the reader. On this site the same href resolves under
+ * `/docs/<slug>/`, where nothing is served, so each one 404'd (the link crawl
+ * in `broken-links.spec.ts` found 40 of them). A relative href is resolved
+ * from the SOURCE file's own folder and then either points at the matching
+ * `/docs/<slug>/` page (when that file is one we render) or at the file on
+ * GitHub. Anchors, absolute URLs and site-rooted paths are left alone.
+ */
+export function rewriteRepoLinks(
+  html: string,
+  sourceFile: string,
+  repoUrl: string = detectedConfig.projectUrl
+): string {
+  return html.replace(
+    /(<a\b[^>]*?\shref=")([^"]*)(")/gi,
+    (whole, open: string, href: string, close: string) => {
+      if (!href || href.startsWith('#') || href.startsWith('/')) return whole;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return whole;
+      const hashAt = href.indexOf('#');
+      const pathPart = hashAt < 0 ? href : href.slice(0, hashAt);
+      const fragment = hashAt < 0 ? '' : href.slice(hashAt);
+      if (!pathPart) return whole;
+      const target = posix.normalize(
+        posix.join(posix.dirname(sourceFile), pathPart)
+      );
+      if (target.startsWith('..')) return whole;
+      const served = DOCS.find((d) => d.file === target);
+      const dest = served
+        ? `/docs/${served.slug}/${fragment}`
+        : `${repoUrl}/blob/main/${target}${fragment}`;
+      return `${open}${dest}${close}`;
+    }
+  );
 }
 
 /**

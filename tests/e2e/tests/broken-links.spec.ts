@@ -207,11 +207,22 @@ test.describe('Broken Links Detection', () => {
       return;
     }
 
+    // The 404 check is about the PAGE, not the #fragment on it. Playwright's
+    // goto() returns null when the target differs from the current URL only by
+    // its hash (a same-document jump), and null was being reported as "No
+    // response received" for perfectly good anchor links such as
+    // /docs/auth-and-sessions/#part-2. Visit the page without the fragment,
+    // and count it once however many anchors point at it.
+    const pageUrl = targetUrl.split('#')[0];
+    if (visitedUrls.has(pageUrl)) {
+      return;
+    }
+    visitedUrls.add(pageUrl);
     visitedUrls.add(targetUrl);
 
     try {
       // Navigate to the target URL (use domcontentloaded - faster and sufficient for 404 check)
-      const response = await page.goto(targetUrl, {
+      const response = await page.goto(pageUrl, {
         waitUntil: 'domcontentloaded',
         timeout: 15000,
       });
@@ -265,7 +276,7 @@ test.describe('Broken Links Detection', () => {
       }
 
       // If successful, crawl this page for more links
-      await crawlPage(page, targetUrl);
+      await crawlPage(page, pageUrl);
     } catch (error) {
       brokenLinks.push({
         sourceUrl,
@@ -298,10 +309,12 @@ test.describe('Broken Links Detection', () => {
   }
 
   test('check all internal links for 404s', async ({ page, baseURL }) => {
-    test.skip(
-      !!process.env.CI,
-      'Crawl too slow in CI (120s timeout exceeded with authenticated storageState)'
-    );
+    // The crawl visits every internal page one after another, so it needs far
+    // more than the file's 120s default. It used to be skipped in CI for being
+    // too slow; a long limit lets it run, and the line at the end records how
+    // long it took so the CI log shows the real duration.
+    test.setTimeout(600000);
+    const crawlStartedAt = Date.now();
     baseUrl = baseURL || 'http://localhost:3000';
 
     // Start from homepage
@@ -338,6 +351,10 @@ test.describe('Broken Links Detection', () => {
         );
       }
     }
+
+    console.log(
+      `Internal link crawl: ${visitedUrls.size} pages visited in ${Date.now() - crawlStartedAt} ms`
+    );
 
     // Assert no broken links were found
     expect(brokenLinks).toEqual([]);

@@ -105,19 +105,18 @@ test.describe('Homepage Navigation', () => {
     await page.goBack();
   });
 
-  test('GitHub repository link opens in new tab', async ({ page, context }) => {
-    test.skip(!!process.env.CI, 'External tab popups unreliable in CI');
-
-    // Listen for new page/tab
-    const [newPage] = await Promise.all([
-      context.waitForEvent('page'),
-      page.click('text=View Source'),
-    ]);
-
-    // Check the new tab URL
-    await newPage.waitForLoadState();
-    expect(newPage.url()).toContain('github.com');
-    await newPage.close();
+  test('repository link asks for a new tab and keeps the opener out of reach', async ({
+    page,
+  }) => {
+    // Opening the popup is the browser's job and is unreliable to observe in an
+    // automatic run. What this app owns is the link itself: it must point at
+    // the project's repository (the URL is detected per fork, so only the
+    // scheme is fixed), ask for a new tab, and keep the opener out of reach.
+    const sourceLink = page.getByRole('link', { name: /clone the starter/i });
+    await expect(sourceLink).toHaveCount(1);
+    await expect(sourceLink).toHaveAttribute('href', /^https:\/\/[^/]+\/.+/);
+    await expect(sourceLink).toHaveAttribute('target', '_blank');
+    await expect(sourceLink).toHaveAttribute('rel', /noopener/);
   });
 
   test('skip to main content link works', async ({ page }) => {

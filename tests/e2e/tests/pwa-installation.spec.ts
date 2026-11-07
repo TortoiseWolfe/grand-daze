@@ -118,59 +118,60 @@ test.describe('PWA Installation', () => {
     expect(hasLargeIcon).toBe(true);
   });
 
-  test('app works offline after service worker activation', async ({
-    page,
-    context,
-    browserName,
-  }) => {
-    // WebKit does not support page.reload() while offline with service workers —
-    // triggers "WebKit encountered an internal error". Known Playwright limitation.
-    test.skip(
-      browserName === 'webkit',
-      'WebKit does not support offline reload with service workers'
-    );
-    // Check if service workers are supported
-    const swSupported = await page.evaluate(() => 'serviceWorker' in navigator);
+  // The suite blocks service workers everywhere else (playwright.config.ts:
+  // they intercept navigations and abort page.goto). This is the one place a
+  // worker is the thing under test, so it is allowed here and only here. Before
+  // this, the block meant the worker could never activate and the test below
+  // skipped itself on every run, so offline mode was never exercised.
+  test.describe('offline', () => {
+    test.use({ serviceWorkers: 'allow' });
 
-    // A bare `return` here reported as PASSED, so a browser with no service worker
-    // support looked like proof that offline mode works (#850). test.skip() reports
-    // what actually happened.
-    test.skip(
-      !swSupported,
-      'Service workers are not supported in this browser'
-    );
+    test('app works offline after service worker activation', async ({
+      page,
+      context,
+      browserName,
+    }) => {
+      // WebKit does not support page.reload() while offline with service workers —
+      // triggers "WebKit encountered an internal error". Known Playwright limitation.
+      test.skip(
+        browserName === 'webkit',
+        'WebKit does not support offline reload with service workers'
+      );
 
-    // Wait for service worker to be active (with timeout)
-    const swActive = await page.evaluate(async () => {
-      try {
-        // Race between serviceWorker.ready and a 5-second timeout
-        const timeoutPromise = new Promise<boolean>((resolve) =>
-          setTimeout(() => resolve(false), 5000)
+      // Every supported browser here has service workers, so a missing API is a
+      // failure, not a skip. A bare `return` reported as PASSED (#850) and a skip
+      // hid a worker that never started; an assertion says what happened.
+      const swSupported = await page.evaluate(
+        () => 'serviceWorker' in navigator
+      );
+      expect(swSupported).toBe(true);
+
+      // Wait for the worker to activate. 30s covers a cold CI runner; a worker
+      // that never activates now fails the test instead of skipping it.
+      const swActive = await page.evaluate(async () => {
+        const timeout = new Promise<boolean>((resolve) =>
+          setTimeout(() => resolve(false), 30000)
         );
-        const readyPromise = navigator.serviceWorker.ready.then(
+        const ready = navigator.serviceWorker.ready.then(
           (reg) => reg.active !== null
         );
-        return await Promise.race([readyPromise, timeoutPromise]);
-      } catch {
-        return false;
+        return await Promise.race([ready, timeout]);
+      });
+      expect(swActive, 'Service worker did not activate within 30s').toBe(true);
+
+      // Go offline
+      await context.setOffline(true);
+
+      // Try to navigate while offline
+      try {
+        await page.reload();
+        // Page should still load (from cache)
+        await expect(page.locator('h1').first()).toBeVisible({ timeout: 5000 });
+      } finally {
+        // Go back online
+        await context.setOffline(false);
       }
     });
-
-    // Same again: a service worker that never activated is a skip, not a pass.
-    test.skip(!swActive, 'Service worker did not activate within 5s');
-
-    // Go offline
-    await context.setOffline(true);
-
-    // Try to navigate while offline
-    try {
-      await page.reload();
-      // Page should still load (from cache)
-      await expect(page.locator('h1').first()).toBeVisible({ timeout: 5000 });
-    } finally {
-      // Go back online
-      await context.setOffline(false);
-    }
   });
 
   test('install button shows on supported browsers', async ({ page }) => {
