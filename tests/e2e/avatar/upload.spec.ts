@@ -480,6 +480,11 @@ test.describe('Avatar Upload Flow', () => {
     // Wait to ensure upload doesn't unexpectedly succeed
     await page.waitForTimeout(2000);
 
+    // The one thing that must hold while offline: no success message appeared.
+    // This is the test's hard assertion; the retry check below is optional
+    // because the retry button is not built yet.
+    await expect(page.getByText(/uploaded successfully/i)).not.toBeVisible();
+
     // Restore network
     await context.setOffline(false);
 
