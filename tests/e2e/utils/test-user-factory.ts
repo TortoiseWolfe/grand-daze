@@ -2693,6 +2693,15 @@ export interface IsolatedPayment {
  */
 export async function seedIsolatedPayment(opts?: {
   prefix?: string;
+  /**
+   * Seed the FIRST payment as a failed one instead of a succeeded one — what
+   * `/payment-result?id=<intentId>` renders after a provider decline, which a
+   * real Stripe Checkout is not needed to produce. `retryCount` sets how many
+   * retries the parent intent has already used (the page shows "Attempt N of 3"
+   * and expands the recovery list from 2). The intent is backdated past the
+   * 30 s cooling period so the Retry button is enabled.
+   */
+  failure?: { errorCode: string; errorMessage?: string; retryCount?: number };
 }): Promise<IsolatedPayment | null> {
   const admin = getAdminClient();
   if (!admin) return null;
@@ -2701,6 +2710,8 @@ export async function seedIsolatedPayment(opts?: {
   const prefix = opts?.prefix ?? 'iso-pay';
   const created = await createKeyedUserWithSession(prefix, 'isop', stamp);
   if (!created) return null;
+
+  const withFailure = Boolean(opts?.failure);
 
   // Parent intent (payment_results.intent_id → payment_intents, ON DELETE CASCADE).
   const insertIntent = async () => {
@@ -2712,6 +2723,13 @@ export async function seedIsolatedPayment(opts?: {
         currency: 'usd',
         type: 'one_time',
         customer_email: created.user.email,
+        ...(withFailure
+          ? {
+              retry_count: opts?.failure?.retryCount ?? 0,
+              // Past the 30 s cooling period, still inside the 24 h expiry.
+              created_at: new Date(Date.now() - 5 * 60_000).toISOString(),
+            }
+          : {}),
       })
       .select('id')
       .single();
@@ -2722,7 +2740,8 @@ export async function seedIsolatedPayment(opts?: {
 
   const insertResult = async (
     intentId: string,
-    status: 'succeeded' | 'failed' | 'refunded' | 'pending' = 'succeeded'
+    status: 'succeeded' | 'failed' | 'refunded' | 'pending' = 'succeeded',
+    failure?: { errorCode: string; errorMessage?: string }
   ) => {
     const { data, error } = await admin
       .from('payment_results')
@@ -2735,6 +2754,12 @@ export async function seedIsolatedPayment(opts?: {
         charged_currency: 'usd',
         webhook_verified: true,
         verification_method: 'webhook',
+        ...(failure
+          ? {
+              error_code: failure.errorCode,
+              error_message: failure.errorMessage ?? 'Seeded failure',
+            }
+          : {}),
       })
       .select('id')
       .single();
@@ -2747,7 +2772,9 @@ export async function seedIsolatedPayment(opts?: {
   let resultId: string;
   try {
     intentId = await insertIntent();
-    resultId = await insertResult(intentId);
+    resultId = withFailure
+      ? await insertResult(intentId, 'failed', opts?.failure)
+      : await insertResult(intentId);
   } catch (e) {
     console.warn('seedIsolatedPayment:', (e as Error).message);
     await deleteTestUser(created.user.id);
