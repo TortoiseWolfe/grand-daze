@@ -446,7 +446,7 @@ jobs:
             scripts/ci/playwright-in-container.sh test \
               --project=${{ matrix.browser }}-${{ matrix.slice.project }} --shard=${{ matrix.slice.shard }} \
               $WORKERS_FLAG \
-              --grep-invert='@hosted' theme-switching --repeat-each=120 --retries=0 \
+              --grep-invert='@hosted' sw-probe --repeat-each=5 --retries=0 \
               --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
         env:
           CI: 'true'
