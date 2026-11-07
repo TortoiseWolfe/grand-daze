@@ -279,7 +279,9 @@ test.describe('Group Chat E2E', () => {
         await handleReAuthModal(viewer.page, DEFAULT_TEST_PASSWORD).catch(
           () => {}
         );
-        if (/\/messages\?conversation=/.test(viewer.page.url())) {
+        // Static export: the app lands on /messages/?conversation=<id>, with a
+        // slash before the "?", so the pattern accepts both spellings (#37).
+        if (/\/messages\/?\?conversation=/.test(viewer.page.url())) {
           navigated = true;
           break;
         }
@@ -291,16 +293,12 @@ test.describe('Group Chat E2E', () => {
         }
         await viewer.page.waitForTimeout(1000);
       }
-      // If creation neither errored NOR navigated in 90s, the throwaway-user
-      // Argon2/ECDH key distribution was just too slow on this runner — skip
-      // rather than flake-fail. The encrypt/decrypt LOGIC is covered by the
-      // message-service unit tests; this spec guards the "group is reachable,
-      // no 'not yet implemented' throw, message round-trips" flow when the
-      // environment is fast enough to create the group.
-      test.skip(
-        !navigated,
-        'group creation did not complete within 90s on this runner (slow Argon2/ECDH)'
-      );
+      // Creation neither errored nor navigated in 90s: fail loudly. A skip
+      // here hid a wrong URL pattern in all three browsers (#37).
+      expect(
+        navigated,
+        'group creation did not reach /messages/?conversation=<id> within 90s'
+      ).toBe(true);
 
       await handleReAuthModal(viewer.page, DEFAULT_TEST_PASSWORD).catch(
         () => {}
