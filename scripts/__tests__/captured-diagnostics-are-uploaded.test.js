@@ -112,7 +112,10 @@ describe('the lane uploads the diagnostics it captures (#766)', () => {
 
   it('does not upload them on green runs', () => {
     // The other half. Uploading test-results/ unconditionally from 24 shards trades
-    // one waste for another, so the diagnostics step must be failure-gated.
+    // one waste for another, so the diagnostics step must be gated: on failure(), or
+    // on the directory actually holding files. The second form exists because a test
+    // that fails once and passes on retry leaves its evidence behind while the shard
+    // ends green, and failure() alone threw that evidence away (#41).
     const lane = fs.readFileSync(LOCAL_LANE, 'utf8');
     const cfg = fs.readFileSync(CONFIG, 'utf8');
     const dir = outputDir(cfg);
@@ -122,10 +125,10 @@ describe('the lane uploads the diagnostics it captures (#766)', () => {
 
     assert.match(
       block,
-      /if:\s*failure\(\)/,
-      `the step uploading '${dir}/' is not gated on failure(). On a green run that ` +
-        `directory is noise, and 24 shards uploading it every time is the waste this ` +
-        `fix was meant to avoid.`
+      /if:\s*(failure\(\)|always\(\)\s*&&\s*hashFiles\('test-results\/\*\*'\)\s*!=\s*'')/,
+      `the step uploading '${dir}/' is neither gated on failure() nor on the directory ` +
+        `holding files. On a green run that directory is noise, and 24 shards uploading ` +
+        `it every time is the waste this fix was meant to avoid.`
     );
   });
 

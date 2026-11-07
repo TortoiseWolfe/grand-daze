@@ -600,11 +600,16 @@ jobs:
       # run then discards. That cost real time on #757, where three occurrences were
       # diagnosed from log text because the trace it advertised did not exist.
       #
-      # ONLY ON FAILURE, deliberately. On a green run this directory is noise, and
-      # uploading it from every selected shard would trade one waste for another. The
-      # artifact is worth having exactly when someone is about to go looking for it.
+      # NOT ONLY ON FAILURE (#41). A test that fails once and passes on retry leaves its
+      # screenshot, video and trace here while the shard still ends green, so
+      # `if: failure()` threw away exactly the evidence of the flaky attempts: four
+      # retry-only passes in run 42394648041 could only be diagnosed from log text.
+      # A shard with no retried test leaves this directory empty (Playwright deletes
+      # the output of tests that pass first time), so the step runs only when the
+      # directory holds something: a clean shard uploads nothing, a flaky or failing
+      # one uploads its evidence.
       - name: Upload failure diagnostics
-        if: failure()
+        if: always() && hashFiles('test-results/**') != ''
         uses: actions/upload-artifact@v6
         with:
           name: e2e-local-diagnostics-${{ steps.slug.outputs.id }}
