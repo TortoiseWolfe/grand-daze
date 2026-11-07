@@ -248,6 +248,23 @@ test.describe('Landmarks and skip link', () => {
     // not the first tab stop bypasses nothing, and one that only scrolls leaves
     // focus in the nav so the next Tab walks the whole menu again.
     await page.goto('/docs', { waitUntil: 'domcontentloaded' });
+
+    // Wait for React to hydrate before touching the keyboard. Without this the
+    // Tab and Enter land at DOMContentLoaded (713 ms into the test): the anchor
+    // jump focuses #main-content, hydration then replaces that node, and focus
+    // falls back to <body> — so the read below sees '' instead of the id (#41).
+    // React stamps every DOM node it owns with a `__reactFiber$…` key when it
+    // hydrates it, which is the one signal that the node the skip link points
+    // at is the final one. (`body[data-theme]` is not usable: it is set before
+    // paint, long before hydration — see mobile-touch-targets.spec.ts.)
+    await page.waitForFunction(() => {
+      const target = document.getElementById('main-content');
+      return (
+        target !== null &&
+        Object.keys(target).some((key) => key.startsWith('__reactFiber'))
+      );
+    });
+
     await page.keyboard.press('Tab');
 
     const focused = page.locator('a[data-skip-link]');
