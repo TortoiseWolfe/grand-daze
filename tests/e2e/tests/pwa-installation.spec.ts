@@ -131,6 +131,10 @@ test.describe('PWA Installation', () => {
       context,
       browserName,
     }) => {
+      // The wait below can use 30s on a cold runner, so the default 30s test
+      // budget would expire before the offline reload even starts.
+      test.setTimeout(75000);
+
       // WebKit does not support page.reload() while offline with service workers —
       // triggers "WebKit encountered an internal error". Known Playwright limitation.
       test.skip(
@@ -146,18 +150,42 @@ test.describe('PWA Installation', () => {
       );
       expect(swSupported).toBe(true);
 
-      // Wait for the worker to activate. 30s covers a cold CI runner; a worker
-      // that never activates now fails the test instead of skipping it.
-      const swActive = await page.evaluate(async () => {
-        const timeout = new Promise<boolean>((resolve) =>
-          setTimeout(() => resolve(false), 30000)
-        );
-        const ready = navigator.serviceWorker.ready.then(
-          (reg) => reg.active !== null
-        );
-        return await Promise.race([ready, timeout]);
+      // `serviceWorker.ready` only says a worker is active, not that THIS page
+      // is controlled by it or that its precache holds the page yet. Going
+      // offline between those moments sends the reload to a network that is
+      // gone, and it hangs until the test times out (#44). So wait for all
+      // three: an active worker, control of this page, and the page in the
+      // cache. 30s covers a cold CI runner; a worker that never gets there
+      // fails the test with the state it reached, instead of skipping it.
+      const swState = await page.evaluate(async () => {
+        const deadline = Date.now() + 30000;
+        const pause = (ms: number) =>
+          new Promise<void>((resolve) => setTimeout(resolve, ms));
+        const look = async () => {
+          const registration = await navigator.serviceWorker.getRegistration();
+          return {
+            active: registration?.active != null,
+            controlled: navigator.serviceWorker.controller != null,
+            cached:
+              (await caches.match(window.location.href, {
+                ignoreSearch: true,
+              })) !== undefined,
+          };
+        };
+        let state = await look();
+        while (
+          !(state.active && state.controlled && state.cached) &&
+          Date.now() < deadline
+        ) {
+          await pause(250);
+          state = await look();
+        }
+        return state;
       });
-      expect(swActive, 'Service worker did not activate within 30s').toBe(true);
+      expect(
+        swState,
+        'Service worker was not active, in control of the page and holding it in its cache within 30s'
+      ).toEqual({ active: true, controlled: true, cached: true });
 
       // Go offline
       await context.setOffline(true);
