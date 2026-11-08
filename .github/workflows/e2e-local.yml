@@ -448,7 +448,7 @@ jobs:
               --project=${{ matrix.browser }}-${{ matrix.slice.project }} --shard=${{ matrix.slice.shard }} \
               $WORKERS_FLAG \
               --grep-invert='@hosted' \
-              --grep='skip link is the first thing|probe-skiplink' --repeat-each=100 --retries=0 \
+              --grep='app works offline after service worker activation' --repeat-each=100 --retries=0 --trace=retain-on-failure \
               --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
         env:
           CI: 'true'
