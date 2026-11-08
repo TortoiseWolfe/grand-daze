@@ -13,8 +13,9 @@ import sharp from 'sharp';
  * fails if the street level is too dark or too uniform to be the city.
  *
  * WebGL honesty (see tests/e2e/twin-glass-contrast.spec.ts + #288): headless
- * Chromium needs software GL (playwright.visual.config.ts forces SwiftShader). If
- * WebGL is still unavailable we SKIP rather than false-green on a blank canvas.
+ * Chromium draws with software GL (SwiftShader), which is slow but accurate, so this
+ * guard runs there. If WebGL is unavailable altogether we SKIP rather than
+ * false-green on a blank canvas.
  *
  * Run: docker exec sh-cod-grand-daze-1 pnpm exec playwright test \
  *        --config playwright.visual.config.ts
@@ -107,36 +108,32 @@ test.describe('walk scene is visible (not a dark void / empty frame)', () => {
   test('street level renders lit geometry', async ({ page }) => {
     await openWalk(page);
 
-    // Gate on a REAL GPU. Software renderers (SwiftShader / llvmpipe — headless
-    // CI and this dev container) can't render the heavy R3F scene, so a pixel
-    // guard there cannot tell "the app is dark" from "the env can't draw" (the
-    // #288 limitation the twin-contrast specs document). Skip cleanly rather than
-    // false-fail; the guard still runs on real-GPU dev machines / GPU CI runners.
-    const gpu = await page.evaluate(() => {
+    // Software WebGL is fine here. This test used to skip on SwiftShader and llvmpipe,
+    // on the belief that a software renderer cannot draw the scene (#288). It can:
+    // under SwiftShader the walk engages after about 47 s and the frame measures a
+    // mean of 0.18 and a variance of 0.073 against floors of 0.1 and 0.0015. What the
+    // test needs is time, not a GPU, so the only gate left is "is there WebGL at all".
+    const hasGl = await page.evaluate(() => {
       const c = document.createElement('canvas');
-      const gl = (c.getContext('webgl2') ||
-        c.getContext('webgl')) as WebGLRenderingContext | null;
-      if (!gl) return { webgl: false, renderer: '' };
-      const ext = gl.getExtension('WEBGL_debug_renderer_info');
-      const renderer = ext
-        ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL))
-        : '';
-      return { webgl: true, renderer };
+      return !!(c.getContext('webgl2') || c.getContext('webgl'));
     });
-    test.skip(!gpu.webgl, 'no WebGL (see #288) — the visual guard needs a GPU');
-    test.skip(
-      /swiftshader|llvmpipe|softwarerasterizer|swrast|software/i.test(
-        gpu.renderer
-      ),
-      `software WebGL (${gpu.renderer}) — the visual guard needs a real GPU (see #288); it runs on dev machines / GPU CI`
-    );
+    test.skip(!hasGl, 'no WebGL in this browser (see #288)');
+    // Walk takes about 47 s to engage under software GL, so this test gets more than the
+    // file-wide 150 s: 30 s to open, up to 120 s of waiting, an 8 s settle and the shot.
+    test.setTimeout(240_000);
 
-    // Real GPU: wait for Walk to activate, then settle the first frames. Hard wait —
+    // Wait for Walk to activate, then settle the first frames. Hard wait —
     // a dark-void check against a scene that never entered walk measures the wrong frame.
-    await page.locator('[data-stance]').first().waitFor({ timeout: 25_000 });
+    await page.locator('[data-stance]').first().waitFor({ timeout: 120_000 });
     await page.waitForTimeout(8000);
 
-    const shot = await page.locator('canvas').first().screenshot();
+    // Software WebGL redraws the canvas too slowly for Playwright's "wait for the element to be
+    // stable" check (two frames with the same box): in CI it ran out of the 15 s action budget
+    // at that step on all three tries (run 42436527737). Measure the box once and capture that
+    // rectangle instead, with a longer wait for the capture itself.
+    const box = await page.locator('canvas').first().boundingBox();
+    expect(box, 'the walk canvas has no layout box to capture').not.toBeNull();
+    const shot = await page.screenshot({ clip: box!, timeout: 60_000 });
 
     // Downsample to a coarse grid and measure mean luminance + inter-tile
     // variance. sharp decodes the PNG the compositor produced.

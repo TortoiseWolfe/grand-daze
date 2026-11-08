@@ -40,6 +40,10 @@ import { FOOTER_LINKS } from '@/config/footer-links';
 // unlike 'Tour', which only renders when the site manifest has tour stops.
 const DIORAMA_SIGNAL = 'Miniature';
 
+/** Wait for a click or a state change while a software-rendered canvas blocks the main thread
+ *  (CI has no GPU). The 15 s action timeout was not enough on the runner (#719). */
+const SOFTWARE_GL_CLICK_MS = 60_000;
+
 async function webglAvailable(page: Page): Promise<boolean> {
   return page.evaluate(() => {
     const canvas = document.createElement('canvas');
@@ -47,45 +51,6 @@ async function webglAvailable(page: Page): Promise<boolean> {
       canvas.getContext('webgl2') ||
       canvas.getContext('webgl') ||
       canvas.getContext('experimental-webgl')
-    );
-  });
-}
-
-/**
- * Is WebGL backed by real hardware, or by a software rasteriser? (#716/#719)
- *
- * "WebGL exists" and "WebGL is fast enough to assert an interaction against" are different
- * claims, and conflating them is what kept this spec red for eight consecutive runs on
- * `main`. GitHub-hosted runners have no GPU, so Chromium falls back to SwiftShader, and a
- * CDP category trace of `/twins/chatt/?ortho` shows where the time goes:
- *
- *   GLES2::ReadPixels                        10,702 ms
- *   CommandBufferHelper::Finish              10,909 ms
- *   CommandBufferProxyImpl::WaitForGetOffset 10,906 ms
- *
- * Compositing a WebGL canvas without a GPU goes through a synchronous GPU->CPU readback, so
- * the main thread stalls for seconds and a click cannot be processed. Nothing in `src/`
- * calls `readPixels`; three application-level fixes were tried against it and moved nothing
- * (see #719). The UI is fine — verified by hand on hardware: the overflow opens, aria flips,
- * Top-down appears.
- *
- * So the timing-sensitive half of this spec is skipped on software renderers, LOUDLY, while
- * everything measurable there still runs. Raising `actionTimeout` instead was rejected: it
- * would blind every other test in the suite to make one route pass.
- */
-async function hardwareAccelerated(page: Page): Promise<boolean> {
-  return page.evaluate(() => {
-    const canvas = document.createElement('canvas');
-    const gl = (canvas.getContext('webgl2') ||
-      canvas.getContext('webgl')) as WebGLRenderingContext | null;
-    if (!gl) return false;
-    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-    if (!dbg) return true; // cannot tell; assume real and let the test run
-    const renderer = String(
-      gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) ?? ''
-    ).toLowerCase();
-    return !/swiftshader|llvmpipe|softpipe|software|microsoft basic render/.test(
-      renderer
     );
   });
 }
@@ -230,12 +195,14 @@ test.describe('/twins/[slug]?diorama — the R3F exhibit (opt-in since #292)', (
       !(await webglAvailable(page)),
       'WebGL unavailable in this browser/runner; the twin route has no fallback panel'
     );
-    test.skip(
-      !(await hardwareAccelerated(page)),
-      'Software-rendered WebGL (SwiftShader/llvmpipe): compositing this canvas goes through ' +
-        'a synchronous GPU readback — traced at 10.7s of ReadPixels — so the main thread ' +
-        'cannot service a click. The UI is verified working on hardware; see #719.'
-    );
+    // Software WebGL is not a reason to skip (#719). Compositing this canvas without a
+    // GPU does stall the main thread on a synchronous readback (traced at 10.7 s of
+    // ReadPixels), but under SwiftShader the dock still appears in about 2 s, the
+    // overflow opens in about 1.2 s and the whole round trip finishes in about 22 s,
+    // well inside the test.slow() budget above. In CI the same stall outlasted the 15 s
+    // action timeout: the click on "More controls" hung in "performing click action" on all
+    // three tries (run 42436527737). So the clicks below get their own 60 s, which is the
+    // cost of one blocked main thread on a software renderer, not a global change.
 
     await expect(
       page.getByRole('button', { name: DIORAMA_SIGNAL })
@@ -249,9 +216,11 @@ test.describe('/twins/[slug]?diorama — the R3F exhibit (opt-in since #292)', (
     const overflow = page.getByRole('button', { name: 'More controls' });
     const openOverflow = async () => {
       if ((await overflow.getAttribute('aria-expanded')) !== 'true') {
-        await overflow.click();
+        await overflow.click({ timeout: SOFTWARE_GL_CLICK_MS });
       }
-      await expect(overflow).toHaveAttribute('aria-expanded', 'true');
+      await expect(overflow).toHaveAttribute('aria-expanded', 'true', {
+        timeout: SOFTWARE_GL_CLICK_MS,
+      });
     };
     await openOverflow();
     await expect(page.getByRole('button', { name: 'Top-down' })).toBeVisible();
@@ -262,10 +231,14 @@ test.describe('/twins/[slug]?diorama — the R3F exhibit (opt-in since #292)', (
     // as console errors below. Miniature is in the primary bar; clicking it
     // also dismisses the overflow (click-outside), so re-enter Top-down by
     // reopening the overflow, waited on its expanded state.
-    await page.getByRole('button', { name: 'Miniature' }).click();
+    await page
+      .getByRole('button', { name: 'Miniature' })
+      .click({ timeout: SOFTWARE_GL_CLICK_MS });
     await expect(overflow).toHaveAttribute('aria-expanded', 'false');
     await openOverflow();
-    await page.getByRole('button', { name: 'Top-down' }).click();
+    await page
+      .getByRole('button', { name: 'Top-down' })
+      .click({ timeout: SOFTWARE_GL_CLICK_MS });
     await page.waitForTimeout(1500);
     const relevant = errors.filter((e) => {
       const lower = e.toLowerCase();
