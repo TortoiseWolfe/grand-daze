@@ -619,6 +619,13 @@ export async function handleReAuthModal(
 ): Promise<boolean> {
   const testPassword = password || getDefaultTestPassword();
 
+  // CI runs Firefox headed on a bare virtual display with no window manager, and
+  // tests open the viewer and the partner at the same moment, each in its own
+  // window. A window that is not frontmost can leave Playwright's click waiting
+  // 15 s on "stable" or on dispatch (#41), so make this one the active window
+  // before the first click on the unlock dialog.
+  await page.bringToFront();
+
   // Check if the CURRENT user's private key is in IndexedDB. After the
   // batch 7c migration, keys live in MessagingDB.messaging_private_keys
   // as non-extractable CryptoKey objects (no longer in localStorage).
@@ -900,7 +907,24 @@ export async function handleReAuthModal(
     await passwordInput.fill(testPassword);
 
     const submitBtn = modal.locator('button[type="submit"]').first();
-    await submitBtn.click();
+    // The unlock click sometimes stalls 15 s in headed Firefox on a bare display
+    // (#41). Whether the window has focus when it stalls is still unproven, so
+    // record it: the line below goes to the job log whether the click works or not.
+    const windowState = () =>
+      page
+        .evaluate(
+          () => `hasFocus=${document.hasFocus()} ${document.visibilityState}`
+        )
+        .catch(() => 'window state unreadable');
+    const stateBefore = await windowState();
+    try {
+      await submitBtn.click();
+    } catch (error) {
+      console.log(
+        `[handleReAuthModal] ✗ Unlock click failed on attempt ${attempt}/${MAX_ATTEMPTS}. Before: ${stateBefore}. After: ${await windowState()}`
+      );
+      throw error;
+    }
 
     // Wait for modal to close. Argon2id key derivation is CPU-intensive
     // and under 24-shard CI load with WebCrypto thread contention can take
