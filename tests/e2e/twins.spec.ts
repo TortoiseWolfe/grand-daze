@@ -40,6 +40,10 @@ import { FOOTER_LINKS } from '@/config/footer-links';
 // unlike 'Tour', which only renders when the site manifest has tour stops.
 const DIORAMA_SIGNAL = 'Miniature';
 
+/** Wait for a click or a state change while a software-rendered canvas blocks the main thread
+ *  (CI has no GPU). The 15 s action timeout was not enough on the runner (#719). */
+const SOFTWARE_GL_CLICK_MS = 60_000;
+
 async function webglAvailable(page: Page): Promise<boolean> {
   return page.evaluate(() => {
     const canvas = document.createElement('canvas');
@@ -195,7 +199,10 @@ test.describe('/twins/[slug]?diorama — the R3F exhibit (opt-in since #292)', (
     // GPU does stall the main thread on a synchronous readback (traced at 10.7 s of
     // ReadPixels), but under SwiftShader the dock still appears in about 2 s, the
     // overflow opens in about 1.2 s and the whole round trip finishes in about 22 s,
-    // well inside the 15 s action timeout and the test.slow() budget above.
+    // well inside the test.slow() budget above. In CI the same stall outlasted the 15 s
+    // action timeout: the click on "More controls" hung in "performing click action" on all
+    // three tries (run 42436527737). So the clicks below get their own 60 s, which is the
+    // cost of one blocked main thread on a software renderer, not a global change.
 
     await expect(
       page.getByRole('button', { name: DIORAMA_SIGNAL })
@@ -209,9 +216,11 @@ test.describe('/twins/[slug]?diorama — the R3F exhibit (opt-in since #292)', (
     const overflow = page.getByRole('button', { name: 'More controls' });
     const openOverflow = async () => {
       if ((await overflow.getAttribute('aria-expanded')) !== 'true') {
-        await overflow.click();
+        await overflow.click({ timeout: SOFTWARE_GL_CLICK_MS });
       }
-      await expect(overflow).toHaveAttribute('aria-expanded', 'true');
+      await expect(overflow).toHaveAttribute('aria-expanded', 'true', {
+        timeout: SOFTWARE_GL_CLICK_MS,
+      });
     };
     await openOverflow();
     await expect(page.getByRole('button', { name: 'Top-down' })).toBeVisible();
@@ -222,10 +231,14 @@ test.describe('/twins/[slug]?diorama — the R3F exhibit (opt-in since #292)', (
     // as console errors below. Miniature is in the primary bar; clicking it
     // also dismisses the overflow (click-outside), so re-enter Top-down by
     // reopening the overflow, waited on its expanded state.
-    await page.getByRole('button', { name: 'Miniature' }).click();
+    await page
+      .getByRole('button', { name: 'Miniature' })
+      .click({ timeout: SOFTWARE_GL_CLICK_MS });
     await expect(overflow).toHaveAttribute('aria-expanded', 'false');
     await openOverflow();
-    await page.getByRole('button', { name: 'Top-down' }).click();
+    await page
+      .getByRole('button', { name: 'Top-down' })
+      .click({ timeout: SOFTWARE_GL_CLICK_MS });
     await page.waitForTimeout(1500);
     const relevant = errors.filter((e) => {
       const lower = e.toLowerCase();

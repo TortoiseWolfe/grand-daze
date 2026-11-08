@@ -127,7 +127,13 @@ test.describe('walk scene is visible (not a dark void / empty frame)', () => {
     await page.locator('[data-stance]').first().waitFor({ timeout: 120_000 });
     await page.waitForTimeout(8000);
 
-    const shot = await page.locator('canvas').first().screenshot();
+    // Software WebGL redraws the canvas too slowly for Playwright's "wait for the element to be
+    // stable" check (two frames with the same box): in CI it ran out of the 15 s action budget
+    // at that step on all three tries (run 42436527737). Measure the box once and capture that
+    // rectangle instead, with a longer wait for the capture itself.
+    const box = await page.locator('canvas').first().boundingBox();
+    expect(box, 'the walk canvas has no layout box to capture').not.toBeNull();
+    const shot = await page.screenshot({ clip: box!, timeout: 60_000 });
 
     // Downsample to a coarse grid and measure mean luminance + inter-tile
     // variance. sharp decodes the PNG the compositor produced.
