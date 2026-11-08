@@ -440,8 +440,12 @@ test.describe('Session Persistence E2E', () => {
       }
     });
 
-    // Try to access protected route
-    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
+    // Try to access protected route. Wait only for the first response, not for
+    // domcontentloaded: the app may redirect to /sign-in from the client before
+    // the page finishes loading, and WebKit then aborts the load and makes
+    // goto() throw "WebKit encountered an internal error" even though the
+    // redirect is an outcome this test accepts.
+    await page.goto('/profile', { waitUntil: 'commit' });
 
     // Should redirect to sign-in when refresh fails
     // Note: Behavior depends on auth implementation
