@@ -247,8 +247,12 @@ test.describe('Protected Routes E2E', () => {
       sessionStorage.clear();
     });
 
-    // Try to access protected route
-    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
+    // Try to access protected route. Wait only for the first response, not for
+    // domcontentloaded: with no stored session the app redirects to /sign-in
+    // from the client, and in WebKit that redirect can start before the page
+    // finishes loading, which makes goto() throw "interrupted by another
+    // navigation" even though the redirect is exactly what this test expects.
+    await page.goto('/profile', { waitUntil: 'commit' });
 
     // Verify redirected to sign-in (may include returnUrl query param)
     await page.waitForURL(/\/sign-in/);
