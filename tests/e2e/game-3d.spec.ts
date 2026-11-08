@@ -423,15 +423,12 @@ test.describe('/game/3d — SC-004: Multi-modality camera input', () => {
       .not.toBe(initial);
   });
 
-  test('touch drag changes camera position', async ({ page, browserName }) => {
+  test('touch drag changes camera position', async ({ page }) => {
     // Playwright's touch emulation requires a touch-enabled context.
-    // We dispatch a touchstart/touchmove/touchend sequence directly because
-    // the default page context isn't touch-enabled in the test matrix.
-    test.skip(
-      browserName === 'firefox',
-      'Firefox does not synthesize touch events from page.dispatchEvent reliably; mobile is covered by the dedicated mobile viewport test (US-5).'
-    );
-
+    // We dispatch a pointerdown/pointermove/pointerup sequence (pointerType
+    // 'touch') on the canvas directly because the default page context isn't
+    // touch-enabled in the test matrix. This passed 20 of 20 repeats on
+    // Firefox in CI, so it runs on every browser.
     await page.goto('/game/3d');
     await expect(page.locator('[data-webgl-ok]').first()).toBeVisible({
       timeout: 5000,
