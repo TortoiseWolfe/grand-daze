@@ -284,6 +284,10 @@ export default defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         headless: FIREFOX_HEADLESS,
+        // The stalled unlock click (#41) passes on retry, and the default
+        // 'on-first-retry' only records the retry, which is the run that works.
+        // Record the first attempt too, and keep it only if that attempt fails.
+        trace: 'retain-on-first-failure',
         storageState: './tests/e2e/fixtures/storage-state-auth.json',
       },
     },
