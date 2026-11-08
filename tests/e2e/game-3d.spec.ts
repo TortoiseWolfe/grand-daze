@@ -427,10 +427,6 @@ test.describe('/game/3d — SC-004: Multi-modality camera input', () => {
     // Playwright's touch emulation requires a touch-enabled context.
     // We dispatch a touchstart/touchmove/touchend sequence directly because
     // the default page context isn't touch-enabled in the test matrix.
-    test.skip(
-      browserName === 'firefox',
-      'Firefox does not synthesize touch events from page.dispatchEvent reliably; mobile is covered by the dedicated mobile viewport test (US-5).'
-    );
 
     await page.goto('/game/3d');
     await expect(page.locator('[data-webgl-ok]').first()).toBeVisible({

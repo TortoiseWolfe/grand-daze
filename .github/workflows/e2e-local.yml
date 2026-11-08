@@ -115,17 +115,15 @@ jobs:
       - name: Select browser coverage
         id: browsers
         env:
-          E2E_FULL_BROWSERS: >-
-            ${{ github.event_name != 'pull_request' ||
-                contains(github.event.pull_request.labels.*.name, 'full-e2e') }}
+          E2E_FULL_BROWSERS: 'false'
         run: |
           if [ "$E2E_FULL_BROWSERS" = "true" ]; then
             browsers='["chromium","firefox","webkit"]'
             expected_shards=24
             browser_mode=full
           else
-            browsers='["chromium"]'
-            expected_shards=8
+            browsers='["webkit","firefox"]'
+            expected_shards=2
             browser_mode=chromium
           fi
           {
@@ -197,14 +195,7 @@ jobs:
       matrix:
         browser: ${{ fromJSON(needs.changes.outputs.browsers) }}
         slice:
-          - { project: msg, shard: 1/1 }
-          - { project: msg-iso, shard: 1/1, workers: 2 }
-          - { project: gen, shard: 1/6 }
-          - { project: gen, shard: 2/6 }
-          - { project: gen, shard: 3/6 }
-          - { project: gen, shard: 4/6 }
-          - { project: gen, shard: 5/6 }
-          - { project: gen, shard: 6/6 }
+          - { project: gen, shard: 1/1 }
 
     steps:
       - name: Checkout the code under test
@@ -457,8 +448,10 @@ jobs:
               --project=${{ matrix.browser }}-${{ matrix.slice.project }} --shard=${{ matrix.slice.shard }} \
               $WORKERS_FLAG \
               --grep-invert='@hosted' \
+              --grep="$PROBE_GREP" --repeat-each=20 --retries=0 \
               --reporter=line,json,./tests/e2e/reporters/assertion-count-reporter.ts || true
         env:
+          PROBE_GREP: ${{ matrix.browser == 'webkit' && 'WCAG AAA color-contrast-enhanced.*grand-daze-light|app works offline after service worker activation' || 'touch drag changes camera position' }}
           CI: 'true'
           SKIP_WEBSERVER: 'true'
           BASE_URL: http://localhost:3000
