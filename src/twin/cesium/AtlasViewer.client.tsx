@@ -572,7 +572,7 @@ export default function AtlasViewer({ slug }: { slug: string }) {
   // interaction, not just the globe's, including things nowhere near this
   // component: CookieConsent's "Accept All" (src/app/layout.tsx renders it as
   // a sibling of the twin route, fixed z-[60]), GlobalNav, PWAInstall
-  // (fixed, floating over the globe), CountdownBanner, SetupBanner. A
+  // (fixed, floating over the globe), SetupBanner. A
   // first-time visitor — exactly who the auto-playing tour and the OG card
   // exist to hook — loses the tour the moment they click the cookie banner
   // that's already on screen. The spec asks for "globe interaction — drag,

@@ -21,7 +21,6 @@ import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { GroupKeyService } from '@/services/messaging/group-key-service';
 import { isBackendCaptchaProtected } from './captcha-guard';
 import { waitForLoadStateOrGiveUp } from './settle';
-import { suppressSeasonalBanner } from './seasonal-banner';
 
 /**
  * Key used for PROGRAMMATIC sign-ins in test setup.
@@ -532,7 +531,6 @@ export function getDefaultTestPassword(): string {
  *
  * Dismisses:
  * - Cookie consent banner ("Accept All" button)
- * - Promotional countdown banner ("Dismiss countdown banner" button)
  *
  * @param page - Playwright page object
  * @param options - Configuration options
@@ -577,19 +575,6 @@ export async function dismissCookieBanner(
         },
         { timeout: 3000 }
       );
-    }
-  } catch {
-    // Banner not present or already dismissed - continue silently
-  }
-
-  // Dismiss promotional countdown banner using force click
-  try {
-    const countdownDismiss = page.getByRole('button', {
-      name: /dismiss countdown banner/i,
-    });
-    if (await countdownDismiss.isVisible({ timeout }).catch(() => false)) {
-      await countdownDismiss.click({ force: true });
-      await page.waitForTimeout(500);
     }
   } catch {
     // Banner not present or already dismissed - continue silently
@@ -1778,8 +1763,6 @@ export async function openAuthedPage(
   const context = await browser.newContext({
     storageState: { cookies: [], origins: [] },
   });
-  // From Oct 31 the seasonal countdown banner covers the Edit and Delete buttons (#11).
-  await suppressSeasonalBanner(context);
   const page = await context.newPage();
   await injectSessionIntoPage(page, session);
   return { page, context, close: () => context.close() };

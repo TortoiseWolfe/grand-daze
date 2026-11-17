@@ -23,7 +23,6 @@ import {
   JsonLdScript,
 } from '@/utils/metadata';
 import PWAInstall from '@/components/PWAInstall';
-import { CountdownBanner } from '@/components/atomic/CountdownBanner';
 import { SetupBanner } from '@/components/SetupBanner';
 import A11yDevOverlay from '@/components/organisms/A11yDevOverlay';
 
@@ -203,7 +202,6 @@ export default function RootLayout({
                 Skip to main content
               </a>
               <GlobalNav />
-              <CountdownBanner />
               <SetupBanner />
               <ErrorBoundary level="page">
                 {/* The skip TARGET. tabIndex={-1} so the anchor jump actually
